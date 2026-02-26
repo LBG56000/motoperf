@@ -1,0 +1,44 @@
+services:
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "${PORT_BACK}:${PORT_BACK}"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - mongo
+    command: sh -c "npm install && npm run dev"
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+    container_name: frontend
+    ports:
+      - "${PORT_FRONT}:${PORT_FRONT}"
+    depends_on:
+      - backend
+    environment:
+      - NUXT_HOST=0.0.0.0
+    env_file:
+      - ./.env
+    command: sh -c "npm install && npm run dev"
+  mongo:
+    image: mongo:8
+    container_name: mongo
+    restart: always
+    ports:
+      - "${PORT_DB}:${PORT_DB}"
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.ts
+    env_file:
+      - ./.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+
+volumes:
+  mongo_data:
