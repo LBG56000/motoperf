@@ -1,7 +1,7 @@
 import { CreateUserDto } from '../dto/user.create.dto'
 import User from '../models/User'
 
-const createUser = (data: CreateUserDto) => {
+const createUser = (data: CreateUserDto): Promise<CreateUserDto> => {
   return User.create(data)
 }
 
