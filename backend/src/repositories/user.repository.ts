@@ -1,11 +1,12 @@
-import User from "../models/User"
+import { CreateUserDto } from '../dto/user.create.dto'
+import User from '../models/User'
 
-const createUser = (data: any)=>{
-    return User.create(data)
+const createUser = (data: CreateUserDto) => {
+  return User.create(data)
 }
 
 const getAllUsers = () => {
-    return User.find()
+  return User.find()
 }
 
-export default {createUser,getAllUsers}
+export default { createUser, getAllUsers }
