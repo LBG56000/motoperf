@@ -1,8 +1,18 @@
-import { InferSchemaType, Schema, model } from 'mongoose'
+import type { IUser } from '../types/user'
+import { Schema, model } from 'mongoose'
 
 const userSchema = new Schema(
   {
-    name: {
+    id: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    firstname: {
+      type: String,
+      required: true,
+    },
+    lastname: {
       type: String,
       required: true,
     },
@@ -11,10 +21,30 @@ const userSchema = new Schema(
       required: true,
       unique: true,
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    ridingStartYear: {
+      type: Number,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      required: true,
+    },
+    userType: {
+      type: String,
+      enum: ['beginner', 'confirmed', 'expert', 'other'],
+      default: 'beginner',
+    },
+
   },
   { timestamps: true },
 )
 
-type User = InferSchemaType<typeof userSchema>
-
-export default model<User>('User', userSchema)
+export default model<IUser>('User', userSchema)

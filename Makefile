@@ -2,7 +2,7 @@ clear:
 	sudo docker compose down \
 
 start:
-	sudo docker compose up --build \
+	sudo docker compose up \
 
 clear-all:
 	sudo docker compose down -v \
@@ -14,3 +14,6 @@ get-dump:
 
 run-seed:
 	sudo docker exec -it backend npm run seed
+
+build:
+	sudo docker compose up --build \

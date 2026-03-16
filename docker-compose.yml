@@ -6,6 +6,7 @@ services:
       - "${PORT_BACK}:${PORT_BACK}"
     volumes:
       - ./backend:/app
+      - /app/node_modules
     env_file:
       - ./.env
     depends_on:
@@ -14,6 +15,7 @@ services:
     build: ./frontend
     volumes:
       - ./frontend:/app
+      - /app/node_modules
     container_name: frontend
     ports:
       - "${PORT_FRONT}:${PORT_FRONT}"
