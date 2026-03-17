@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import seedUser from './user.seed'
+import seedUser from './user'
 
 const connectToMongo = async () => {
   return await mongoose.connect(process.env.MONGO_URI as string)
