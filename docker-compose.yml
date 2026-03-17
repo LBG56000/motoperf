@@ -33,7 +33,7 @@ services:
       - "${PORT_DB}:${PORT_DB}"
     volumes:
       - mongo_data:/data/db
-      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.ts
+      - ./mongo-init.ts:/docker-entrypoint-initdb.d/mongo-init.ts
     env_file:
       - ./.env
     environment:
