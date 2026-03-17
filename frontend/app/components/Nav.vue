@@ -1,21 +1,29 @@
 <script setup></script>
 
 <template>
-  <div class="container">
-    <p class="logo">Motocenter</p>
+  <div class="navbar">
+    <UButton size="md" color="primary" class="logo">Motocenter</UButton>
 
     <div class="list">
-      <p>Comparateur</p>
-      <p>Forum</p>
-      <p>Balades</p>
-      <p>Nous connaitre</p>
-      <p class="connexion">Connexion</p>
+      <UButton size="md" color="neutral" variant="ghost">Comparateur</UButton>
+      <UButton size="md" color="neutral" variant="ghost">Forum</UButton>
+      <UButton size="md" color="neutral" variant="ghost">Balades</UButton>
+      <UButton size="md" color="neutral" variant="ghost"
+        >Nous connaitre</UButton
+      >
+      <UButton
+        trailing-icon="i-lucide-arrow-right"
+        size="md"
+        color="neutral"
+        class="connexion"
+        >Connexion</UButton
+      >
     </div>
   </div>
 </template>
 
 <style scoped>
-.container {
+.navbar {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -23,33 +31,28 @@
 
   padding: 10px;
 }
+
 .list {
   display: flex;
   flex-direction: row;
   gap: 40px;
 }
+
 p {
   align-self: center;
   font-family: 'Popins', sans-serif;
 }
+
 .logo {
   font-size: 1.2rem;
   font-weight: bold;
 
-  background-color: #f00;
-  color: white;
-
-  border-radius: 5px;
-
-  padding: 20px 40px;
-  margin: 0;
+  padding: 20px 50px;
 }
+
 .connexion {
   font-size: 1rem;
   font-weight: 600;
-
-  color: white;
-  background-color: black;
 
   border-radius: 40px;
 

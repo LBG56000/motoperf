@@ -1,13 +1,12 @@
 <script setup>
-// const test = '1'
+import Nav from './components/Nav.vue'
 </script>
 
 <template>
-  <div>
-    <h1>TESTkjfgnfjbgjbgskjfgsjbgjfbggjfgnjfdgn</h1>
-    <h1>epigqefhgefgfgbh</h1>
-    gjfbgjbfhbg
-    <!-- <NuxtRouteAnnouncer /> -->
-    <!-- <NuxtWelcome /> -->
-  </div>
+  <UApp>
+    <NuxtPage />
+    <Nav class="w-full left-0 right-0"></Nav>
+  </UApp>
 </template>
+
+<style></style>
