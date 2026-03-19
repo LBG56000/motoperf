@@ -40,7 +40,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         <UButton size="md" color="neutral" variant="ghost" to="/"
           >Balades</UButton
         >
-        <UButton size="md" color="neutral" variant="ghost" to="/"
+        <UButton size="md" color="neutral" variant="ghost" to="/knowUs"
           >Nous connaitre</UButton
         >
         <UButton
