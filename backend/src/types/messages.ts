@@ -5,8 +5,7 @@ export interface IMessage {
   like: number
   dislike: number
   isRep: boolean
-  isPublicationResponse: boolean
-  parentId: string | null
+  reference: string | null
   motorcycleId: boolean | null
   userId: boolean | null
   createAt: string

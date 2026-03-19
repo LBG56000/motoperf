@@ -26,10 +26,7 @@ const messageSchema = new Schema(
     isRep: {
       type: Boolean,
     },
-    isPublicationResponse: {
-      type: Boolean,
-    },
-    parentId: {
+    reference: {
       type: String,
     },
     motorcycleId: {
@@ -47,14 +44,5 @@ const messageSchema = new Schema(
     validateBeforeSave: true,
   },
 )
-
-messageSchema.pre('validate', function () {
-  const hasUser = !!this.isPublicationResponse
-  const hasMotorcycle = !!this.isRep
-
-  if (hasUser && hasMotorcycle) {
-    throw new Error('A message must not have isPublicationResponse AND isRep')
-  }
-})
 
 export default model<IMessage>('Message', messageSchema)
