@@ -9,8 +9,8 @@ const appName: string = useRuntimeConfig().public.appName
 
 <style scoped>
 .logo {
-  font-family: var(--font-krona);
+  font-family: 'krona-one', sans-serif;
   font-size: 1.2rem;
-  color: var(--text-color) !important;
+  color:white !important;
 }
 </style>
