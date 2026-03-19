@@ -52,11 +52,11 @@ const seedUser = async () => {
       userType: 'other',
     },
   ])
+
   console.log('User seeding')
 
   const users = await User.find()
   console.log('Seeded users:', users)
-  process.exit()
 }
 
 export default seedUser

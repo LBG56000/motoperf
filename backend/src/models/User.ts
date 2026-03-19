@@ -16,6 +16,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    pseudo: {
+      type: String,
+      require: true,
+    },
     email: {
       type: String,
       required: true,
@@ -35,14 +39,15 @@ const userSchema = new Schema(
     createdAt: {
       type: Date,
       default: Date.now,
-      required: true,
     },
     userType: {
       type: String,
       enum: ['beginner', 'confirmed', 'expert', 'other'],
       default: 'beginner',
     },
-
+    idMoto: {
+      type: String,
+    },
   },
   { timestamps: true },
 )

@@ -16,4 +16,5 @@ run-seed:
 	sudo docker exec -it backend npm run seed
 
 build:
-	sudo docker compose up --build \
+	sudo docker compose up --build -d
+	sudo docker compose run --rm backend npm run seed

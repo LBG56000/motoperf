@@ -4,8 +4,8 @@ import Nav from './components/Nav.vue'
 
 <template>
   <UApp>
-    <NuxtPage />
     <Nav class="w-full left-0 right-0"></Nav>
+    <NuxtPage />
   </UApp>
 </template>
 
