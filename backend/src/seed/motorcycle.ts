@@ -1,12 +1,12 @@
-import Brand from '../models/Brand'
+import Motorcycle from '../models/Motorcycle'
 import { connectToMongo } from '.'
 
 const seedMotorcycles = async () => {
   console.log('Je passe dans le seed motorcycles')
   await connectToMongo()
-  await Brand.deleteMany({})
+  await Motorcycle.deleteMany({})
 
-  await Brand.insertMany([
+  await Motorcycle.insertMany([
     {
       id: 'm-001',
       brandId: 1,
@@ -149,7 +149,7 @@ const seedMotorcycles = async () => {
 
   console.log('Motorcycles seeded')
 
-  const motorcycles = await Brand.find()
+  const motorcycles = await Motorcycle.find()
   console.log('Seeded motorcycles:', motorcycles)
 }
 

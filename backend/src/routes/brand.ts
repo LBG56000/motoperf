@@ -6,9 +6,9 @@ const router = Router()
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
-    const { project, sort, size } = prepareQuery(req.query)
+    const { project, sort, limit } = prepareQuery(req.query)
     try {
-      const brands = await Brand.find().select(project).sort(sort).limit(size)
+      const brands = await Brand.find().select(project).sort(sort).limit(limit)
       res.status(200).json({ brands })
     } catch (error) {
       console.error('Error accessing brand route:', error)

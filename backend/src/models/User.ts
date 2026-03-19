@@ -18,7 +18,7 @@ const userSchema = new Schema(
     },
     pseudo: {
       type: String,
-      require: true,
+      required: true,
     },
     email: {
       type: String,
