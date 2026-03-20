@@ -3,7 +3,8 @@
 <template>
   <UApp>
     <NuxtPage />
-  </NuxtLayout>
+    <Footer />
+  </UApp>
 </template>
 
 <style></style>
