@@ -7,11 +7,12 @@ const router = Router()
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
-    const { project, sort, deep } = prepareQuery(req.query)
+    const { project, sort, deep, limit } = prepareQuery(req.query)
     try {
       let query = Post.find()
         .select(project)
         .sort(sort)
+        .limit(limit)
       if (deep) {
         query = query
           .populate('user')
