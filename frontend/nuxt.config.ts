@@ -6,7 +6,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiback: 'http://localhost:5000/api/v1/',
-      appName: 'MotoCenter'
+      appName: 'MotoCenter',
+      apiBase: process.env.NUXT_PUBLIC_API_URL
     }
   },
 

@@ -23,6 +23,7 @@ const seed = async () => {
     await seedMotorcycles()
     await seedPost()
     await seedCategory()
+    await seedPost()
 
     console.log('Seeding terminé')
     process.exit(0)

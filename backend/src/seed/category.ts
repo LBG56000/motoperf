@@ -9,15 +9,19 @@ const seedCategory = async () => {
   await Category.insertMany([
     {
       id: 'c-001',
-      name: 'Category1',
+      name: 'Réparation',
     },
     {
       id: 'c-002',
-      name: 'Category2',
+      name: 'Entretien',
     },
     {
       id: 'c-003',
-      name: 'Category3',
+      name: 'Course',
+    },
+    {
+      id: 'c-004',
+      name: 'Opinion'
     }
   ])
 }
