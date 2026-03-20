@@ -4,6 +4,7 @@
   <UApp>
     <Nav></Nav>
     <NuxtPage />
+    <Footer />
   </UApp>
 </template>
 
