@@ -1,4 +1,44 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const guides = [
+  { label: 'Accueil', to: '/' },
+  { label: 'Comparateur' },
+  { label: 'Forum' },
+  { label: 'Balades' },
+  { label: 'Nous connaitre', to: '/knowUs' }
+]
+
+const socials = [
+  {
+    label: 'Instagram',
+    href: 'https://www.instagram.com',
+    icon: 'i-lucide-instagram'
+  },
+  {
+    label: 'Facebook',
+    href: 'https://www.facebook.com',
+    icon: 'i-lucide-facebook'
+  },
+  {
+    label: 'Youtube',
+    href: 'https://www.youtube.com',
+    icon: 'i-lucide-youtube'
+  },
+  {
+    label: 'Linkedin',
+    href: 'https://www.linkedin.com',
+    icon: 'i-lucide-linkedin'
+  },
+  { label: 'X', href: 'https://www.x.com', icon: 'i-lucide-x' }
+]
+
+const contacts = [
+  'sloan.morgant@mgtsoftware.com',
+  'loris.caruhel@mgtsoftware.com',
+  'milio.lintanff--castel@mgtsoftware.com',
+  'leo.bruneau-gache@mgtsoftware.com',
+  'nominoe.barbotaud@mgtsoftware.com'
+]
+</script>
 
 <template>
   <div>
@@ -6,12 +46,17 @@
       <div>
         <h4>Guides</h4>
         <div class="list">
-          <div class="list-item"><NuxtLink to="/">Accueil</NuxtLink></div>
-          <div class="list-item">Comparateur</div>
-          <div class="list-item">Forum</div>
-          <div class="list-item">Balades</div>
-          <div class="list-item">
-            <NuxtLink to="/knowUs">Nous connaitre</NuxtLink>
+          <div
+            class="list-item"
+            v-for="(item, idx) in guides"
+            :key="`guide-${idx}`"
+          >
+            <template v-if="item.to">
+              <NuxtLink :to="item.to">{{ item.label }}</NuxtLink>
+            </template>
+            <template v-else>
+              {{ item.label }}
+            </template>
           </div>
         </div>
       </div>
@@ -19,60 +64,19 @@
       <div>
         <h4 class="text-hidden">Réseaux sociaux</h4>
         <div class="list">
-          <div class="list-item-rs">
+          <div
+            class="list-item-rs"
+            v-for="(item, idx) in socials"
+            :key="`social-${idx}`"
+          >
             <a
-              href="https://www.instagram.com"
+              :href="item.href"
               target="_blank"
               rel="noopener noreferrer"
               class="align-icon"
             >
-              <span>Instagram</span>
-              <UIcon name="i-lucide-instagram" class="size-7 icons" />
-            </a>
-          </div>
-          <div class="list-item-rs">
-            <a
-              href="https://www.facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="align-icon"
-            >
-              <span>Facebook</span>
-              <UIcon name="i-lucide-facebook" class="size-7 icons" />
-            </a>
-          </div>
-          <div class="list-item-rs">
-            <a
-              href="https://www.youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="align-icon"
-            >
-              <span>Youtube</span>
-
-              <UIcon name="i-lucide-youtube" class="size-7" />
-            </a>
-          </div>
-          <div class="list-item-rs">
-            <a
-              href="https://www.linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="align-icon"
-            >
-              <span>Linkedin</span>
-              <UIcon name="i-lucide-linkedin" class="size-7 icons" />
-            </a>
-          </div>
-          <div class="list-item-rs">
-            <a
-              href="https://www.x.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="align-icon"
-            >
-              <span>X</span>
-              <UIcon name="i-lucide-x" class="size-7 icons" />
+              <span class="span-rs">{{ item.label }}</span>
+              <UIcon :name="item.icon" class="size-7 icons" />
             </a>
           </div>
         </div>
@@ -81,32 +85,12 @@
       <div>
         <h4>Contact</h4>
         <div class="list">
-          <div class="list-item">
-            <a class="link-mail" href="mailto:sloan.morgant@mgtsoftware.com"
-              >sloan.morgant@mgtsoftware.com</a
-            >
-          </div>
-          <div class="list-item">
-            <a class="link-mail" href="mailto:loris.caruhel@mgtsoftware.com"
-              >loris.caruhel@mgtsoftware.com</a
-            >
-          </div>
-          <div class="list-item">
-            <a
-              class="link-mail"
-              href="mailto:milio.lintanff--castel@mgtsoftware.com"
-              >milio.lintanff--castel@mgtsoftware.com</a
-            >
-          </div>
-          <div class="list-item">
-            <a class="link-mail" href="mailto:leo.bruneau-gache@mgtsoftware.com"
-              >leo.bruneau-gache@mgtsoftware.com</a
-            >
-          </div>
-          <div class="list-item">
-            <a class="link-mail" href="mailto:nominoe.barbotaud@mgtsoftware.com"
-              >nominoe.barbotaud@mgtsoftware.com</a
-            >
+          <div
+            class="list-item"
+            v-for="(email, idx) in contacts"
+            :key="`contact-${idx}`"
+          >
+            <a class="link-mail" :href="`mailto:${email}`">{{ email }}</a>
           </div>
         </div>
       </div>
@@ -161,10 +145,12 @@
   width: 100%;
   display: flex;
   align-items: start;
+  margin-bottom: 0.4em;
 }
 
 .footer div .list-item-rs {
   width: 100%;
+  margin-bottom: 0.4em;
 }
 
 .footer div h4,
@@ -211,15 +197,34 @@
     flex: 1 1 100%;
   }
 
+  .text-hidden {
+    visibility: hidden;
+  }
+
+  .footer.end {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+  }
+
+  .span-rs {
+    display: none;
+  }
   .footer div:nth-child(2) .list {
     display: flex;
     justify-content: center;
-    gap: 1.2rem;
-    text-align: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 1.5rem;
   }
 
-  .text-hidden {
-    visibility: hidden;
+  .align-icon {
+    justify-content: center;
+  }
+
+  .list-item-rs {
+    max-width: 40px;
   }
 }
 </style>
