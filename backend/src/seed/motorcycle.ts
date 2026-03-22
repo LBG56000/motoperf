@@ -1,4 +1,5 @@
 import Motorcycle from '../models/Motorcycle'
+import Brand from '../models/Brand'
 import { connectToMongo } from '.'
 
 const seedMotorcycles = async () => {
@@ -6,12 +7,20 @@ const seedMotorcycles = async () => {
   await connectToMongo()
   await Motorcycle.deleteMany({})
 
+  // Récupérer les brands pour avoir leurs vrais _id MongoDB
+  const brands = await Brand.find()
+  const brandByName = (name: string) => {
+    const brand = brands.find(b => b.name === name)
+    if (!brand) throw new Error(`Brand "${name}" introuvable. Lancez le seed brand d'abord.`)
+    return brand._id
+  }
+
   await Motorcycle.insertMany([
     {
       id: 'm-001',
-      brandId: 1,
+      brandId: brandByName('Honda'),
       engine_size: 599,
-      model: 'CBR600RR',
+      name: 'CBR600RR',
       horsePower: 121,
       year: 2020,
       price: 12000,
@@ -22,9 +31,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-002',
-      brandId: 2,
+      brandId: brandByName('Kawasaki'),
       engine_size: 636,
-      model: 'Ninja ZX-6R',
+      name: 'Ninja ZX-6R',
       horsePower: 130,
       year: 2021,
       price: 11500,
@@ -35,9 +44,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-003',
-      brandId: 3,
+      brandId: brandByName('Suzuki'),
       engine_size: 599,
-      model: 'GSX-R600',
+      name: 'GSX-R600',
       horsePower: 125,
       year: 2019,
       price: 11000,
@@ -48,9 +57,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-004',
-      brandId: 4,
+      brandId: brandByName('Yamaha'),
       engine_size: 599,
-      model: 'YZF-R6',
+      name: 'YZF-R6',
       horsePower: 118,
       year: 2020,
       price: 11800,
@@ -61,9 +70,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-005',
-      brandId: 5,
+      brandId: brandByName('Ducati'),
       engine_size: 955,
-      model: 'Panigale V2',
+      name: 'Panigale V2',
       horsePower: 155,
       year: 2023,
       price: 17990,
@@ -78,9 +87,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-006',
-      brandId: 6,
+      brandId: brandByName('BMW'),
       engine_size: 999,
-      model: 'S1000RR',
+      name: 'S1000RR',
       horsePower: 210,
       year: 2024,
       price: 21990,
@@ -92,9 +101,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-007',
-      brandId: 7,
+      brandId: brandByName('Honda'),
       engine_size: 998,
-      model: 'CBR1000RR-R Fireblade',
+      name: 'CBR1000RR-R Fireblade',
       horsePower: 217,
       year: 2024,
       price: 24599,
@@ -106,9 +115,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-008',
-      brandId: 8,
+      brandId: brandByName('Yamaha'),
       engine_size: 998,
-      model: 'YZF-R1',
+      name: 'YZF-R1',
       horsePower: 200,
       year: 2023,
       price: 19999,
@@ -120,9 +129,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-009',
-      brandId: 9,
+      brandId: brandByName('Ducati'),
       engine_size: 1099,
-      model: 'Streetfighter V4',
+      name: 'Streetfighter V4',
       horsePower: 208,
       year: 2024,
       price: 23990,
@@ -133,9 +142,9 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-010',
-      brandId: 10,
+      brandId: brandByName('Kawasaki'),
       engine_size: 1043,
-      model: 'Z H2',
+      name: 'Z H2',
       horsePower: 200,
       year: 2023,
       price: 18500,
@@ -144,6 +153,19 @@ const seedMotorcycles = async () => {
       is_new: true,
       time_0_100: 3.4,
       speedMax: 280,
+    },
+    {
+      id: 'm-011',
+      brandId: brandByName('Honda'),
+      engine_size: 599,
+      name: 'CBR600RR',
+      horsePower: 121,
+      year: 2021,
+      price: 12000,
+      numberOfComparison: 3,
+      withAllFiled: false,
+      is_new: false,
+      speedMax: 257,
     },
   ])
 

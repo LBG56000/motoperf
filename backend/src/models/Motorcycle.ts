@@ -8,16 +8,17 @@ const motorcycleSchema = new Schema({
     unique: true,
   },
   brandId: {
-    type: Number,
-    require: true,
+    type: Schema.Types.ObjectId,
+    ref: 'Brand',
+    required: true,
   },
   engine_size: {
     type: Number,
     required: true,
   },
-  model: {
+  name: {
     type: String,
-    require: true,
+    required: true,
   },
   horsePower: {
     type: Number,
@@ -51,11 +52,11 @@ const motorcycleSchema = new Schema({
   },
   year: {
     type: Number,
-    require: true,
+    required: true,
   },
   price: {
     type: Number,
-    require: true,
+    required: true,
   },
   createdAt: {
     type: Date,

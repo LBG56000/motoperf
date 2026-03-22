@@ -1,6 +1,6 @@
 export interface IMotorcycle {
   id: string
-  model: string
+  name: string
   brandId: string
   createdAt: string
   engine_size: number
