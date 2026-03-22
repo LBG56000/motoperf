@@ -13,10 +13,12 @@ const defaultFilter = {}
 export function prepareQuery(query: ReqQuery) {
   // Permet le requêtage de plusieurs colonnes (ex = /users?project=firstname,lastname)
   let project: Record<string, number>
-  if (query.project) {
-    const fields = query.project.split(',')
 
-    project = fields.reduce(
+  // Si project=all, on sélectionne tous les champs
+  if (query.project === 'all') {
+    project = {}
+  } else if (query.project) {
+    project = query.project.split(',').reduce(
       (acc, field) => {
         acc[field.trim()] = 1
         return acc
