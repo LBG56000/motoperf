@@ -1,0 +1,16 @@
+import type { IBrand } from "./brand";
+import type { ICategory } from "./category";
+import type { IMessage } from "./message";
+import type { IUser } from "./users";
+
+export interface IPost {
+    id: string,
+    question: string,
+    content: string,
+    category: ICategory,
+    user: IUser,
+    brand: IBrand,
+    createdAt: string,
+    views: string,
+    responses: IMessage[]
+}
