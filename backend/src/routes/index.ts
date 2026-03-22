@@ -14,5 +14,6 @@ router.use('/messages', messageRoutes)
 router.use('/motorcycles', motorcycleRoutes)
 router.use('/posts', postRoutes)
 router.use('/categories', categoryRoutes)
+router.use('/brand', brandRoutes)
 
 export default router

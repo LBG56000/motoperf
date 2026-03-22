@@ -10,18 +10,22 @@ const seedCategory = async () => {
     {
       id: 'c-001',
       name: 'Réparation',
+      icon: 'wrench'
     },
     {
       id: 'c-002',
       name: 'Entretien',
+      icon: 'cog'
     },
     {
       id: 'c-003',
       name: 'Course',
+      icon: 'motorbike'
     },
     {
       id: 'c-004',
-      name: 'Opinion'
+      name: 'Opinion',
+      icon: 'megaphone'
     }
   ])
 }
