@@ -19,11 +19,10 @@ const seed = async () => {
 
     await seedUser()
     await seedBrand()
-    await seedMessage()
     await seedMotorcycles()
-    await seedPost()
     await seedCategory()
     await seedPost()
+    await seedMessage()
 
     console.log('Seeding terminé')
     process.exit(0)

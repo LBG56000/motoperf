@@ -2,6 +2,7 @@ import { Request, Router } from "express"
 import { prepareQuery, ReqQuery } from "../utils/find"
 import Post from "../models/Post"
 import { IPost } from "../types/post"
+import Message from "../models/Message"
 
 const router = Router()
 router.get(
@@ -27,5 +28,23 @@ router.get(
     }
   },
 )
+
+router.get('/:id/responses', async (req, res) => {
+  try {
+    const post = await Post.findOne({ id: req.params.id })
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' })
+    }
+    const messages = await Message.find({
+      reference: post._id,
+      referenceModel: 'Post'
+    })
+
+    res.json({ messages })
+  } catch (error) {
+    console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 
 export default router

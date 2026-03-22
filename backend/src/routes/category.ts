@@ -6,12 +6,12 @@ const router = Router()
 router.get(
 	'/',
 	async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
-		const { project, sort, size } = prepareQuery(req.query)
+		const { project, sort, limit } = prepareQuery(req.query)
 		try {
 			const categories = await Category.find()
 				.select(project)
 				.sort(sort)
-				.limit(size)
+				.limit(limit)
 			res.status(200).json({ categories })
 		} catch (error) {
 			console.error('Error accessing message route:', error)

@@ -1,46 +1,23 @@
 import Message from '../models/Message'
 import { connectToMongo } from '.'
+import Post from '../models/Post'
 
 const seedMessage = async () => {
   await connectToMongo()
   await Message.deleteMany({})
 
-  await Message.insertMany([
-    // Réponses à m-001
-    {
-      id: 'm-003',
-      content: 'Je te conseille une Honda CB500, très fiable 👍',
-      like: 5,
-      dislike: 0,
-      isRep: true,
-      reference: 'post::m-001',
-    },
-    {
-      id: 'm-004',
-      content: 'Yamaha MT-07 est top aussi, plus fun 😄',
-      like: 6,
-      dislike: 1,
-      isRep: true,
-      reference: 'post::m-001',
-    },
+  const post1 = await Post.findOne({ id: 'p-001' })
 
-    // Réponses à m-002
+  await Message.insertMany([
     {
-      id: 'm-005',
-      content: 'Pour débuter, évite les trop grosses cylindrées',
-      like: 10,
-      dislike: 0,
-      isPublicationResponse: true,
-      reference: 'message::m-002',
-    },
-    {
-      id: 'm-006',
+      id: 'm-001',
       content: 'Pense aussi au coût de l’assurance',
       like: 7,
       dislike: 0,
-      isPublicationResponse: true,
-      reference: 'message::m-002',
-    },
+      isRep: true,
+      reference: [post1?._id],
+      referenceModel: 'Post',
+    }
   ])
   console.log('Message seeding')
 

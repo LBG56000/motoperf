@@ -1,5 +1,5 @@
 import type { IMessage } from '../types/messages'
-import { Schema, model } from 'mongoose'
+import { Schema, Types, model } from 'mongoose'
 
 const messageSchema = new Schema(
   {
@@ -27,13 +27,19 @@ const messageSchema = new Schema(
       type: Boolean,
     },
     reference: {
+      type: Types.ObjectId,
+      refPath: 'referenceModel'
+    },
+    referenceModel: {
       type: String,
+      enum: ['Post', 'Message']
     },
     motorcycleId: {
       type: String,
     },
-    userId: {
-      type: String,
+    user: {
+      type: Types.ObjectId,
+      ref: 'User'
     },
     createdAt: {
       type: Date,

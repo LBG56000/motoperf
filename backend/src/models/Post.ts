@@ -17,18 +17,26 @@ const postSchema = new Schema({
   },
   category: {
     type: Types.ObjectId,
-    ref: "Category",
+    ref: 'Category',
     required: true
   },
   user: {
     type: Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true
   },
   brand: {
     type: Types.ObjectId,
-    ref: "Brand",
+    ref: 'Brand',
     required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  views: {
+    type: Number,
+    default: 0,
   }
 })
 

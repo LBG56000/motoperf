@@ -1,3 +1,6 @@
+import { Types } from "mongoose"
+import { IUser } from "./user"
+
 export interface IMessage {
   id: string
   content: string
@@ -5,9 +8,10 @@ export interface IMessage {
   like: number
   dislike: number
   isRep: boolean
-  reference: string | null
+  reference?: Types.ObjectId;
+  referenceModel?: 'Post' | 'Message';
   motorcycleId: boolean | null
-  userId: boolean | null
+  user: IUser
   createAt: string
 }
 

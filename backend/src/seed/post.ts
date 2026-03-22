@@ -26,6 +26,7 @@ const seedPost = async () => {
       category: category1._id,
       user: user._id,
       brand: brand._id,
+      views: 12
     },
     {
       id: 'p-002',

@@ -2,7 +2,6 @@ import Brand from '../models/Brand'
 import { connectToMongo } from '.'
 
 const seedBrand = async () => {
-  console.log('Je passe dans le seed du brand')
   await connectToMongo()
   await Brand.deleteMany({})
 
@@ -26,10 +25,6 @@ const seedBrand = async () => {
     {
       id: 'b-005',
       name: 'BMW',
-    },
-    {
-      id: 'b-006',
-      name: 'Ducati',
     },
   ])
   console.log('Brand seeding')
