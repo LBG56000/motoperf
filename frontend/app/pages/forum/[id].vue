@@ -48,7 +48,7 @@ onMounted(async () => {
     </div>
     <div>
       <div class="icon-and-text">
-        <UAvatar src="https://thispersondoesnotexist.com/" size="3xl" loading="lazy" class="margin-2" />
+        <UAvatar :src="`/_nuxt/assets/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
         <h2>{{ post?.question }}</h2>
       </div>
       <div>
@@ -64,7 +64,7 @@ onMounted(async () => {
         </div>
         <div class="flex row end margin-1_5">
           <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
-            }}</p>
+          }}</p>
           <div class="icon-and-text">
             <UIcon class="size-7 margin-2" name="i-lucide-eye" />
             <p>{{ post?.views }} vues</p>

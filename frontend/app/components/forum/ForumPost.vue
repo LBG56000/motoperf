@@ -13,7 +13,8 @@ const handleEditFilter = () => {
 <template>
   <UCard class="postCard">
     <div class="card-forum">
-      <UAvatar src="https://thispersondoesnotexist.com/" size="3xl" loading="lazy" class="margin-2" />
+      <UAvatar :src="`/_nuxt/assets/images/users/${props.post.user.image}`" size="3xl" loading="lazy"
+        class="margin-2" />
       <div>
         <div class="container title">
           <h4>{{ props.post.content }}</h4>
@@ -31,7 +32,7 @@ const handleEditFilter = () => {
         </div>
         <div class="container">
           <p>Par {{ props.post.user.firstname }}, {{ formatTimeAgo(props.post.createdAt)
-          }}</p>
+            }}</p>
           <div class="icon-and-text">
             <UIcon class="size-7 margin-2" name="i-lucide-eye" />
             <p>{{ props.post.views }} vues</p>
