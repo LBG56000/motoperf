@@ -9,5 +9,5 @@ export interface IMessage {
   isRep: boolean
   motorcycleId: boolean | null
   user: IUser
-  createAt: string
+  createdAt: string
 }

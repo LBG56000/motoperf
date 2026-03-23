@@ -8,24 +8,26 @@ const props = defineProps<{
 <template>
   <div class="margin-1_5">
     <div v-for="response in props.responses" :key="response.id">
-      <br>
       <div class="icon-and-text">
         <UAvatar :src="`/_nuxt/assets/images/users/${response.user.image}`" :alt="response.user.firstname" size="3xl"
-          :title="response.user.firstname" />
-        <p>{{ response.user.firstname }}</p>
-      </div>
-      <p>{{ response.content }}</p>
-      <div class="icon-and-text">
+          :title="response.user.firstname" class="margin-right-0_5" />
         <div class="icon-and-text">
-          <UIcon name="i-lucide-thumbs-up" class="size-6" />
+          <p class="bold">{{ response.user.firstname }},&nbsp;</p>
+          <p>{{ formatTimeAgo(response.createdAt) }}</p>
+        </div>
+      </div>
+      <p class="margin-top-0_5 margin-left-1">{{ response.content }}</p>
+      <div class="icon-and-text margin-1_5 margin-left-1">
+        <div class="icon-and-text margin-right-0_5">
+          <UIcon name="i-lucide-thumbs-up" class="size-6 margin-right-0_2" />
           <p>{{ response.like }}</p>
         </div>
-        <div class="icon-and-text">
-          <UIcon name="i-lucide-thumbs-down" class="size-6" />
+        <div class="icon-and-text margin-right-0_5">
+          <UIcon name="i-lucide-thumbs-down" class="size-6 margin-right-0_2" />
           <p>{{ response.dislike }}</p>
         </div>
-        <div class="icon-and-text">
-          <UIcon name="i-lucide-messages-square" class="size-6" />
+        <div class="icon-and-text margin-right-0_5">
+          <UIcon name="i-lucide-messages-square" class="size-6 margin-right-0_2" />
           <p>Répondre</p>
         </div>
       </div>
@@ -41,5 +43,25 @@ const props = defineProps<{
 
 .margin-1_5 {
   margin-top: 1.5em;
+}
+
+.margin-top-0_5 {
+  margin-top: 0.5em;
+}
+
+.margin-right-0_5 {
+  margin-right: 0.5em;
+}
+
+.margin-right-0_2 {
+  margin-right: 0.2em;
+}
+
+.margin-left-1 {
+  margin-left: 1em;
+}
+
+.bold {
+  font-weight: bold;
 }
 </style>
