@@ -13,7 +13,7 @@ const handleEditFilter = () => {
 <template>
   <UCard class="postCard">
     <div class="card-forum">
-      <UAvatar src="https://thispersondoesnotexist.com/" size="3xl" loading="lazy" />
+      <UAvatar src="https://thispersondoesnotexist.com/" size="3xl" loading="lazy" class="margin-2" />
       <div>
         <div class="container title">
           <h4>{{ props.post.content }}</h4>

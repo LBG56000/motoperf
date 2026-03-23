@@ -44,35 +44,35 @@ onMounted(async () => {
   <div class="filters">
     <UCard>
       <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">
-        <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
+        <UIcon class="size-7 margin-0_5" name="i-lucide-messages-square" />
         <p>Tous les posts</p>
       </div>
       <div class="icon-and-text filter cursor-pointer" @click="handleHaveMyFavorites">
-        <UIcon class="size-7 margin-2" name="i-lucide-star" />
+        <UIcon class="size-7 margin-0_5" name="i-lucide-star" />
         <p>Mes favoris</p>
       </div>
       <div class="filter">
         <div class="icon-and-text">
-          <UIcon class="size-7 margin-2" name="i-lucide-grid-2x2-check" />
+          <UIcon class="size-7 margin-0_5" name="i-lucide-grid-2x2-check" />
           <p>Catégories</p>
         </div>
-        <div class="categories-filters">
+        <div class="filter">
           <div v-for="category in categories" :key="category.id" class="icon-and-text sub-filter cursor-pointer"
             @click="handlClickOnCategory(category.id)">
-            <UIcon class="size-7 margin-2" :name="'i-lucide-' + category.icon" />
+            <UIcon class="size-7 margin-0_5" :name="'i-lucide-' + category.icon" />
             <p>{{ category.name }}</p>
           </div>
         </div>
       </div>
       <div class="filter">
         <div class="icon-and-text">
-          <UIcon class="size-7 margin-2" name="i-lucide-warehouse" />
+          <UIcon class="size-7 margin-0_5" name="i-lucide-warehouse" />
           <p>Marques</p>
         </div>
-        <div class="brands-filters">
+        <div class="filter">
           <div v-for="brand in brands" :key="brand.id" class="icon-and-text sub-filter cursor-pointer"
             @click="handlClickBrand(brand.id)">
-            <img :src="brand.icon" alt="" width="40" height="40">
+            <img :src="brand.icon" :alt="brand.name" :title="brand.name" width="40" height="40" class="margin-0_5">
             <p>{{ brand.name }}</p>
           </div>
         </div>
@@ -89,19 +89,22 @@ onMounted(async () => {
   align-items: center;
 }
 
-.categories-filters {
-  margin-right: 1em;
-}
-
 .filter {
   margin: 2em;
 }
 
 .filters {
   margin-right: 2em;
+  position: sticky;
+  top: 0;
+  left: 0;
 }
 
 .sub-filter {
   margin: 1em;
+}
+
+.margin-0_5 {
+  margin-right: 0.5em;
 }
 </style>
