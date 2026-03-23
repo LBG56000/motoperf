@@ -21,22 +21,22 @@ const seedPost = async () => {
   await Post.insertMany([
     {
       id: 'p-001',
-      question: 'Question 1',
-      content: 'Quelle est la meilleure moto pour débuter ?',
+      question: 'Quelle est la meilleure moto pour débuter ?',
+      content: 'Je cherche une une bonne moto pour commencer, j\'ai vu Malo, Loris, Sloan et Cyril. Ils m\'ont donné envie.',
       category: category1._id,
       user: user._id,
       brand: brand._id,
       views: 12,
-      image: 'https://resources.motogp.pulselive.com/photo-resources/2026/03/21/b8cc7d18-21ff-445e-a24a-b6db858e2795/LGZ_1910_.jpg?width=1580&height=889'
+      image: 'test1.png'
     },
     {
       id: 'p-002',
-      question: 'Question 2',
-      content: 'Quelle est la meilleure marque de moto ?',
+      question: 'Quelle est la meilleure marque de moto ?',
+      content: 'Des personnes diront que c\'est Suzuky ou Honda, mais vraiment c\'est quoi la meilleure ? ',
       category: category2._id,
       user: user._id,
       brand: brand._id,
-      image: 'https://resources.motogp.pulselive.com/photo-resources/2026/03/21/b8cc7d18-21ff-445e-a24a-b6db858e2795/LGZ_1910_.jpg?width=1580&height=889'
+      image: 'test2.png'
     },
   ])
 }

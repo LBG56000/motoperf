@@ -64,13 +64,14 @@ onMounted(async () => {
         </div>
         <div class="flex row end margin-1_5">
           <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
-          }}</p>
+            }}</p>
           <div class="icon-and-text">
             <UIcon class="size-7 margin-2" name="i-lucide-eye" />
             <p>{{ post?.views }} vues</p>
           </div>
         </div>
-        <img :src="post?.image" :alt="`Image du post ${post?.question} par ${post?.user.firstname}`"
+        <img :src="`/_nuxt/assets/images/posts/${post?.image}`"
+          :alt="`Image du post ${post?.question} par ${post?.user.firstname}`"
           :title="`Image du post ${post?.question} par ${post?.user.firstname}`" class="img margin-1_5 margin-bottom-1">
       </div>
       <h4 class="margin-bottom-1">{{ post?.content }}</h4>
@@ -78,11 +79,12 @@ onMounted(async () => {
         <UIcon name="i-lucide-star" class="size-7" />
         <p>Mettre ma réponse en favori</p>
       </div>
-      <div class="margin-bottom-1 w-5/6">
-        <UFormField label="Ecrire une réponse" required :ui="{ container: 'w-5/6' }">
-          <UTextarea v-model="newReponseOfPost" class="w-5/6" />
-        </UFormField>
-        <UButton class="margin-top-0_5">Ecrire mon post</UButton>
+      <UFormField label="Ecrire une réponse" required :ui="{ container: 'w-5/6' }">
+        <UTextarea v-model="newReponseOfPost" class="w-5/6" />
+      </UFormField>
+      <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''">Ecrire mon post</UButton>
+      <p v-if="responses.length === 0">Aucune réponse à ce post, ajouter la première</p>
+      <div v-else class="margin-bottom-1 w-5/6">
         <ForumResponse :responses="responses" />
       </div>
     </div>
