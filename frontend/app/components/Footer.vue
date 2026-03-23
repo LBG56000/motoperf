@@ -28,7 +28,7 @@ const socials = [
     href: 'https://www.linkedin.com',
     icon: 'i-lucide-linkedin'
   },
-  { label: 'X', href: 'https://www.x.com', icon: 'i-lucide-x' }
+  { label: 'X', href: 'https://www.x.com', icon: 'i-simple-icons-x' }
 ]
 
 const contacts = [
@@ -47,9 +47,9 @@ const contacts = [
         <h4>Guides</h4>
         <div class="list">
           <div
-            class="list-item"
             v-for="(item, idx) in guides"
             :key="`guide-${idx}`"
+            class="list-item"
           >
             <template v-if="item.to">
               <NuxtLink :to="item.to">{{ item.label }}</NuxtLink>
@@ -65,9 +65,9 @@ const contacts = [
         <h4 class="text-hidden">Réseaux sociaux</h4>
         <div class="list">
           <div
-            class="list-item-rs"
             v-for="(item, idx) in socials"
             :key="`social-${idx}`"
+            class="list-item-rs"
           >
             <a
               :href="item.href"
@@ -86,9 +86,9 @@ const contacts = [
         <h4>Contact</h4>
         <div class="list">
           <div
-            class="list-item"
             v-for="(email, idx) in contacts"
             :key="`contact-${idx}`"
+            class="list-item"
           >
             <a class="link-mail" :href="`mailto:${email}`">{{ email }}</a>
           </div>
@@ -113,6 +113,7 @@ const contacts = [
   display: flex;
   justify-content: space-around;
   align-items: start;
+  padding-top: 4em;
 }
 
 .end {
