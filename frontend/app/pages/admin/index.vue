@@ -8,6 +8,10 @@ interface Stat {
   value: number
 }
 
+definePageMeta({
+  layout: 'admin'
+})
+
 const userName: string = 'Admin'
 const apiBack = useRuntimeConfig().public.apiback
 const stats = ref<Stat[]>([])
@@ -45,7 +49,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NuxtLayout name="admin">
+  <div>
     <Header />
     <hr />
     <main>
@@ -59,7 +63,7 @@ onMounted(() => {
         />
       </div>
     </main>
-  </NuxtLayout>
+  </div>
 </template>
 
 <style scoped>

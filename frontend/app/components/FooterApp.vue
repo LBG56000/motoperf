@@ -183,6 +183,10 @@ const contacts = [
   font-weight: 300;
 }
 
+hr {
+  margin: 2em;
+}
+
 /* Mobile layout  */
 @media (max-width: 1024px) {
   .footer {

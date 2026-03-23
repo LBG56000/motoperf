@@ -1,12 +1,9 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
-  <UApp>
-    <Nav class="w-full left-0 right-0"></Nav>
+  <NuxtLayout>
     <NuxtPage />
-    <Footer />
-  </UApp>
+  </NuxtLayout>
 </template>
 
 <style></style>
