@@ -24,6 +24,7 @@
   --text-color: #000;
 
   --background: #fff;
+  --background-secondary: #00000008;
 
   /* Font */
 
@@ -40,6 +41,7 @@
   --text-color: #fff;
 
   --background: #000;
+  --background-secondary: #ffffff20;
 }
 
 body {

@@ -1,4 +1,13 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Sponsor from '@/components/Sponsor.vue'
+const items = [
+  `/_nuxt/assets/images/sponsors/1.png`,
+  `/_nuxt/assets/images/sponsors/2.png`,
+  `/_nuxt/assets/images/sponsors/3.png`,
+  `/_nuxt/assets/images/sponsors/4.png`,
+  `/_nuxt/assets/images/sponsors/5.png`
+]
+</script>
 <template>
   <main>
     <section class="hero-header">
@@ -9,13 +18,17 @@
       </h1>
 
       <div class="list">
-        <UButton size="xl" color="primary" class="rounded-full"
+        <UButton
+          size="xl"
+          color="primary"
+          class="rounded-full button"
+          style="color: white"
           >Essayer</UButton
         >
         <UButton
           size="xl"
           color="neutral"
-          class="rounded-full"
+          class="rounded-full button"
           trailing-icon="i-lucide-arrow-right"
           variant="outline"
           >Se connecter</UButton
@@ -26,12 +39,12 @@
         <img
           src="/assets/images/accueil/R1_fond.png"
           alt="Moto"
-          class="w-96 h-auto"
+          class="img-cover"
         />
         <img
           src="/assets/images/accueil/BMW_fond.png"
           alt="Moto"
-          class="w-96 h-auto"
+          class="img-cover"
         />
       </div>
     </section>
@@ -41,8 +54,11 @@
           <h2>Un peu d'histoire</h2>
           <p>
             Depuis que l’homme a inventé le moteur thermique, il a toujours
-            cherché à repousser ses limites : plus de puissance, plus de couple,
-            plus de vitesse. Depuis 1868, des milliers de modèles de motos ont
+            cherché à repousser ses limites : plus de
+            <span class="bold">puissance</span>, plus de
+            <span class="bold">couple</span>, plus de
+            <span class="bold">vitesse</span>. Depuis
+            <span class="bold">1868</span>, des milliers de modèles de motos ont
             vu le jour. Et si toi aussi tu veux savoir laquelle correspond le
             mieux à ce que tu recherches ...
           </p>
@@ -50,11 +66,11 @@
         <img
           src="/assets/images/accueil/Hornet.png"
           alt="Moto"
-          class="w-96 h-auto"
+          class="img-cover"
         />
       </div>
     </section>
-    <section>
+    <section class="basic-section">
       <h2 style="text-align: center">
         <span style="color: var(--ui-primary)">Motocenter</span>
         en quelques chiffres
@@ -90,21 +106,34 @@
         </div>
       </article>
     </section>
-    <section>
+    <section class="basic-section">
       <h2 style="text-align: center">Les best-sellers</h2>
-      <article></article>
+      <Carrousel :items="items" />
     </section>
-    <section class="invitation justify-content-center">
+    <section class="invitation justify-content-center basic-section">
       <h3 style="text-align: center">Tester le comparateur dès maintenant !</h3>
       <div>
         <UButton
           size="xl"
           color="primary"
-          class="rounded-full"
-          style="font-size: small"
+          class="rounded-full button"
+          style="color: white"
           >Essayer</UButton
         >
       </div>
+    </section>
+    <section class="basic-section">
+      <h2 style="text-align: center">Ils nous font confiance</h2>
+      <Sponsor />
+    </section>
+    <section class="justify-content-center">
+      <UButton
+        size="xl"
+        color="neutral"
+        class="rounded-full button"
+        icon="i-lucide-badge-check"
+        >Approuvé par 100 utilisateurs</UButton
+      >
     </section>
   </main>
 </template>
@@ -117,6 +146,12 @@ main {
 
 section {
   margin: 0 10%;
+}
+
+.basic-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .hero-header {
@@ -136,7 +171,20 @@ section {
 .list {
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 1rem;
+}
+
+.img-cover {
+  flex: 1; /* = flex-grow: 1; flex-shrink: 1; flex-basis: 0%; */
+
+  width: 100%;
+  min-width: 38%;
+  height: 100%;
+
+  object-fit: cover;
+
+  object-position: center;
 }
 
 .row {
@@ -154,7 +202,12 @@ section {
 }
 
 .justify-content-center {
+  display: flex;
   justify-content: center;
+}
+
+.bold {
+  font-weight: bold;
 }
 
 .box {
@@ -166,7 +219,7 @@ section {
 
   gap: 1rem;
 
-  border: solid 3px var(--ui-primary);
+  border: solid 3px var(--background-secondary);
   border-radius: 10px;
 
   width: 100%;
@@ -184,11 +237,16 @@ section {
   align-items: center;
 
   border-radius: 40px;
-  background-color: antiquewhite;
+  background-color: var(--background-secondary);
 
   margin: 0 20%;
   padding: 4rem;
 
   gap: 3rem;
+}
+
+.button {
+  font-size: small;
+  padding: 10px 40px;
 }
 </style>
