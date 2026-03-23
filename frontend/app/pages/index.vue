@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Sponsor from '@/components/Sponsor.vue'
+import type { IMotorcycle } from '~/types/motorcycle'
+
 const items = [
   `/_nuxt/assets/images/sponsors/1.png`,
   `/_nuxt/assets/images/sponsors/2.png`,
@@ -7,6 +9,18 @@ const items = [
   `/_nuxt/assets/images/sponsors/4.png`,
   `/_nuxt/assets/images/sponsors/5.png`
 ]
+
+const apiBack = useRuntimeConfig().public.apiback
+
+const { data, error } = await useFetch<{ motorcycles: IMotorcycle[] }>(
+  `${apiBack}motorcycles`
+)
+
+onMounted(() => {
+  if (data.value) {
+    console.log('Mes motos :', data.value)
+  }
+})
 </script>
 <template>
   <main>

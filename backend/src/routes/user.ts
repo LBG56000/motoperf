@@ -8,11 +8,6 @@ router.get(
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
     const { project, sort, limit, filter } = prepareQuery(req.query)
     try {
-router.get(
-  '/',
-  async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const { project, sort, limit, filter } = prepareQuery(req.query)
-    try {
       const users = await User.find()
         .where(filter)
         .select(project)
@@ -24,12 +19,8 @@ router.get(
         .limit(limit)
       res.status(200).json({ users })
     } catch (error) {
-    } catch (error) {
       console.error('Error accessing user route:', error)
       res.status(500).json({ error: 'Internal server error' })
-    }
-  },
-)
     }
   },
 )
