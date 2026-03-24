@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { IBrand } from '~/types/brand'
-import type { IMotorcycle } from '~/types/motorcycle'
+import type { IBrand } from '@/types/brands'
+import type { IMotorcycle } from '@/types/motorcycles'
 
 // Moto 1 || Moto 2
 const props = defineProps<{
@@ -58,12 +58,14 @@ const brandFilteredList = computed(() => {
 // Model list filtered by user input
 const motorcycleFilteredList = computed(() => {
   const search = modelInput.value.toLowerCase()
-  return [...new Set(
-    motorcyclesList.value
-      .filter((motorcycle) => motorcycle.name?.toLowerCase().includes(search))
-      .map((motorcycle) => motorcycle.name)
-      .filter((name): name is string => !!name)
-  )]
+  return [
+    ...new Set(
+      motorcyclesList.value
+        .filter((motorcycle) => motorcycle.name?.toLowerCase().includes(search))
+        .map((motorcycle) => motorcycle.name)
+        .filter((name): name is string => !!name)
+    )
+  ]
 })
 
 const yearFilteredList = computed(() => {
@@ -83,7 +85,6 @@ watch(
       const found = motorcyclesList.value.find(
         (m) => m.name === name && m.year === year
       )
-      console.log('Found motorcycle:', found)
       selectedId.value = found?.id
     } else {
       selectedId.value = undefined
@@ -92,7 +93,7 @@ watch(
 )
 
 async function fetchBrands() {
-  const apiBack = useRuntimeConfig().public.apiback
+  const apiBack = useRuntimeConfig().public.apiBase
   const data = await $fetch<{ brands: IBrand[] }>(`${apiBack}brands`, {
     params: { project: 'name' }
   })
@@ -102,13 +103,16 @@ async function fetchBrands() {
 async function fetchMotorcyclesByBrand() {
   // If first change on model input, fetch motorcycles list for the selected brand
   if (!isMotorcyclesFetched.value) {
-    const apiBack = useRuntimeConfig().public.apiback
-    const data = await $fetch<{ motorcycles: IMotorcycle[] }>(`${apiBack}motorcycles`, {
-      params: {
-        project: 'id,name,year',
-        filter: JSON.stringify({ brandId: motorcycle.value.brand?._id })
+    const apiBack = useRuntimeConfig().public.apiBase
+    const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
+      `${apiBack}motorcycles`,
+      {
+        params: {
+          project: 'id,name,year',
+          filter: JSON.stringify({ brandId: motorcycle.value.brand?._id })
+        }
       }
-    })
+    )
     motorcyclesList.value = data.motorcycles
     isMotorcyclesFetched.value = true
   }
@@ -127,6 +131,7 @@ onMounted(() => {
         v-model="brandInput"
         :placeholder="placeholderMotorcycle.brand"
         :items="brandFilteredList"
+        clear
       />
     </UFormField>
 
@@ -135,6 +140,7 @@ onMounted(() => {
         v-model="modelInput"
         :placeholder="placeholderMotorcycle.name"
         :items="motorcycleFilteredList"
+        clear
         @update:open="fetchMotorcyclesByBrand"
       />
     </UFormField>
@@ -144,6 +150,7 @@ onMounted(() => {
         v-model="motorcycle.year"
         :placeholder="String(placeholderMotorcycle.year)"
         :items="yearFilteredList"
+        clear
         @update:open="fetchMotorcyclesByBrand"
       />
     </UFormField>
