@@ -8,16 +8,17 @@ const motorcycleSchema = new Schema({
     unique: true,
   },
   brandId: {
-    type: Number,
-    require: true,
+    type: Schema.Types.ObjectId,
+    ref: 'Brand',
+    required: true,
   },
   engine_size: {
     type: Number,
     required: true,
   },
-  model: {
+  name: {
     type: String,
-    require: true,
+    required: true,
   },
   horsePower: {
     type: Number,
@@ -26,17 +27,16 @@ const motorcycleSchema = new Schema({
   soundLink: {
     type: String,
   },
+  imageUrl: {
+    type: String,
+  },
   is_new: {
     type: Boolean,
   },
-  time_0_100: {
-    type: Number,
-  },
-  time_100_200: {
-    type: Number,
-  },
-  time_200_300: {
-    type: Number,
+  acceleration: {
+    time_0_100: { type: Number },
+    time_100_200: { type: Number },
+    time_200_300: { type: Number },
   },
   speedMax: {
     type: Number,
@@ -51,11 +51,11 @@ const motorcycleSchema = new Schema({
   },
   year: {
     type: Number,
-    require: true,
+    required: true,
   },
   price: {
     type: Number,
-    require: true,
+    required: true,
   },
   createdAt: {
     type: Date,

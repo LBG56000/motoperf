@@ -6,9 +6,10 @@ const router = Router()
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const { project, sort, limit } = prepareQuery(req.query)
+    const { project, sort, limit, filter } = prepareQuery(req.query)
     try {
       const motorcycles = await Motorcycle.find()
+        .where(filter)
         .select(project)
         .sort(sort)
         .limit(limit)

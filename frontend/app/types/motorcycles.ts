@@ -1,22 +1,22 @@
-import { IAcceleration } from "./accelerations"
+import type { IAcceleration } from "./accelerations"
 
 export interface IMotorcycle {
   id: string
   name: string
   brandId: string
   createdAt: string
-  engine_size: number
+  year: number
+  price: number
   horsePower: number
   torque: number
   weight: number
+  engine_size: number
   consumption: number
+  acceleration?: IAcceleration
+  speedMax?: number
   soundLink?: string
   imageUrl?: string
   is_new?: boolean
-  acceleration?: IAcceleration
-  speedMax?: number
   numberOfComparison?: number
   withAllFiled?: boolean
-  year: number
-  price: number
 }

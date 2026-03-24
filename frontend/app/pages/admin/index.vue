@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IUser } from '~/types/users'
+import type { IUser } from '@/types/users'
 import CardStats from '~/components/admin/CardStats.vue'
 import Header from '~/components/admin/Header.vue'
 
@@ -13,7 +13,7 @@ definePageMeta({
 })
 
 const userName: string = 'Admin'
-const apiBack = useRuntimeConfig().public.apiback
+const apiBack = useRuntimeConfig().public.apiBase
 const stats = ref<Stat[]>([])
 
 async function fetchStats() {

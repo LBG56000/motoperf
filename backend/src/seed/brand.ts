@@ -9,23 +9,27 @@ const seedBrand = async () => {
   await Brand.insertMany([
     {
       id: 'b-001',
-      marque: 'Honda',
+      name: 'Honda',
     },
     {
       id: 'b-002',
-      marque: 'Kawasaki',
+      name: 'Kawasaki',
     },
     {
       id: 'b-003',
-      marque: 'Suzuki',
+      name: 'Suzuki',
     },
     {
       id: 'b-004',
-      marque: 'Yamaha',
+      name: 'Yamaha',
     },
     {
       id: 'b-005',
-      marque: 'BMW',
+      name: 'BMW',
+    },
+    {
+      id: 'b-006',
+      name: 'Ducati',
     },
   ])
   console.log('Brand seeding')

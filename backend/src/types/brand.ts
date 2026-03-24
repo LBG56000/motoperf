@@ -1,5 +1,5 @@
 export interface IBrand {
   id: string
-  marque: string
+  name: string
   createAt: string
 }
