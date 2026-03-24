@@ -14,11 +14,11 @@ async function fetchMotocycles() {
         filter: JSON.stringify({
           id: { $in: [motorcycle1Id.value, motorcycle2Id.value] }
         }),*/
-        project: 'model horsePower price'
+        project: 'model,horsePower,price'
       }
     }
   )
-
+    console.log(data)
   items.value = data.motorcycles
 }
 
