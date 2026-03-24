@@ -49,9 +49,6 @@ onMounted(async () => {
 
 <template>
   <div>
-    <div>
-      <!-- <NavApp></NavApp> -->
-    </div>
     <USkeleton v-if="loading" class="size-12 rounded-full" />
     <div v-else class="forum-filters">
       <ForumFilters />
@@ -72,6 +69,11 @@ onMounted(async () => {
 .forum-filters {
   display: flex;
   flex-direction: row;
+  align-items: start;
   margin: 5em;
+}
+
+.forum-filters>div>div {
+  margin-top: 2em;
 }
 </style>

@@ -47,20 +47,18 @@ onMounted(async () => {
         <h2>{{ post?.question }}</h2>
       </div>
       <div>
-        <div class="flex row end margin-1_5">
+        <div class="grid margin-1_5">
           <div>
             <UBadge size="xl" class="margin-2">{{ post?.brand.name }}</UBadge>
             <UBadge size="xl">{{ post?.category.name }}</UBadge>
           </div>
-          <div class="icon-and-text">
+          <div class="icon-and-text right">
             <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
             <p>{{ responses.length || 0 }} réponses </p>
           </div>
-        </div>
-        <div class="flex row end margin-1_5">
           <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
           }}</p>
-          <div class="icon-and-text">
+          <div class="icon-and-text right">
             <UIcon class="size-7 margin-2" name="i-lucide-eye" />
             <p>{{ post?.views }} vues</p>
           </div>
@@ -72,7 +70,7 @@ onMounted(async () => {
       <h4 class="margin-bottom-1">{{ post?.content }}</h4>
       <div class="icon-and-text margin-bottom-1">
         <UIcon name="i-lucide-star" class="size-7" />
-        <p>Mettre ma réponse en favori</p>
+        <p>Mettre ce post en favori</p>
       </div>
       <UFormField label="Ecrire une réponse" required :ui="{ container: 'w-5/6' }">
         <UTextarea v-model="newReponseOfPost" class="w-5/6" />
@@ -129,5 +127,15 @@ onMounted(async () => {
 
 .margin-bottom-1 {
   margin-bottom: 1em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 0.5em;
+}
+
+.right {
+  justify-self: end;
 }
 </style>
