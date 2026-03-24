@@ -14,7 +14,8 @@ const props = defineProps<{
     arrows
     :items="items"
     :ui="{
-      item: 'basis-1/4 ps-0',
+      container: 'flex items-stretch h-full',
+      item: 'basis-1/4 ps-0 self-stretch',
       prev: 'sm:start-8',
       next: 'sm:end-8'
     }"
@@ -41,7 +42,7 @@ const props = defineProps<{
           color="primary"
           class="rounded-full"
           style="color: white"
-          icon="i-lucide-search"
+          icon="i-lucide-arrow-left-right"
           >Comparer</UButton
         >
       </div>
@@ -55,6 +56,9 @@ article {
   flex-direction: column;
   text-align: center;
   align-items: center;
+
+  height: 100%;
+  justify-content: space-between;
 
   border: 4px solid var(--background-secondary);
   border-radius: 20px;
