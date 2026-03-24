@@ -20,7 +20,6 @@ const logos = ['1', '2', '3', '4', '5']
 .carousel {
   width: 100%;
   overflow: hidden;
-  background: var(--background-secondary);
   padding: 20px 0;
 }
 

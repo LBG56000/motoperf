@@ -18,7 +18,6 @@ async function fetchMotocycles() {
       }
     }
   )
-    console.log(data)
   items.value = data.motorcycles
 }
 

@@ -2,7 +2,7 @@
 const appName: string = useRuntimeConfig().public.appName
 </script>
 <template>
-  <UButton size="md" variant="ghost" class="logo" to="/">
+  <UButton size="md" color="primary" class="logo" to="/">
     {{ appName }}
   </UButton>
 </template>
