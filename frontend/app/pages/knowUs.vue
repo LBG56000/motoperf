@@ -56,6 +56,17 @@
 </template>
 
 <style>
+.page {
+  margin-bottom: 3em;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .center {
   display: flex;
   flex-direction: column;

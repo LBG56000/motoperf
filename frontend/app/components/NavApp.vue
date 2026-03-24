@@ -46,7 +46,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
           trailing-icon="i-lucide-arrow-right"
           size="xl"
           color="neutral"
-          class="rounded-full"
+          class="rounded-full button"
           >Connexion</UButton
         >
       </div>
@@ -181,5 +181,10 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
   text-align: center;
 
   background-color: var(--background);
+}
+
+.button {
+  font-size: small;
+  padding: 10px 40px;
 }
 </style>
