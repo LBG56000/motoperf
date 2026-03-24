@@ -57,7 +57,7 @@ onMounted(async () => {
             <p>{{ responses.length || 0 }} réponses </p>
           </div>
           <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
-            }}</p>
+          }}</p>
           <div class="icon-and-text right">
             <UIcon class="size-7 margin-2" name="i-lucide-eye" />
             <p>{{ post?.views }} vues</p>
@@ -75,7 +75,7 @@ onMounted(async () => {
       <UFormField label="Ecrire une réponse" required :ui="{ container: 'w-5/6' }">
         <UTextarea v-model="newReponseOfPost" class="w-5/6" />
       </UFormField>
-      <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''">Ecrire une réponse</UButton>
+      <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''">Ajouter ma réponse</UButton>
       <p v-if="responses.length === 0">Aucune réponse à ce post, ajouter la première</p>
       <div v-else class="margin-bottom-1 w-5/6">
         <LazyForumResponse :responses="responses" />
