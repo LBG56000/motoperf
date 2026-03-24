@@ -132,7 +132,11 @@ onMounted(() => {
         :placeholder="placeholderMotorcycle.brand"
         :items="brandFilteredList"
         clear
-      />
+      >
+        <template #empty>
+          Aucune marque trouvée
+        </template>
+      </UInputMenu>
     </UFormField>
 
     <UFormField label="Modèle" name="model">
@@ -142,7 +146,11 @@ onMounted(() => {
         :items="motorcycleFilteredList"
         clear
         @update:open="fetchMotorcyclesByBrand"
-      />
+      >
+        <template #empty>
+          Aucun modèle trouvé
+        </template>
+      </UInputMenu>
     </UFormField>
 
     <UFormField label="Année" name="year">
@@ -152,7 +160,11 @@ onMounted(() => {
         :items="yearFilteredList"
         clear
         @update:open="fetchMotorcyclesByBrand"
-      />
+      >
+        <template #empty>
+          Aucune année trouvée
+        </template>
+      </UInputMenu>
     </UFormField>
   </div>
 </template>
