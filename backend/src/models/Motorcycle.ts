@@ -27,17 +27,16 @@ const motorcycleSchema = new Schema({
   soundLink: {
     type: String,
   },
+  imageUrl: {
+    type: String,
+  },
   is_new: {
     type: Boolean,
   },
-  time_0_100: {
-    type: Number,
-  },
-  time_100_200: {
-    type: Number,
-  },
-  time_200_300: {
-    type: Number,
+  acceleration: {
+    time_0_100: { type: Number },
+    time_100_200: { type: Number },
+    time_200_300: { type: Number },
   },
   speedMax: {
     type: Number,
