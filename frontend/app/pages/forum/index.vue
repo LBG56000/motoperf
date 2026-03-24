@@ -48,6 +48,8 @@ onMounted(async () => {
     <div class="forum-filters">
       <ForumFilters :loading />
       <div>
+        <USkeleton v-if="loading" class="size-12 rounded-full" />
+        <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
         <div v-for="post in posts" :key="post.id">
           <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
         </div>

@@ -14,10 +14,6 @@ const handleEditAPost = () => {
 const handleOpenAPost = (id: string) => {
   navigateTo(`/forum/${id}`)
 }
-
-onMounted(async () => {
-  await props.post
-})
 </script>
 <template>
   <UCard class="card-forum" @click="handleOpenAPost(post.id)">
@@ -39,7 +35,7 @@ onMounted(async () => {
             </div>
 
             <p>Par {{ props.post.user.firstname }}, {{ formatTimeAgo(props.post.createdAt)
-              }}</p>
+            }}</p>
           </div>
           <div class="statsContainer">
             <div class="stats">
