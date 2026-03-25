@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { IMotorcycle } from '~/types/motorcycle'
+import type { IMotorcycle } from '@/types/motorcycles'
 
-const props = defineProps<{
+defineProps<{
   items: IMotorcycle[]
 }>()
 </script>
@@ -15,30 +15,30 @@ const props = defineProps<{
     :items="items"
     :ui="{
       container: 'flex items-stretch h-full',
-      item: 'basis-1/4 ps-0 self-stretch',
-      prev: 'sm:start-8',
-      next: 'sm:end-8'
+      item: 'basis-1/5 ps-0 self-stretch',
+      prev: 'sm:start-15',
+      next: 'sm:end-15'
     }"
   >
     <article>
-      <h4>{{ item.model }}</h4>
+      <h5>{{ item.name }}</h5>
       <img
-        src="/_nuxt/assets/images/sponsors/2.png"
-        width="320"
-        height="320"
+        src="/images/motorcycles/YZF-R1.png"
+        width="100"
+        height="100"
         class="rounded-lg"
         loading="lazy"
       />
       <div id="description">
         <p>{{ item.horsePower }} ch</p>
-        <hr />
-        <p>Nm</p>
-        <hr />
+        <p>-</p>
+        <p>{{ item.torque }} Nm</p>
+        <p>-</p>
         <p>{{ item.price }}€</p>
       </div>
       <div>
         <UButton
-          size="xl"
+          size="sm"
           color="primary"
           class="rounded-full"
           style="color: white"
@@ -58,26 +58,26 @@ article {
   align-items: center;
 
   height: 100%;
+  width: 230px;
   justify-content: space-between;
 
-  border: 4px solid var(--background-secondary);
-  border-radius: 20px;
+  border: 2px solid var(--background-secondary);
+  border-radius: 16px;
 
-  padding: 20px;
-  margin: 0 30px;
+  padding: 12px 0;
+  margin: 0 2px;
 
   gap: 0.5rem;
 }
 
 article p,
-article h4,
 article span {
   font-family: 'Krona One', sans-serif;
 }
 
 article p {
-  font-size: 0.7rem;
-  font-weight: bold;
+  font-size: 13px;
+  font-weight: 200;
 }
 
 hr {
@@ -89,5 +89,6 @@ hr {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: -5px;
 }
 </style>
