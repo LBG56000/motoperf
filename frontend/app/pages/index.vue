@@ -146,6 +146,7 @@ onMounted(async () => {
           color="primary"
           class="rounded-full button"
           style="color: white"
+          to="/comparo"
           >Essayer</UButton
         >
       </div>
