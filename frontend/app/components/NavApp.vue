@@ -1,9 +1,12 @@
 <script setup>
+import ConnexionForm from './ConnexionForm.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
 const isOpen = ref(false)
 const mode = ref(false)
 const colorMode = useColorMode()
+
+const isModalOpen = ref(false)
 
 function toggle_open() {
   isOpen.value = !isOpen.value
@@ -24,6 +27,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
 
 <template>
   <div id="navbar-pc">
+    <ConnexionForm v-model="isModalOpen" />
     <div class="navbar">
       <div class="list-left">
         <LogoApp />
@@ -43,10 +47,16 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
           >Nous connaitre</UButton
         >
         <UButton
+          loading-auto
           trailing-icon="i-lucide-arrow-right"
           size="xl"
           color="neutral"
           class="rounded-full button"
+          @click="
+            () => {
+              isModalOpen = true
+            }
+          "
           >Connexion</UButton
         >
       </div>
@@ -109,6 +119,11 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         color="neutral"
         variant="ghost"
         style="justify-content: center"
+        @click="
+          {
+            ;() => (isModalOpen = true)
+          }
+        "
         >Mon profil</UButton
       >
     </div>
