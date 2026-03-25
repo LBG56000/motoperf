@@ -4,12 +4,9 @@ import ResultatFieldNumber from '~/components/card/ResultatFieldNumber.vue'
 import ResultatFieldImg from '~/components/card/ResultatFieldImg.vue'
 import ResultatFieldSound from '~/components/card/ResultatFieldSound.vue'
 import MotocyclesForm from '~/components/form/MotocyclesForm.vue'
+import CarrouselMotorcycles from '~/components/CarrouselMotorcycles.vue'
 
-definePageMeta({
-  layout: 'frontend'
-})
-
-const apiBack = useRuntimeConfig().public.apiBase
+const apiBase = useRuntimeConfig().public.apiBase
 const showResultat = ref(false)
 const motorcycle1 = ref<IMotorcycle>()
 const motorcycle2 = ref<IMotorcycle>()
@@ -31,6 +28,9 @@ const fieldCategories = {
   Image: 'imageUrl'
 }
 const resultatTemplate = useTemplateRef('resultat')
+const carousselBeginnerBikes = ref<IMotorcycle[]>([])
+const carousselSportBikes = ref<IMotorcycle[]>([])
+const carousselAdventureBikes = ref<IMotorcycle[]>([])
 
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -87,16 +87,11 @@ function createResultat() {
       }
     }
   }
-  console.log('Résultats créés :', {
-    resultatNumber,
-    resultatSound,
-    resultatImg
-  })
 }
 
 async function fetchMotocycles() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBack}motorcycles`,
+    `${apiBase}motorcycles`,
     {
       params: {
         filter: JSON.stringify({
@@ -114,6 +109,57 @@ async function fetchMotocycles() {
   await nextTick()
   resultatTemplate.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
+
+async function fetchCarrouselMotorcycles() {
+  const project = 'name,horsePower,torque,price'
+  const limit = 10
+  // SportsBikes for Carrousel
+  const sportBikesData = await $fetch<{motorcycles: IMotorcycle[]}>(
+    `${apiBase}motorcycles`,
+    {
+      params:{
+        filter: JSON.stringify({
+          category : 'sportsbike'
+        }),
+        project,
+        limit
+      }
+    }
+  )
+  // Beginners Bikes for Carrousel
+  const beginnerBikesData = await $fetch<{motorcycles: IMotorcycle[]}>(
+    `${apiBase}motorcycles`,
+    {
+      params:{
+        filter: JSON.stringify({
+          isAvailableA2 : true
+        }),
+        project,
+        limit
+      }
+    }
+  )
+  // Adventure Bikes for Carrousel
+  const adventureBikesData = await $fetch<{motorcycles: IMotorcycle[]}>(
+    `${apiBase}motorcycles`,
+    {
+      params:{
+        filter: JSON.stringify({
+          category : 'adventure'
+        }),
+        project,
+        limit
+      }
+    }
+  )
+  carousselSportBikes.value = sportBikesData.motorcycles
+  carousselBeginnerBikes.value = beginnerBikesData.motorcycles
+  carousselAdventureBikes.value = adventureBikesData.motorcycles
+}
+
+onMounted(() => {
+  fetchCarrouselMotorcycles()
+})
 </script>
 
 <template>
@@ -140,7 +186,7 @@ async function fetchMotocycles() {
               :field-name="field.fieldName"
               :first-value="field.firstValue"
               :second-value="field.secondValue"
-            />
+              />
             <br />
           </div>
         </div>
@@ -158,21 +204,39 @@ async function fetchMotocycles() {
           <h3>Sons</h3>
           <div v-for="field in resultatSound" :key="field.fieldName">
             <ResultatFieldSound
-              :field-name="field.fieldName"
-              :first-value="field.firstValue"
-              :second-value="field.secondValue"
+            :field-name="field.fieldName"
+            :first-value="field.firstValue"
+            :second-value="field.secondValue"
             />
           </div>
         </div>
       </div>
     </Transition>
+    <div class="caroussel-container">
+      <div>
+        <h3>Pour la performance</h3>
+        <CarrouselMotorcycles :items="carousselSportBikes" />
+      </div>
+      <div>
+        <h3>Pour le A2</h3>
+        <CarrouselMotorcycles :items="carousselBeginnerBikes" />
+      </div>
+      <div>
+        <h3>Pour l'aventure</h3>
+        <CarrouselMotorcycles :items="carousselAdventureBikes" />
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-h3 {
+.container-form h3 {
   text-align: center;
   margin: 20px;
+}
+
+.caroussel-container h3 {
+  text-align: left;
 }
 
 .form-button {
@@ -195,6 +259,12 @@ h3 {
   display: flex;
   justify-content: center;
   gap: 2rem;
+}
+
+.caroussel-container {
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
 }
 
 .resultat-section {

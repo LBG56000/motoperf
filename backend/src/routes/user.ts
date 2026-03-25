@@ -8,8 +8,7 @@ router.get(
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
     const { project, sort, limit, filter } = prepareQuery(req.query)
     try {
-      const users = await User.find()
-        .where(filter)
+      const users = await User.find(filter)
         .select(project)
         .sort(sort)
         .limit(limit)

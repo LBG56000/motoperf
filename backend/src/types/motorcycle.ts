@@ -1,10 +1,12 @@
 import { IAcceleration } from "./accelerations"
+import { MotorcycleCategory } from "../models/Motorcycle"
 
 export interface IMotorcycle {
   id: string
-  name: string
   brandId: string
-  createdAt: string
+  name: string
+  year: number
+  category: MotorcycleCategory
   engine_size: number
   horsePower: number
   torque: number
@@ -12,11 +14,12 @@ export interface IMotorcycle {
   consumption: number
   soundLink?: string
   imageUrl?: string
+  isAvailableA2?: boolean
   is_new?: boolean
   acceleration?: IAcceleration
   speedMax?: number
   numberOfComparison?: number
   withAllFiled?: boolean
-  year: number
   price: number
+  createdAt: string
 }
