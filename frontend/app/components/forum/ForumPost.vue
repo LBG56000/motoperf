@@ -97,7 +97,6 @@ const handleOpenAPost = (id: string) => {
 .stats {
   display: flex;
   gap: 0.5em;
-  margin-bottom: 1em;
   margin-top: 1em;
 }
 
