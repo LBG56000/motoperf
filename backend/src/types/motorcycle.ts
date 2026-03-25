@@ -1,17 +1,21 @@
 import { IBrand } from './brand'
 
+import { IAcceleration } from './accelerations'
+
 export interface IMotorcycle {
   id: string
-  model: string
+  name: string
   brand: IBrand
   createdAt: string
   engine_size: number
   horsePower: number
+  torque: number
+  weight: number
+  consumption: number
   soundLink?: string
+  imageUrl?: string
   is_public?: boolean
-  time_0_100?: number
-  time_100_200?: number
-  time_200_300?: number
+  acceleration?: IAcceleration
   speedMax?: number
   numberOfComparison?: number
   withAllFiled?: boolean

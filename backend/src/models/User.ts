@@ -48,6 +48,10 @@ const userSchema = new Schema(
     idMoto: {
       type: String,
     },
+    image: {
+      type: String,
+      default: 'default.svg'
+    }
   },
   { timestamps: true },
 )

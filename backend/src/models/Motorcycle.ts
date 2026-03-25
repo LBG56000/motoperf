@@ -16,9 +16,9 @@ const motorcycleSchema = new Schema({
     type: Number,
     required: true,
   },
-  model: {
+  name: {
     type: String,
-    required: true,
+    requiredd: true,
   },
   horsePower: {
     type: Number,
@@ -27,17 +27,16 @@ const motorcycleSchema = new Schema({
   soundLink: {
     type: String,
   },
+  imageUrl: {
+    type: String,
+  },
   is_public: {
     type: Boolean,
   },
-  time_0_100: {
-    type: Number,
-  },
-  time_100_200: {
-    type: Number,
-  },
-  time_200_300: {
-    type: Number,
+  acceleration: {
+    time_0_100: { type: Number },
+    time_100_200: { type: Number },
+    time_200_300: { type: Number },
   },
   speedMax: {
     type: Number,
@@ -52,10 +51,11 @@ const motorcycleSchema = new Schema({
   },
   year: {
     type: Number,
-    required: true,
+    requiredd: true,
   },
   price: {
     type: Number,
+    required: true,
   },
   createdAt: {
     type: Date,
