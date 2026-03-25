@@ -232,7 +232,7 @@ const seedMotorcycles = async () => {
     // Motos A2
     {
       id: 'm-012',
-      brandId: brandByName('Honda'),
+      brand: brandByName('Honda'),
       engine_size: 471,
       name: 'CB500F',
       horsePower: 47,
@@ -250,7 +250,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-013',
-      brandId: brandByName('Yamaha'),
+      brand: brandByName('Yamaha'),
       engine_size: 689,
       name: 'MT-07',
       horsePower: 73,
@@ -268,7 +268,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-014',
-      brandId: brandByName('Kawasaki'),
+      brand: brandByName('Kawasaki'),
       engine_size: 649,
       name: 'Z650',
       horsePower: 68,
@@ -286,7 +286,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-015',
-      brandId: brandByName('Suzuki'),
+      brand: brandByName('Suzuki'),
       engine_size: 645,
       name: 'SV650',
       horsePower: 73,
@@ -305,7 +305,7 @@ const seedMotorcycles = async () => {
     // Motos Adventure
     {
       id: 'm-016',
-      brandId: brandByName('Honda'),
+      brand: brandByName('Honda'),
       engine_size: 1084,
       name: 'Africa Twin',
       horsePower: 102,
@@ -323,7 +323,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-017',
-      brandId: brandByName('BMW'),
+      brand: brandByName('BMW'),
       engine_size: 1254,
       name: 'R 1250 GS',
       horsePower: 136,
@@ -341,7 +341,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-018',
-      brandId: brandByName('Yamaha'),
+      brand: brandByName('Yamaha'),
       engine_size: 1199,
       name: 'Super Ténéré 1200',
       horsePower: 112,
@@ -359,7 +359,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-019',
-      brandId: brandByName('Ducati'),
+      brand: brandByName('Ducati'),
       engine_size: 1158,
       name: 'Multistrada V4',
       horsePower: 170,
@@ -378,7 +378,7 @@ const seedMotorcycles = async () => {
     // Motos A2 supplémentaires
     {
       id: 'm-020',
-      brandId: brandByName('Kawasaki'),
+      brand: brandByName('Kawasaki'),
       engine_size: 649,
       name: 'Ninja 650',
       horsePower: 68,
@@ -396,7 +396,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-021',
-      brandId: brandByName('Yamaha'),
+      brand: brandByName('Yamaha'),
       engine_size: 689,
       name: 'Ténéré 700',
       horsePower: 73,
@@ -414,7 +414,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-022',
-      brandId: brandByName('Honda'),
+      brand: brandByName('Honda'),
       engine_size: 471,
       name: 'CBR500R',
       horsePower: 47,
@@ -432,7 +432,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-023',
-      brandId: brandByName('Suzuki'),
+      brand: brandByName('Suzuki'),
       engine_size: 248,
       name: 'V-Strom 250 SX',
       horsePower: 26,
@@ -451,7 +451,7 @@ const seedMotorcycles = async () => {
     // Adventure supplémentaires
     {
       id: 'm-024',
-      brandId: brandByName('Kawasaki'),
+      brand: brandByName('Kawasaki'),
       engine_size: 1043,
       name: 'Versys 1000 SE',
       horsePower: 120,
@@ -469,7 +469,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-025',
-      brandId: brandByName('BMW'),
+      brand: brandByName('BMW'),
       engine_size: 1254,
       name: 'R 1250 GS Adventure',
       horsePower: 136,
