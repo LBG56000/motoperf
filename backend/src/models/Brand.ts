@@ -15,6 +15,10 @@ const brandSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  icon: {
+    type: String,
+    required: true
+  }
 })
 
 export default model<IBrand>('Brand', brandSchema)
