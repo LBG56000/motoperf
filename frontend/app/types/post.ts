@@ -4,7 +4,7 @@ import type { IMessage } from "./messages";
 import type { IUser } from "./users";
 
 export interface IPost {
-    id: string,
+    _id: string,
     question: string,
     content: string,
     category: ICategory,

@@ -32,7 +32,7 @@ router.get(
 
 router.get('/:id/responses', async (req, res) => {
   try {
-    const post = await Post.findOne({ id: req.params.id })
+    const post = await Post.findOne({ _id: req.params.id })
     if (!post) {
       return res.status(404).json({ error: 'Post not found' })
     }

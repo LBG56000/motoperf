@@ -1,5 +1,7 @@
+import type { IUser } from "./users"
+
 export interface IMessage {
-  id: string
+  _id: string
   content: string
   description: string | null
   like: number
@@ -8,7 +10,7 @@ export interface IMessage {
   isPublicationResponse: boolean
   parentId: string | null
   motorcycleId: boolean | null
-  userId: boolean | null
+  user: IUser
   createAt: string
 }
 
