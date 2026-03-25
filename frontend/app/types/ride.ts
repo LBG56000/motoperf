@@ -1,5 +1,5 @@
 export interface IRide {
-  id: number
+  _id: string
   title: string
   description: string
   geom: any
