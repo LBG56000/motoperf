@@ -30,25 +30,12 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         <ToggleSwitch v-model="mode" />
       </div>
       <div class="list-right">
-        <UButton size="md" color="neutral" variant="ghost" to="/"
-          >Comparateur</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/"
-          >Forum</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/"
-          >Balades</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/knowUs"
-          >Nous connaitre</UButton
-        >
-        <UButton
-          trailing-icon="i-lucide-arrow-right"
-          size="xl"
-          color="neutral"
-          class="rounded-full button"
-          >Connexion</UButton
-        >
+        <UButton size="md" color="neutral" variant="ghost" to="/">Comparateur</UButton>
+        <UButton size="md" color="neutral" variant="ghost" to="/forum">Forum</UButton>
+        <UButton size="md" color="neutral" variant="ghost" to="/">Balades</UButton>
+        <UButton size="md" color="neutral" variant="ghost" to="/knowUs">Nous connaitre</UButton>
+        <UButton trailing-icon="i-lucide-arrow-right" size="xl" color="neutral" class="rounded-full button">Connexion
+        </UButton>
       </div>
     </div>
   </div>
@@ -58,59 +45,15 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         <LogoApp />
         <ToggleSwitch v-model="mode" />
       </div>
-      <UIcon
-        :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'"
-        class="size-10"
-        @click="toggle_open"
-      />
+      <UIcon :name="isOpen ? 'i-lucide-chevron-down' : 'i-lucide-menu'" class="size-10" @click="toggle_open" />
     </div>
     <div v-if="isOpen" class="list-mobile">
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        style="justify-content: center"
-        to="/"
-        >Comparateur</UButton
-      >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        style="justify-content: center"
-        to="/"
-        >Forum</UButton
-      >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        style="justify-content: center"
-        to="/"
-        >Balades</UButton
-      >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        style="justify-content: center"
-        to="/"
-        >Nous connaitre</UButton
-      >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        style="justify-content: center"
-        >Connexion</UButton
-      >
-      <UButton
-        size="md"
-        color="neutral"
-        variant="ghost"
-        style="justify-content: center"
-        >Mon profil</UButton
-      >
+      <UButton size="md" color="neutral" variant="ghost" style="justify-content: center" to="/">Comparateur</UButton>
+      <UButton size="md" color="neutral" variant="ghost" style="justify-content: center" to="/">Forum</UButton>
+      <UButton size="md" color="neutral" variant="ghost" style="justify-content: center" to="/">Balades</UButton>
+      <UButton size="md" color="neutral" variant="ghost" style="justify-content: center" to="/">Nous connaitre</UButton>
+      <UButton size="md" color="neutral" variant="ghost" style="justify-content: center">Connexion</UButton>
+      <UButton size="md" color="neutral" variant="ghost" style="justify-content: center">Mon profil</UButton>
     </div>
   </div>
 </template>

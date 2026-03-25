@@ -20,4 +20,26 @@ router.get(
   },
 )
 
+router.get('/:id/responses', async (req, res) => {
+  try {
+    const message = await Message.findOne({ id: req.params.id })
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' })
+    }
+    const query = Message.find({
+      reference: message._id,
+      referenceModel: 'Message'
+    })
+
+    query.populate('user')
+
+    const messages = await query
+
+    res.json({ messages })
+  } catch (error) {
+    console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 export default router

@@ -7,7 +7,8 @@ export interface IUser {
   isAdmin: boolean
   password: string
   ridingStartYear?: number
-  createdAt: Date
-  userType: 'beginner' | 'confirmed' | 'expert' | 'other'
+  createdAt?: Date
+  userType?: 'beginner' | 'confirmed' | 'expert' | 'other'
+  image: string
   idMoto: string
 }

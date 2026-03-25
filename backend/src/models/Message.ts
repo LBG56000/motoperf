@@ -1,5 +1,5 @@
 import type { IMessage } from '../types/messages'
-import { Schema, model } from 'mongoose'
+import { Schema, Types, model } from 'mongoose'
 
 const messageSchema = new Schema(
   {
@@ -26,17 +26,20 @@ const messageSchema = new Schema(
     isRep: {
       type: Boolean,
     },
-    isPublicationResponse: {
-      type: Boolean,
+    reference: {
+      type: Types.ObjectId,
+      refPath: 'referenceModel'
     },
-    parentId: {
+    referenceModel: {
       type: String,
+      enum: ['Post', 'Message']
     },
     motorcycleId: {
       type: String,
     },
-    userId: {
-      type: String,
+    user: {
+      type: Types.ObjectId,
+      ref: 'User'
     },
     createdAt: {
       type: Date,
@@ -47,14 +50,5 @@ const messageSchema = new Schema(
     validateBeforeSave: true,
   },
 )
-
-messageSchema.pre('validate', function () {
-  const hasUser = !!this.isPublicationResponse
-  const hasMotorcycle = !!this.isRep
-
-  if (hasUser && hasMotorcycle) {
-    throw new Error('A message must not have isPublicationResponse AND isRep')
-  }
-})
 
 export default model<IMessage>('Message', messageSchema)

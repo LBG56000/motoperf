@@ -9,5 +9,6 @@ export interface IUser {
   ridingStartYear?: number
   createdAt: Date
   userType: 'beginner' | 'confirmed' | 'expert' | 'other'
-  idMoto: string
+  idMoto: string,
+  image: string
 }
