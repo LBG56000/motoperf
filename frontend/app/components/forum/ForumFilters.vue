@@ -66,8 +66,8 @@ onMounted(async () => {
         </div>
         <div class="filter">
           <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-          <div v-else v-for="category in categories" :key="category.id" class="icon-and-text sub-filter cursor-pointer"
-            @click="handlClickOnCategory(category.id)">
+          <div v-else v-for="category in categories" :key="category._id" class="icon-and-text sub-filter cursor-pointer"
+            @click="handlClickOnCategory(category._id)">
             <UIcon class="size-7 margin-0_5" :name="'i-lucide-' + category.icon" />
             <p>{{ category.name }}</p>
           </div>

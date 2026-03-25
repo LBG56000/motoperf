@@ -8,26 +8,24 @@ const seedCategory = async () => {
 
   await Category.insertMany([
     {
-      id: 'c-001',
       name: 'Réparation',
       icon: 'wrench'
     },
     {
-      id: 'c-002',
       name: 'Entretien',
       icon: 'cog'
     },
     {
-      id: 'c-003',
       name: 'Course',
       icon: 'motorbike'
     },
     {
-      id: 'c-004',
       name: 'Opinion',
       icon: 'megaphone'
     }
   ])
+
+  console.log('Categories seeding')
 }
 
 export default seedCategory
