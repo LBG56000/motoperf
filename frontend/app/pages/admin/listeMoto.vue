@@ -11,6 +11,7 @@ definePageMeta({
 const UBadge = resolveComponent('UBadge')
 const apiBack = useRuntimeConfig().public.apiback
 const motos = ref<IMotorcycle[]>([])
+const selectedMoto = ref<IMotorcycle | null>(null)
 
 const columns = [
   { accessorKey: 'brand', header: 'Marque' },
@@ -18,7 +19,7 @@ const columns = [
   { accessorKey: 'year', header: 'Année' },
   {
     accessorKey: 'published',
-    header: 'statut',
+    header: 'Statut',
     cell: ({ row }) => {
       const value = row.getValue('published') as boolean
 
@@ -79,18 +80,21 @@ const panelOpen = ref(false)
 
 function closePanel() {
   panelOpen.value = false
+  selectedMoto.value = null
 }
 
 const refreshing = ref(false)
 
 async function refreshAll() {
   refreshing.value = true
-  try {
-    await refreshNuxtData()
-  } finally {
-    refreshing.value = false
-  }
-  console.log('Refresh ')
+  await fetchData()
+  refreshing.value = false
+}
+
+function onRowClick(row: any) {
+  selectedMoto.value = row.original
+  panelOpen.value = true
+  console.log('aaaaaaaa')
 }
 </script>
 
@@ -111,19 +115,28 @@ async function refreshAll() {
           <UButton size="md" color="primary" label="Open"
             >Ajouter une moto</UButton
           >
-          <UButton :disabled="refreshing" @click="refreshAll">
-            Refetch All Data
-          </UButton>
 
           <template #body>
-            <CardMoto :mode="'create'" :onClosePanel="closePanel" />
+            <CardMoto
+              :mode="selectedMoto ? 'edit' : 'create'"
+              :moto="selectedMoto"
+              :onClosePanel="closePanel"
+              :onRefresh="refreshAll"
+            />
           </template>
         </USlideover>
       </div>
 
       <div class="main-content">
         <h3>Liste des motos</h3>
-        <UTable :data="motos" :columns="columns" />
+        <UTable
+          :data="motos"
+          :columns="columns"
+          :ui="{
+            tr: 'cursor-pointer hover:bg-gray-50'
+          }"
+          @row:click="onRowClick"
+        />
       </div>
     </main>
   </div>

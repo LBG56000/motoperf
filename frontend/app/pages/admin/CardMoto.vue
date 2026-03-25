@@ -7,7 +7,8 @@ const apiBack = useRuntimeConfig().public.apiback
 
 const props = defineProps({
   mode: { type: String, default: 'create' },
-  onClosePanel: { type: Function, required: true }
+  onClosePanel: { type: Function, required: true },
+  onRefresh: { type: Function, required: true }
 })
 
 const schema = v.object({
@@ -15,7 +16,6 @@ const schema = v.object({
   model: v.pipe(v.string(), v.minLength(1, 'Model is required')),
   year: v.number('Year is required'),
   engineSize: v.number('Engine size is required'),
-  power: v.optional(v.number()),
   horsepower: v.optional(v.number()),
   maxSpeed: v.optional(v.number()),
   time_0_100: v.optional(v.number()),
@@ -31,8 +31,8 @@ type Schema = v.InferOutput<typeof schema>
 const state = reactive<Schema>({
   brand: '',
   model: '',
-  year: undefined as any,
-  engineSize: undefined as any,
+  year: 2026,
+  engineSize: undefined,
   power: undefined,
   horsepower: undefined,
   maxSpeed: undefined,
@@ -103,12 +103,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     props.onClosePanel()
 
+    props.onRefresh()
+
     Object.assign(state, {
       brand: '',
       model: '',
       year: undefined,
       engineSize: undefined,
-      power: undefined,
       horsepower: undefined,
       maxSpeed: undefined,
       time_0_100: undefined,
@@ -143,10 +144,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     <UFormField label="Cylindrée" name="engineSize" required>
       <UInputNumber v-model="state.engineSize" />
-    </UFormField>
-
-    <UFormField label="Puissance" name="power" required>
-      <UInputNumber v-model="state.power" />
     </UFormField>
 
     <UFormField label="Chevaux" name="horsepower">
