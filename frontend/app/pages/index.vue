@@ -1,24 +1,51 @@
 <script setup lang="ts">
 import Sponsor from '@/components/Sponsor.vue'
 import type { IMotorcycle } from '@/types/motorcycles'
+import StatsHome from '~/components/card/StatsHome.vue'
 
-const items = ref<IMotorcycle[]>([])
+const itemsCaroussel = ref<IMotorcycle[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
 
+const itemsTab = [
+  [
+    {
+      content: '80 Marques',
+      urlImg: '/images/accueil/icon_Binocle.png'
+    },
+    {
+      content: '10 000 ch',
+      urlImg: '/images/accueil/icon_Settings.png'
+    },
+    {
+      content: '3560 modèles',
+      urlImg: '/images/accueil/icon_moto.png'
+    }
+  ],
+  [
+    {
+      content: 'Base de données complètes',
+      urlImg: '/images/accueil/icon_checked_classic.png'
+    },
+    {
+      content: 'Communautée active',
+      urlImg: '/images/accueil/icon_clock.png'
+    },
+    {
+      content: 'Equipe passionée',
+      urlImg: '/images/accueil/icon_idea.png'
+    }
+  ]
+]
 async function fetchMotocycles() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
     {
       params: {
-        /*
-        filter: JSON.stringify({
-          id: { $in: [motorcycle1Id.value, motorcycle2Id.value] }
-        }),*/
-        project: 'model,horsePower,price'
+        project: 'name,horsePower,torque,price'
       }
     }
   )
-  items.value = data.motorcycles
+  itemsCaroussel.value = data.motorcycles
 }
 
 onMounted(async () => {
@@ -52,14 +79,14 @@ onMounted(async () => {
         >
       </div>
 
-      <div class="list">
+      <div class="hero-images">
         <img
-          src="/assets/images/accueil/R1_fond.png"
+          src="/images/accueil/R1_fond.png"
           alt="Moto"
           class="img-cover"
         />
         <img
-          src="/assets/images/accueil/BMW_fond.png"
+          src="/images/accueil/BMW_fond.png"
           alt="Moto"
           class="img-cover"
         />
@@ -70,7 +97,7 @@ onMounted(async () => {
         <article>
           <h2>Un peu d'histoire</h2>
           <p>
-            Depuis que l’homme a inventé le moteur thermique, il a toujours
+            Depuis que l'homme a inventé le moteur thermique, il a toujours
             cherché à repousser ses limites : plus de
             <span class="bold">puissance</span>, plus de
             <span class="bold">couple</span>, plus de
@@ -81,7 +108,7 @@ onMounted(async () => {
           </p>
         </article>
         <img
-          src="/assets/images/accueil/Hornet.png"
+          src="/images/accueil/Hornet.png"
           alt="Moto"
           class="img-cover"
         />
@@ -93,39 +120,23 @@ onMounted(async () => {
         en quelques chiffres
       </h2>
       <article class="column">
-        <div class="row justify-content-center">
-          <div class="box">
-            <img src="/assets/images/accueil/icon_Binocle.png" />
-            <p>80 Marques</p>
-          </div>
-          <div class="box">
-            <img src="/assets/images/accueil/icon_Settings.png" />
-            <p>10 000 ch</p>
-          </div>
-          <div class="box">
-            <img src="/assets/images/accueil/icon_moto.png" />
-            <p>3560 modèles</p>
-          </div>
-        </div>
-        <div class="row justify-content-center">
-          <div class="box">
-            <img src="/assets/images/accueil/icon_checked_classic.png" />
-            <p>Base de données complètes</p>
-          </div>
-          <div class="box">
-            <img src="/assets/images/accueil/icon_clock.png" />
-            <p>Communautée active</p>
-          </div>
-          <div class="box">
-            <img src="/assets/images/accueil/icon_idea.png" />
-            <p>Equipe passionée</p>
-          </div>
+        <div
+          v-for="line in itemsTab"
+          :key="line[0]?.content"
+          class="row justify-content-center"
+        >
+          <StatsHome
+            v-for="item in line"
+            :key="item.content"
+            :content="item.content"
+            :url-img="item.urlImg"
+          />
         </div>
       </article>
     </section>
     <section class="basic-section">
       <h2 style="text-align: center">Les best-sellers</h2>
-      <Carrousel :items="items" />
+      <CarrouselMotorcycles :items="itemsCaroussel" />
     </section>
     <section class="invitation justify-content-center basic-section">
       <h3 style="text-align: center">Tester le comparateur dès maintenant !</h3>
@@ -135,6 +146,7 @@ onMounted(async () => {
           color="primary"
           class="rounded-full button"
           style="color: white"
+          to="/comparo"
           >Essayer</UButton
         >
       </div>
@@ -193,6 +205,15 @@ section {
   gap: 1rem;
 }
 
+.hero-images {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+}
+
 .img-cover {
   flex: 1; /* = flex-grow: 1; flex-shrink: 1; flex-basis: 0%; */
 
@@ -210,7 +231,7 @@ section {
   flex-direction: row;
   gap: 3.5rem;
 
-  margin: 0 10%;
+  margin: 0 5%;
 }
 
 .column {

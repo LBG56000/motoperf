@@ -35,31 +35,12 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         <ToggleSwitch v-model="mode" />
       </div>
       <div class="list-right">
-        <UButton size="md" color="neutral" variant="ghost" to="/"
-          >Comparateur</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/forum"
-          >Forum</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/ride"
-          >Balades</UButton
-        >
-        <UButton size="md" color="neutral" variant="ghost" to="/knowUs"
-          >Nous connaitre</UButton
-        >
-        <UButton
-          loading-auto
-          trailing-icon="i-lucide-arrow-right"
-          size="xl"
-          color="neutral"
-          class="rounded-full button"
-          @click="
-            () => {
-              isModalOpen = true
-            }
-          "
-          >Connexion</UButton
-        >
+        <UButton size="md" color="neutral" variant="ghost" to="/comparo">Comparateur</UButton>
+        <UButton size="md" color="neutral" variant="ghost" to="/forum">Forum</UButton>
+        <UButton size="md" color="neutral" variant="ghost" to="/ride">Balades</UButton>
+        <UButton size="md" color="neutral" variant="ghost" to="/knowUs">Nous connaitre</UButton>
+        <UButton trailing-icon="i-lucide-arrow-right" size="xl" color="neutral" class="rounded-full button">Connexion
+        </UButton>
       </div>
     </div>
   </div>
@@ -138,9 +119,8 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
 
 #navbar-mobile,
 #navbar-pc {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
   width: 100%;
   z-index: 9999;
 }

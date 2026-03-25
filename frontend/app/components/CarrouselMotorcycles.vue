@@ -31,10 +31,10 @@ defineProps<{
       />
       <div id="description">
         <p>{{ item.horsePower }} ch</p>
-        <p>-</p>
+        <hr />
         <p>{{ item.torque }} Nm</p>
-        <p>-</p>
-        <p>{{ item.price }}€</p>
+        <hr />
+        <p>{{ item.price }} €</p>
       </div>
       <div>
         <UButton
