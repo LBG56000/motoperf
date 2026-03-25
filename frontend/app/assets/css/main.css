@@ -25,9 +25,11 @@
 
   --background: #fff;
   --background-secondary: #0000001b;
+  --border-gray: rgba(0, 0, 0, 0.25);
+  --overlay-loading-background: rgba(199, 199, 199, 0.7);
+  --label-text: rgba(0, 0, 0, 0.49);
 
   /* Font */
-
   --font-main: 'Poppins', sans-serif;
 
   /* Breakpoints */
@@ -41,6 +43,9 @@
   --text-color: #fff;
 
   --background: #000;
+  --border-gray: rgba(255, 255, 255, 0.25);
+  --overlay-loading-background: rgba(15, 23, 42, 0.7);
+  --label-text: rgba(255, 255, 255, 0.49);
 }
 
 body {

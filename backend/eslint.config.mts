@@ -25,6 +25,8 @@ export default defineConfig([
           format: ['camelCase'],
         },
       ],
+      'no-console': ['error', { allow: ['error', 'warn'] }],
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ])

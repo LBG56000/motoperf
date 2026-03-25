@@ -5,6 +5,8 @@ import messageRoutes from './message'
 import motorcycleRoutes from './motorcycle'
 import postRoutes from './post'
 import categoryRoutes from './category'
+import rideRoutes from './ride'
+import ridePictures from './picture'
 
 const router = Router()
 
@@ -15,5 +17,7 @@ router.use('/motorcycles', motorcycleRoutes)
 router.use('/posts', postRoutes)
 router.use('/categories', categoryRoutes)
 router.use('/brand', brandRoutes)
+router.use('/rides', rideRoutes)
+router.use('/pictures', ridePictures)
 
 export default router

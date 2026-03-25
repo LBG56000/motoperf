@@ -1,0 +1,88 @@
+import type { IRide } from '../types/ride'
+import mongoose, { Schema, model } from 'mongoose'
+
+const rideSchema = new Schema({
+  id: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  color: {
+    type: String,
+    required: true,
+  },
+  geom: {
+    type: {
+      type: String,
+      enum: ['FeatureCollection'],
+      required: true,
+      default: 'FeatureCollection',
+    },
+    features: [
+      {
+        type: {
+          type: String,
+          enum: ['Feature'],
+          required: true,
+        },
+        properties: {
+          type: Schema.Types.Mixed,
+          default: {},
+        },
+        geometry: {
+          type: {
+            type: String,
+            enum: ['LineString', 'Point', 'Polygon'],
+            required: true,
+          },
+          coordinates: {
+            type: Schema.Types.Mixed,
+            required: true,
+          },
+        },
+      },
+    ],
+  },
+  duration: {
+    type: Number,
+    required: true,
+  },
+  distance: {
+    type: Number,
+    required: true,
+  },
+  start_town: {
+    type: String,
+    required: true,
+  },
+  end_town: {
+    type: String,
+    required: true,
+  },
+  ride_type: {
+    type: String,
+    required: true,
+  },
+  like: {
+    type: Number,
+    default: 0,
+  },
+  picture: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Picture',
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+})
+
+export default model<IRide>('Ride', rideSchema)

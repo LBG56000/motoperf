@@ -1,0 +1,46 @@
+<script setup lang="ts">
+import ButtonArrow from './ButtonArrow.vue'
+
+interface IProps {
+  scrollToElementId: string
+}
+const props = defineProps<IProps>()
+</script>
+
+<template>
+  <div class="header-container">
+    <div class="centered">
+      <slot name="title"> </slot>
+    </div>
+    <div class="centered subtitle">
+      <slot name="subtitle"> </slot>
+      <ButtonArrow :scroll-to-element-id="props.scrollToElementId" />
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 20rem 0;
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.subtitle {
+  padding: 2rem;
+  gap: 3rem;
+  width: 50%;
+  margin: auto;
+}
+</style>
