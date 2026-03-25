@@ -1,5 +1,3 @@
-import type { IPicture } from './picture'
-
 export interface IRide {
   id: number
   title: string
