@@ -7,40 +7,31 @@ const seedBrand = async () => {
 
   await Brand.insertMany([
     {
-      id: 'b-001',
       name: 'Honda',
       icon: 'https://gt-stickers.com/18267-large_default/autocollant-honda-logo-ailes.jpg',
     },
     {
-      id: 'b-002',
       name: 'Kawasaki',
       icon: 'https://media.cdnws.com/_i/46016/2928/2689/32/kawasaki-ref34-stickers-moto-casque-scooter-sticker-autocollant-adhesifs.jpeg',
     },
     {
-      id: 'b-003',
       name: 'Suzuki',
       icon: 'https://autocollant-sticker.com/2036-thickbox_default/logo-suzuki.jpg',
     },
     {
-      id: 'b-004',
       name: 'Yamaha',
       icon: 'https://i.ebayimg.com/images/g/ivkAAOSwnv9cGl47/s-l400.jpg',
     },
     {
-      id: 'b-005',
       name: 'BMW',
       icon: 'https://www.super-fabrique.fr/2174-large_default/sticker-bmw-retro-eclairant.jpg',
     },
     {
-      id: 'b-006',
       name: 'Ducati',
       icon: 'https://upload.wikimedia.org/wikipedia/fr/a/ae/Ducati_logo.png',
     },
   ])
   console.log('Brand seeding')
-
-  const brands = await Brand.find()
-  console.log('Seeded brands:', brands)
 }
 
 export default seedBrand
