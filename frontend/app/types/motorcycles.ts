@@ -5,18 +5,20 @@ export interface IMotorcycle {
   name: string
   brandId: string
   createdAt: string
-  year: number
-  price: number
+  engine_size: number
   horsePower: number
   torque: number
   weight: number
-  engine_size: number
   consumption: number
-  acceleration?: IAcceleration
-  speedMax?: number
   soundLink?: string
   imageUrl?: string
+  category: string
+  isAvailableA2?: boolean
   is_new?: boolean
+  acceleration?: IAcceleration
+  speedMax?: number
   numberOfComparison?: number
   withAllFiled?: boolean
+  year: number
+  price: number
 }

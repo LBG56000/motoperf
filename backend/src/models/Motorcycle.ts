@@ -1,6 +1,16 @@
 import type { IMotorcycle } from '../types/motorcycle'
 import { Schema, model } from 'mongoose'
 
+export enum MotorcycleCategory {
+  SPORTSBIKE = 'sportsbike',
+  ROADSTER = 'roadster',
+  ADVENTURE = 'adventure',
+  CUSTOM = 'custom',
+  TOURING = 'touring',
+  SPORT_TOURING = 'sport-touring',
+  SUPERMOTARD = 'supermotard',
+}
+
 const motorcycleSchema = new Schema({
   id: {
     type: String,
@@ -12,15 +22,36 @@ const motorcycleSchema = new Schema({
     ref: 'Brand',
     required: true,
   },
-  engine_size: {
-    type: Number,
-    required: true,
-  },
   name: {
     type: String,
     required: true,
   },
+  year: {
+    type: Number,
+    required: true,
+  },
+  category: {
+    type: String,
+    enum: Object.values(MotorcycleCategory),
+    required: true,
+  },
+  engine_size: {
+    type: Number,
+    required: true,
+  },
   horsePower: {
+    type: Number,
+    required: true,
+  },
+  torque: {
+    type: Number,
+    required: true,
+  },
+  weight: {
+    type: Number,
+    required: true,
+  },
+  consumption: {
     type: Number,
     required: true,
   },
@@ -29,6 +60,9 @@ const motorcycleSchema = new Schema({
   },
   imageUrl: {
     type: String,
+  },
+  isAvailableA2: {
+    type: Boolean,
   },
   is_new: {
     type: Boolean,
@@ -48,10 +82,6 @@ const motorcycleSchema = new Schema({
   withAllFiled: {
     type: Boolean,
     default: false,
-  },
-  year: {
-    type: Number,
-    required: true,
   },
   price: {
     type: Number,
