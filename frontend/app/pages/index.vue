@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import Sponsor from '@/components/Sponsor.vue'
-import type { IMotorcycle } from '~/types/motorcycle'
+import type { IMotorcycle } from '@/types/motorcycles'
 
 const items = ref<IMotorcycle[]>([])
-const apiBack = useRuntimeConfig().public.apiback
+const apiBase = useRuntimeConfig().public.apiBase
 
 async function fetchMotocycles() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-    `${apiBack}motorcycles`,
+    `${apiBase}motorcycles`,
     {
       params: {
         /*

@@ -27,7 +27,7 @@ const motorcycle = ref<{
 const brandsList = ref<IBrand[]>([])
 const motorcyclesList = ref<IMotorcycle[]>([])
 const isMotorcyclesFetched = ref<boolean>(false)
-
+const apiBase = useRuntimeConfig().public.apiBase
 // Pont string ↔ objet pour UInputMenu
 const brandInput = computed({
   get: () => motorcycle.value.brand?.name ?? '',
@@ -93,8 +93,7 @@ watch(
 )
 
 async function fetchBrands() {
-  const apiBack = useRuntimeConfig().public.apiBase
-  const data = await $fetch<{ brands: IBrand[] }>(`${apiBack}brands`, {
+  const data = await $fetch<{ brands: IBrand[] }>(`${apiBase}brands`, {
     params: { project: 'name' }
   })
   brandsList.value = data.brands
@@ -103,9 +102,8 @@ async function fetchBrands() {
 async function fetchMotorcyclesByBrand() {
   // If first change on model input, fetch motorcycles list for the selected brand
   if (!isMotorcyclesFetched.value) {
-    const apiBack = useRuntimeConfig().public.apiBase
     const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
-      `${apiBack}motorcycles`,
+      `${apiBase}motorcycles`,
       {
         params: {
           project: 'id,name,year',

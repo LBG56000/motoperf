@@ -2,6 +2,7 @@
 import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { IBrand } from '~/types/brand'
+import { MotorcycleCategory, type IMotorcycle } from '~/types/motorcycles'
 
 const apiBase = useRuntimeConfig().public.apiBase
 
@@ -11,20 +12,35 @@ const props = defineProps({
   onRefresh: { type: Function, required: true }
 })
 
+const listMotorcycleCategory = Object.values(MotorcycleCategory).filter(
+  (item) => {
+    return isNaN(Number(item))
+  }
+)
+
 const schema = v.object({
   brand: v.string('La marque est requise'),
-  name: v.pipe(v.string(), v.minLength(3, 'Le nom est requis')),
-  price: v.number('le prix est requis'),
-  year: v.number('La date est requise'),
-  engineSize: v.number('La taille du moteur est requise'),
-  horsepower: v.optional(v.number()),
-  maxSpeed: v.optional(v.number()),
-  time_0_100: v.optional(v.number()),
-  time_100_200: v.optional(v.number()),
-  time_200_300: v.optional(v.number()),
-  braking_100_0: v.optional(v.number()),
-  braking_vmax_0: v.optional(v.number()),
-  isPublished: v.boolean()
+  name: v.pipe(v.string(), v.minLength(3)),
+  year: v.number(),
+  category: v.enum(MotorcycleCategory),
+  engine_size: v.number(),
+  horsePower: v.number(),
+  torque: v.number(),
+  weight: v.number(),
+  consumption: v.number(),
+  soundLink: v.optional(v.string()),
+  imageUrl: v.optional(v.string()),
+  isAvailableA2: v.boolean(),
+  is_public: v.boolean(),
+  acceleration: v.object({
+    time_0_100: v.optional(v.number()),
+    time_100_200: v.optional(v.number()),
+    time_200_300: v.optional(v.number())
+  }),
+  speedMax: v.optional(v.number()),
+  numberOfComparison: v.optional(v.number()),
+  withAllField: v.optional(v.boolean()),
+  price: v.optional(v.number())
 })
 
 type Schema = v.InferOutput<typeof schema>
@@ -32,18 +48,26 @@ type Schema = v.InferOutput<typeof schema>
 const state = reactive<Schema>({
   brand: '',
   name: '',
-  price: 0,
   year: 2026,
-  engineSize: undefined,
-  power: undefined,
-  horsepower: undefined,
-  maxSpeed: undefined,
-  time_0_100: undefined,
-  time_100_200: undefined,
-  time_200_300: undefined,
-  braking_100_0: undefined,
-  braking_vmax_0: undefined,
-  isPublished: false
+  category: '',
+  engine_size: undefined,
+  horsePower: undefined,
+  torque: undefined,
+  weight: undefined,
+  consumption: undefined,
+  soundLink: '',
+  imageUrl: '',
+  isAvailableA2: false,
+  is_public: false,
+  acceleration: {
+    time_0_100: undefined,
+    time_100_200: undefined,
+    time_200_300: undefined
+  },
+  speedMax: undefined,
+  numberOfComparison: undefined,
+  withAllField: false,
+  price: undefined
 })
 
 const brandList = ref<IBrand[]>([])
@@ -53,10 +77,8 @@ async function fetchData() {
   const data = await $fetch<{ brands: IBrand[] }>(
     `${apiBase}brands?project=name`
   )
-  if (data?.brands) {
-    brandList.value = data.brands
-    brandItems.value = data.brands.map((b) => b.name)
-  }
+  brandList.value = data.brands
+  brandItems.value = data.brands.map((b) => b.name)
 }
 
 onMounted(fetchData)
@@ -68,7 +90,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     const selectedBrand = brandList.value.find(
       (b) => b.name === event.data.brand
     )
-
+    console.log(selectedBrand)
     if (!selectedBrand?._id) {
       toast.add({
         title: 'Error',
@@ -77,22 +99,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       })
       return
     }
-
-    const motorcycleData = {
+    const { brand, ...rest } = event.data
+    const motorcycleData: IMotorcycle = {
       id: crypto.randomUUID(),
       brand: selectedBrand._id,
-      price: event.data.price,
-      name: event.data.name,
-      year: event.data.year,
-      engine_size: event.data.engineSize,
-      horsePower: event.data.horsepower || event.data.power,
-      speedMax: event.data.maxSpeed,
-      time_0_100: event.data.time_0_100,
-      time_100_200: event.data.time_100_200,
-      time_200_300: event.data.time_200_300,
-      is_public: event.data.isPublished
+      ...rest,
+      createdAt: new Date().toISOString()
     }
-
     console.log(motorcycleData)
 
     await $fetch(`${apiBase}motorcycles`, {
@@ -107,24 +120,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     })
 
     props.onClosePanel()
-
     props.onRefresh()
-
-    Object.assign(state, {
-      brand: '',
-      name: '',
-      price: 0,
-      year: 2026,
-      engineSize: undefined,
-      horsepower: undefined,
-      maxSpeed: undefined,
-      time_0_100: undefined,
-      time_100_200: undefined,
-      time_200_300: undefined,
-      braking_100_0: undefined,
-      braking_vmax_0: undefined,
-      isPublished: false
-    })
   } catch (err) {
     toast.add({
       title: 'Error',
@@ -144,7 +140,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UInput v-model="state.name" />
     </UFormField>
 
-    <UFormField label="Prix" name="price" required>
+    <UFormField label="Catégorie" name="category" required>
+      <UInputMenu v-model="state.category" :items="listMotorcycleCategory" />
+    </UFormField>
+
+    <UFormField label="Prix" name="price">
       <UInputNumber v-model="state.price" />
     </UFormField>
 
@@ -152,44 +152,66 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UInputNumber v-model="state.year" />
     </UFormField>
 
-    <UFormField label="Cylindrée" name="engineSize" required>
-      <UInputNumber v-model="state.engineSize" />
+    <UFormField label="Cylindrée" name="engine_size" required>
+      <UInputNumber v-model="state.engine_size" />
     </UFormField>
 
-    <UFormField label="Chevaux" name="horsepower" required>
-      <UInputNumber v-model="state.horsepower" />
+    <UFormField label="Chevaux" name="horsePower" required>
+      <UInputNumber v-model="state.horsePower" />
     </UFormField>
 
-    <UFormField label="Vitesse max" name="maxSpeed">
-      <UInputNumber v-model="state.maxSpeed" />
+    <UFormField label="Couple" name="torque" required>
+      <UInputNumber v-model="state.torque" />
+    </UFormField>
+
+    <UFormField label="Poids" name="weight" required>
+      <UInputNumber v-model="state.weight" />
+    </UFormField>
+
+    <UFormField label="Consommation" name="consumption" required>
+      <UInputNumber v-model="state.consumption" />
+    </UFormField>
+
+    <UFormField label="Vitesse max" name="speedMax">
+      <UInputNumber v-model="state.speedMax" />
+    </UFormField>
+
+    <UFormField label="Lien son" name="soundLink">
+      <UInput v-model="state.soundLink" />
+    </UFormField>
+
+    <UFormField label="Image URL" name="imageUrl">
+      <UInput v-model="state.imageUrl" />
     </UFormField>
 
     <h4>Accélération</h4>
 
-    <UFormField label="0 à 100" name="time_0_100">
-      <UInputNumber v-model="state.time_0_100" />
+    <UFormField label="0 à 100" name="acceleration.time_0_100">
+      <UInputNumber v-model="state.acceleration.time_0_100" />
     </UFormField>
 
-    <UFormField label="100 à 200" name="time_100_200">
-      <UInputNumber v-model="state.time_100_200" />
+    <UFormField label="100 à 200" name="acceleration.time_100_200">
+      <UInputNumber v-model="state.acceleration.time_100_200" />
     </UFormField>
 
-    <UFormField label="200 à 300" name="time_200_300">
-      <UInputNumber v-model="state.time_200_300" />
+    <UFormField label="200 à 300" name="acceleration.time_200_300">
+      <UInputNumber v-model="state.acceleration.time_200_300" />
     </UFormField>
 
-    <h4>Freinage</h4>
-
-    <UFormField label="100 à 0" name="braking_100_0">
-      <UInputNumber v-model="state.braking_100_0" />
+    <UFormField label="Nombre de comparaisons" name="numberOfComparison">
+      <UInputNumber v-model="state.numberOfComparison" />
     </UFormField>
 
-    <UFormField label="Vmax à 0" name="braking_vmax_0">
-      <UInputNumber v-model="state.braking_vmax_0" />
+    <UFormField name="isAvailableA2">
+      <USwitch v-model="state.isAvailableA2" label="Compatible A2" />
     </UFormField>
 
-    <UFormField name="isPublished">
-      <USwitch v-model="state.isPublished" label="Publier la moto" />
+    <UFormField name="is_public">
+      <USwitch v-model="state.is_public" label="Public" />
+    </UFormField>
+
+    <UFormField name="withAllField">
+      <USwitch v-model="state.withAllField" label="Complet" />
     </UFormField>
 
     <UButton type="submit" color="primary"> Enregistrer </UButton>
