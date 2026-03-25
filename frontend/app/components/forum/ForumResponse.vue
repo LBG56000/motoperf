@@ -4,61 +4,104 @@ import type { IMessage } from '~/types/message';
 const props = defineProps<{
   responses: IMessage[]
 }>()
+
+const handleAddLike = () => {
+  console.log('Add like')
+}
+
+const handleAddDislike = () => {
+  console.log('Add dislike')
+}
+
+const handleAddResponse = () => {
+  console.log('Add response')
+}
 </script>
+
 <template>
-  <div class="margin-1_5">
-    <div v-for="response in props.responses" :key="response.id">
-      <div class="icon-and-text">
-        <UAvatar :src="`/_nuxt/assets/images/users/${response.user.image}`" :alt="response.user.firstname" size="3xl"
-          :title="response.user.firstname" class="margin-right-0_5" />
-        <div class="icon-and-text">
+  <div class="comments-list">
+    <div v-for="response in props.responses" :key="response.id" class="comment">
+      <UAvatar :src="`/_nuxt/assets/images/users/${response.user.image}`" :alt="response.user.firstname" size="3xl"
+        :title="response.user.firstname" class="margin-right-0_5" />
+
+      <div class="comment-content">
+        <div class="comment-header">
           <p class="bold">{{ response.user.firstname }},&nbsp;</p>
           <p>{{ formatTimeAgo(response.createdAt) }}</p>
         </div>
-      </div>
-      <p class="margin-top-0_5 margin-left-1">{{ response.content }}</p>
-      <div class="icon-and-text margin-1_5 margin-left-1">
-        <div class="icon-and-text margin-right-0_5">
-          <UIcon name="i-lucide-thumbs-up" class="size-6 margin-right-0_2" />
-          <p>{{ response.like }}</p>
-        </div>
-        <div class="icon-and-text margin-right-0_5">
-          <UIcon name="i-lucide-thumbs-down" class="size-6 margin-right-0_2" />
-          <p>{{ response.dislike }}</p>
-        </div>
-        <div class="icon-and-text margin-right-0_5">
-          <UIcon name="i-lucide-messages-square" class="size-6 margin-right-0_2" />
-          <p>Répondre</p>
+
+        <p class="comment-text">{{ response.content }}</p>
+
+        <div class="comment-actions">
+          <div class="action-button" @click="handleAddLike">
+            <UIcon name="i-lucide-thumbs-up" class="size-6" />
+            <p>{{ response.like }}</p>
+          </div>
+          <div class="action-button" @click="handleAddDislike">
+            <UIcon name="i-lucide-thumbs-down" class="size-6" />
+            <p>{{ response.dislike }}</p>
+          </div>
+          <div class="action-button" @click="handleAddResponse">
+            <UIcon name="i-lucide-messages-square" class="size-6" />
+            <p>Répondre</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <style scoped>
-.icon-and-text {
+.comment {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  gap: 0.5em;
 }
 
-.margin-1_5 {
+.comments-list {
   margin-top: 1.5em;
 }
 
-.margin-top-0_5 {
-  margin-top: 0.5em;
+.comment-item {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-.margin-right-0_5 {
-  margin-right: 0.5em;
+.comment-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
 }
 
-.margin-right-0_2 {
-  margin-right: 0.2em;
+.comment-header,
+.comment-actions,
+.action-button {
+  display: flex;
+  align-items: center;
 }
 
-.margin-left-1 {
-  margin-left: 1em;
+.comment-header {
+  gap: 0.5rem;
+}
+
+.comment-text {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.comment-actions {
+  gap: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.action-button {
+  gap: 0.4rem;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .bold {
