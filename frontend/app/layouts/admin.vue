@@ -6,14 +6,17 @@ function getItems() {
     {
       label: 'Accueil',
       icon: 'i-lucide-house',
+      to: '/admin'
     },
     {
       label: 'Motos',
       icon: 'i-lucide-square-dot',
+      to: '/admin/listMoto'
     },
     {
       label: 'Statistiques',
       icon: 'i-lucide-chart-pie',
+      to: '/admin/statistiques'
     }
   ] satisfies NavigationMenuItem[]
 }

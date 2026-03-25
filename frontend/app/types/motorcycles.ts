@@ -1,10 +1,23 @@
-import type { IAcceleration } from "./accelerations"
+import type { IBrand } from './brand'
+
+import type { IAcceleration } from './accelerations'
+
+export enum MotorcycleCategory {
+  SPORTSBIKE = 'sportsbike',
+  ROADSTER = 'roadster',
+  ADVENTURE = 'adventure',
+  CUSTOM = 'custom',
+  TOURING = 'touring',
+  SPORT_TOURING = 'sport-touring',
+  SUPERMOTARD = 'supermotard'
+}
 
 export interface IMotorcycle {
   id: string
+  brand: IBrand
   name: string
-  brandId: string
-  createdAt: string
+  year: number
+  category: MotorcycleCategory
   engine_size: number
   horsePower: number
   torque: number
@@ -12,13 +25,12 @@ export interface IMotorcycle {
   consumption: number
   soundLink?: string
   imageUrl?: string
-  category: string
   isAvailableA2?: boolean
-  is_new?: boolean
+  is_public?: boolean
   acceleration?: IAcceleration
   speedMax?: number
   numberOfComparison?: number
   withAllFiled?: boolean
-  year: number
   price: number
+  createdAt: string
 }

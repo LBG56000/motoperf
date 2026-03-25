@@ -11,15 +11,18 @@ const seedMotorcycles = async () => {
   // Récupérer les brands pour avoir leurs vrais _id MongoDB
   const brands = await Brand.find()
   const brandByName = (name: string) => {
-    const brand = brands.find(b => b.name === name)
-    if (!brand) throw new Error(`Brand "${name}" introuvable. Lancez le seed brand d'abord.`)
+    const brand = brands.find((b) => b.name === name)
+    if (!brand)
+      throw new Error(
+        `Brand "${name}" introuvable. Lancez le seed brand d'abord.`,
+      )
     return brand._id
   }
 
   await Motorcycle.insertMany([
     {
       id: 'm-001',
-      brandId: brandByName('Honda'),
+      brand: brandByName('Honda'),
       engine_size: 599,
       name: 'CBR600RR',
       horsePower: 121,
@@ -32,13 +35,13 @@ const seedMotorcycles = async () => {
       price: 12000,
       numberOfComparison: 3,
       withAllFiled: false,
-      is_new: false,
+      is_public: false,
       speedMax: 257,
-      soundLink: '/sounds/CBR600RR.mp3'
+      soundLink: '/sounds/CBR600RR.mp3',
     },
     {
       id: 'm-002',
-      brandId: brandByName('Kawasaki'),
+      brand: brandByName('Kawasaki'),
       engine_size: 636,
       name: 'Ninja ZX-6R',
       horsePower: 130,
@@ -51,12 +54,12 @@ const seedMotorcycles = async () => {
       price: 11500,
       numberOfComparison: 5,
       withAllFiled: false,
-      is_new: false,
+      is_public: false,
       speedMax: 262,
     },
     {
       id: 'm-003',
-      brandId: brandByName('Suzuki'),
+      brand: brandByName('Suzuki'),
       engine_size: 599,
       name: 'GSX-R600',
       horsePower: 125,
@@ -69,12 +72,12 @@ const seedMotorcycles = async () => {
       price: 11000,
       numberOfComparison: 2,
       withAllFiled: false,
-      is_new: false,
+      is_public: false,
       speedMax: 250,
     },
     {
       id: 'm-004',
-      brandId: brandByName('Yamaha'),
+      brand: brandByName('Yamaha'),
       engine_size: 599,
       name: 'YZF-R6',
       horsePower: 118,
@@ -87,12 +90,12 @@ const seedMotorcycles = async () => {
       price: 11800,
       numberOfComparison: 4,
       withAllFiled: false,
-      is_new: false,
+      is_public: false,
       speedMax: 257,
     },
     {
       id: 'm-005',
-      brandId: brandByName('Ducati'),
+      brand: brandByName('Ducati'),
       engine_size: 955,
       name: 'Panigale V2',
       horsePower: 155,
@@ -105,7 +108,7 @@ const seedMotorcycles = async () => {
       price: 17990,
       numberOfComparison: 8,
       withAllFiled: true,
-      is_new: true,
+      is_public: true,
       soundLink: 'https://example.com/sounds/panigale-v2.mp3',
       time_0_100: 3.3,
       time_100_200: 6.1,
@@ -114,7 +117,7 @@ const seedMotorcycles = async () => {
     },
     {
       id: 'm-006',
-      brandId: brandByName('BMW'),
+      brand: brandByName('BMW'),
       engine_size: 999,
       name: 'S1000RR',
       horsePower: 210,
@@ -128,13 +131,13 @@ const seedMotorcycles = async () => {
       price: 21990,
       numberOfComparison: 12,
       withAllFiled: false,
-      is_new: true,
+      is_public: true,
       time_0_100: 3.1,
       speedMax: 303,
     },
     {
       id: 'm-007',
-      brandId: brandByName('Honda'),
+      brand: brandByName('Honda'),
       engine_size: 998,
       name: 'CBR1000RR-R Fireblade',
       horsePower: 217,
@@ -147,13 +150,13 @@ const seedMotorcycles = async () => {
       price: 24599,
       numberOfComparison: 10,
       withAllFiled: false,
-      is_new: true,
+      is_public: true,
       time_0_100: 3.2,
       speedMax: 299,
     },
     {
       id: 'm-008',
-      brandId: brandByName('Yamaha'),
+      brand: brandByName('Yamaha'),
       engine_size: 998,
       name: 'YZF-R1',
       horsePower: 200,
@@ -167,13 +170,13 @@ const seedMotorcycles = async () => {
       price: 19999,
       numberOfComparison: 9,
       withAllFiled: false,
-      is_new: true,
+      is_public: true,
       time_0_100: 3.0,
       speedMax: 299,
     },
     {
       id: 'm-009',
-      brandId: brandByName('Ducati'),
+      brand: brandByName('Ducati'),
       engine_size: 1099,
       name: 'Streetfighter V4',
       horsePower: 208,
@@ -186,12 +189,12 @@ const seedMotorcycles = async () => {
       price: 23990,
       numberOfComparison: 6,
       withAllFiled: false,
-      is_new: true,
+      is_public: true,
       speedMax: 290,
     },
     {
       id: 'm-010',
-      brandId: brandByName('Kawasaki'),
+      brand: brandByName('Kawasaki'),
       engine_size: 1043,
       name: 'Z H2',
       horsePower: 200,
@@ -204,13 +207,13 @@ const seedMotorcycles = async () => {
       price: 18500,
       numberOfComparison: 7,
       withAllFiled: false,
-      is_new: true,
+      is_public: true,
       time_0_100: 3.4,
       speedMax: 280,
     },
     {
       id: 'm-011',
-      brandId: brandByName('Honda'),
+      brand: brandByName('Honda'),
       engine_size: 599,
       name: 'CBR600RR',
       horsePower: 121,

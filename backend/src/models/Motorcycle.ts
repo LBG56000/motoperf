@@ -1,5 +1,5 @@
 import type { IMotorcycle } from '../types/motorcycle'
-import { Schema, model } from 'mongoose'
+import { Schema, Types, model } from 'mongoose'
 
 export enum MotorcycleCategory {
   SPORTSBIKE = 'sportsbike',
@@ -17,8 +17,8 @@ const motorcycleSchema = new Schema({
     required: true,
     unique: true,
   },
-  brandId: {
-    type: Schema.Types.ObjectId,
+  brand: {
+    type: Types.ObjectId,
     ref: 'Brand',
     required: true,
   },
@@ -64,7 +64,7 @@ const motorcycleSchema = new Schema({
   isAvailableA2: {
     type: Boolean,
   },
-  is_new: {
+  is_public: {
     type: Boolean,
   },
   acceleration: {
