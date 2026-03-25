@@ -1,6 +1,7 @@
 <script setup>
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
+
 const isOpen = ref(false)
 const mode = ref(false)
 const colorMode = useColorMode()

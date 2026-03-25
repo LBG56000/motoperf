@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import HeaderInfo from '../components/global/HeaderInfo.vue'
 import DisplayMapRide from '../components/ride/DisplayMapRide.vue'
-import NavApp from '../components/NavApp.vue'
 </script>
 <template>
   <div>
-    <NavApp />
     <HeaderInfo :scroll-to-element-id="'map'">
       <template #title>
         <h1>

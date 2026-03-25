@@ -21,12 +21,14 @@ const props = defineProps<IProps>()
 
 <style scoped>
 .header-container {
+  min-height: 100vh;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  margin: 20rem 0;
+  margin: 0;
 }
 
 .centered {
@@ -34,13 +36,12 @@ const props = defineProps<IProps>()
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
 }
 
 .subtitle {
   padding: 2rem;
   gap: 3rem;
   width: 50%;
-  margin: auto;
+  margin: 0 auto;
 }
 </style>

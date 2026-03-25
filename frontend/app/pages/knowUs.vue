@@ -2,16 +2,19 @@
 
 <template>
   <div class="page">
-    <div class="center">
-      <h1 class="h1-mobile">À propos de nous</h1>
-      <h3 class="h3-mobile">Découvrez notre histoire et nos engagements</h3>
-    </div>
+    <HeaderInfo :scroll-to-element-id="'content'">
+      <template #title>
+        <h1>
+          À propos de <br />
+          <span style="color: red">nous</span>
+        </h1>
+      </template>
+      <template #subtitle>
+        <p>Découvrez notre histoire et nos engagements</p>
+      </template>
+    </HeaderInfo>
 
-    <div class="button-container">
-      <p>bouton</p>
-    </div>
-
-    <div class="content">
+    <div id="content" class="content">
       <h3 class="subtitle h3-mobile">En quelques mots</h3>
       <br />
 
@@ -73,6 +76,7 @@
 .content {
   max-width: 1000px;
   margin: auto;
+  margin-top: 10dvh;
 }
 
 .subtitle {
