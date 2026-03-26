@@ -101,8 +101,8 @@ async function fetchMotocycles() {
       }
     }
   )
-  motorcycle1.value = data.motorcycles.find((m) => m.id === motorcycle1Id.value)
-  motorcycle2.value = data.motorcycles.find((m) => m.id === motorcycle2Id.value)
+  motorcycle1.value = data.motorcycles.find((m) => m._id === motorcycle1Id.value)
+  motorcycle2.value = data.motorcycles.find((m) => m._id === motorcycle2Id.value)
 
   createResultat()
   showResultat.value = true

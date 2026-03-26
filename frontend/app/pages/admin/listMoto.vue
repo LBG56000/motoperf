@@ -2,7 +2,7 @@
 import Header from '~/components/admin/Header.vue'
 import { h, resolveComponent } from 'vue'
 import CardMoto from '../../components/admin/CardMoto.vue'
-import type { IMotorcycle } from '~/types/motorcycle'
+import type { IMotorcycle } from '~/types/motorcycles'
 
 definePageMeta({
   layout: 'admin'
@@ -60,7 +60,7 @@ async function fetchData() {
 
     if (data?.motorcycles) {
       motos.value = data.motorcycles.map((moto) => ({
-        id: moto.id,
+        id: moto._id,
         brand: moto.brand?.name || '',
         name: moto.name || '',
         year: moto.year || '',
@@ -105,38 +105,22 @@ function onRowClick(row: any) {
 
     <main>
       <div class="header-page">
-        <UInput
-          icon="i-lucide-search"
-          size="md"
-          variant="outline"
-          placeholder="Rechercher une moto..."
-        />
+        <UInput icon="i-lucide-search" size="md" variant="outline" placeholder="Rechercher une moto..." />
         <USlideover v-model:open="panelOpen" title="Ajout d'une moto">
-          <UButton size="md" color="primary" label="Open"
-            >Ajouter une moto</UButton
-          >
+          <UButton size="md" color="primary" label="Open">Ajouter une moto</UButton>
 
           <template #body>
-            <CardMoto
-              :mode="selectedMoto ? 'edit' : 'create'"
-              :moto="selectedMoto"
-              :onClosePanel="closePanel"
-              :onRefresh="refreshAll"
-            />
+            <CardMoto :mode="selectedMoto ? 'edit' : 'create'" :moto="selectedMoto" :onClosePanel="closePanel"
+              :onRefresh="refreshAll" />
           </template>
         </USlideover>
       </div>
 
       <div class="main-content">
         <h3>Liste des motos</h3>
-        <UTable
-          :data="motos"
-          :columns="columns"
-          :ui="{
-            tr: 'cursor-pointer hover:bg-gray-50'
-          }"
-          @row:click="onRowClick"
-        />
+        <UTable :data="motos" :columns="columns" :ui="{
+          tr: 'cursor-pointer hover:bg-gray-50'
+        }" @row:click="onRowClick" />
       </div>
     </main>
   </div>

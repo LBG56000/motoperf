@@ -85,7 +85,7 @@ watch(
       const found = motorcyclesList.value.find(
         (m) => m.name === name && m.year === year
       )
-      selectedId.value = found?.id
+      selectedId.value = found?._id
     } else {
       selectedId.value = undefined
     }

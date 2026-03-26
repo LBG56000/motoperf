@@ -1,5 +1,5 @@
 export interface IBrand {
-  id: string
+  _id: string
   name: string
   createAt: string
   icon: string

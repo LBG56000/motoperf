@@ -1,5 +1,4 @@
 export interface IRide {
-  id: number
   title: string
   description: string
   color: string

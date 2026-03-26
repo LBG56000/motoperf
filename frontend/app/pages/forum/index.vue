@@ -11,7 +11,7 @@ const getPosts = async () => {
   const data = await res.json()
   posts.value = await Promise.all(
     data.posts.map(async (post: IPost) => {
-      post.responses = await getResponseOfPost(post.id)
+      post.responses = await getResponseOfPost(post._id)
       // await getResponsesOfResponses()
       return post
     })
@@ -64,7 +64,7 @@ onMounted(async () => {
       <div>
         <USkeleton v-if="loading" class="size-12 rounded-full" />
         <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
-        <div v-for="post in posts" :key="post.id">
+        <div v-for="post in posts" :key="post._id">
           <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
         </div>
       </div>

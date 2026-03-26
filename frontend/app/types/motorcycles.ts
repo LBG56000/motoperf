@@ -13,7 +13,7 @@ export enum MotorcycleCategory {
 }
 
 export interface IMotorcycle {
-  id: string
+  _id: string
   brand: IBrand
   name: string
   year: number

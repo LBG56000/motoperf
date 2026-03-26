@@ -2,7 +2,6 @@ import { Types } from "mongoose"
 import { IUser } from "./user"
 
 export interface IMessage {
-  id: string
   content: string
   description: string | null
   like: number

@@ -2,11 +2,6 @@ import { model, Schema, Types } from "mongoose";
 import type { IPost } from "../types/post";
 
 const postSchema = new Schema({
-  id: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   question: {
     type: String,
     required: true

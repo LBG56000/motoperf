@@ -3,7 +3,6 @@ import { connectToMongo } from '.'
 import Picture from '../models/Picture'
 
 const seedRide = async () => {
-  console.log('Je passe dans le seed du ride')
   await connectToMongo()
   await Ride.deleteMany({})
 
@@ -17,7 +16,6 @@ const seedRide = async () => {
 
   await Ride.insertMany([
     {
-      id: 1,
       title: 'Balade à côté de la mer',
       description: 'Une superbe balade à travers la côte bretonne.',
       color: '#7EDE6B',
@@ -81,7 +79,6 @@ const seedRide = async () => {
       picture: createdPictures[0]._id,
     },
     {
-      id: 2,
       title: 'Courte balade pour tester sa moto',
       description: 'Idéal pour tester sa vitesse de croisière.',
       color: '#E69F00',
@@ -148,7 +145,6 @@ const seedRide = async () => {
       picture: createdPictures[1]._id,
     },
     {
-      id: 3,
       title: 'Balade centre Bretagne avec beaucoup de virages',
       description: "Des virages à n'en plus finir et une vue imprenable.",
       color: '#CC79A7',
@@ -270,7 +266,6 @@ const seedRide = async () => {
       picture: createdPictures[2]._id,
     },
     {
-      id: 4,
       title: 'Balade à Guingamp',
       description: 'Assez longue balade sur des grads axes.',
       color: '#222222',
@@ -384,7 +379,6 @@ const seedRide = async () => {
       picture: createdPictures[3]._id,
     },
     {
-      id: 5,
       title: 'Longue balade',
       description: 'Longue balade avec des routes sinueuse, grands axes',
       color: '#0072B2',
@@ -507,10 +501,7 @@ const seedRide = async () => {
     },
   ])
 
-  console.log('Ride seeding done.')
-
-  const rides = await Ride.find()
-  console.log('Seeded ride:', rides)
+  console.log('Ride seeding done')
 }
 
 export default seedRide

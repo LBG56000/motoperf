@@ -2,11 +2,6 @@ import type { IRide } from '../types/ride'
 import mongoose, { Schema, model } from 'mongoose'
 
 const rideSchema = new Schema({
-  id: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   title: {
     type: String,
     required: true,
