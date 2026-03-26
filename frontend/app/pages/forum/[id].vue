@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HeaderInfo from '~/components/global/HeaderInfo.vue'
-import type { IMessage } from '~/types/message'
+import type { IMessage } from '~/types/messages'
 import type { IPost } from '~/types/post'
 
 const route = useRoute()
@@ -14,7 +14,7 @@ const newReponseOfPost = ref('')
 const getPost = async () => {
   const data = await $fetch<({ data: IPost })>(`${apiBase}posts`, {
     params: {
-      filter: JSON.stringify({ id: route.params.id }),
+      filter: JSON.stringify({ _id: route.params.id }),
       project: 'image,content,question,createdAt,views',
       deep: true
     }
@@ -72,7 +72,7 @@ onMounted(async () => {
               <p>{{ responses.length || 0 }} réponses </p>
             </div>
             <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
-              }}</p>
+            }}</p>
             <div class="icon-and-text right">
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
               <p>{{ post?.views }} vues</p>

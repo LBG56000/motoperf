@@ -7,7 +7,6 @@ const seedUser = async () => {
 
   await User.insertMany([
     {
-      id: 'u-001',
       firstname: 'Alice',
       lastname: 'Dupont',
       pseudo: 'AliceD',
@@ -20,7 +19,6 @@ const seedUser = async () => {
       image: 'test2.png'
     },
     {
-      id: 'u-002',
       firstname: 'Bob',
       lastname: 'Martin',
       pseudo: 'BobM',
@@ -32,7 +30,6 @@ const seedUser = async () => {
       image: 'test1.png'
     },
     {
-      id: 'u-003',
       firstname: 'Clara',
       lastname: 'Bernard',
       pseudo: 'ClaraB',
@@ -44,7 +41,6 @@ const seedUser = async () => {
       image: 'test4.png'
     },
     {
-      id: 'u-004',
       firstname: 'David',
       lastname: 'Leroy',
       pseudo: 'DavidL',
@@ -56,7 +52,6 @@ const seedUser = async () => {
       image: 'test3.png'
     },
     {
-      id: 'u-005',
       firstname: 'Emma',
       lastname: 'Petit',
       pseudo: 'EmmaP',
@@ -69,9 +64,6 @@ const seedUser = async () => {
   ])
 
   console.log('User seeding')
-
-  const users = await User.find()
-  console.log('Seeded users:', users)
 }
 
 export default seedUser

@@ -85,7 +85,7 @@ watch(
       const found = motorcyclesList.value.find(
         (m) => m.name === name && m.year === year
       )
-      selectedId.value = found?.id
+      selectedId.value = found?._id
     } else {
       selectedId.value = undefined
     }
@@ -107,7 +107,7 @@ async function fetchMotorcyclesByBrand() {
       {
         params: {
           project: 'id,name,year',
-          filter: JSON.stringify({ brandId: motorcycle.value.brand?._id })
+          filter: JSON.stringify({ brand: motorcycle.value.brand?._id })
         }
       }
     )
@@ -131,9 +131,7 @@ onMounted(() => {
         :items="brandFilteredList"
         clear
       >
-        <template #empty>
-          Aucune marque trouvée
-        </template>
+        <template #empty> Aucune marque trouvée </template>
       </UInputMenu>
     </UFormField>
 
@@ -145,9 +143,7 @@ onMounted(() => {
         clear
         @update:open="fetchMotorcyclesByBrand"
       >
-        <template #empty>
-          Aucun modèle trouvé
-        </template>
+        <template #empty> Aucun modèle trouvé </template>
       </UInputMenu>
     </UFormField>
 
@@ -159,9 +155,7 @@ onMounted(() => {
         clear
         @update:open="fetchMotorcyclesByBrand"
       >
-        <template #empty>
-          Aucune année trouvée
-        </template>
+        <template #empty> Aucune année trouvée </template>
       </UInputMenu>
     </UFormField>
   </div>

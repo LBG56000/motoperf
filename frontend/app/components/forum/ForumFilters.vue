@@ -20,9 +20,10 @@ const getCategories = async () => {
 }
 
 const getBrands = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}brand?project=name,id,icon`)
+  const res = await fetch(`${useRuntimeConfig().public.apiBase}brand?project=name,icon`)
   const data = await res.json()
   brands.value = data.brands
+  console.log('test')
 }
 
 const handleHaveMyFavorites = () => {
@@ -65,8 +66,8 @@ onMounted(async () => {
         </div>
         <div class="filter">
           <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-          <div v-else v-for="category in categories" :key="category.id" class="icon-and-text sub-filter cursor-pointer"
-            @click="handlClickOnCategory(category.id)">
+          <div v-else v-for="category in categories" :key="category._id" class="icon-and-text sub-filter cursor-pointer"
+            @click="handlClickOnCategory(category._id)">
             <UIcon class="size-7 margin-0_5" :name="'i-lucide-' + category.icon" />
             <p>{{ category.name }}</p>
           </div>
@@ -79,8 +80,8 @@ onMounted(async () => {
         </div>
         <div class="filter">
           <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-          <div v-else v-for="brand in brands" :key="brand.id" class="icon-and-text sub-filter cursor-pointer"
-            @click="handlClickBrand(brand.id)">
+          <div v-else v-for="brand in brands" :key="brand._id" class="icon-and-text sub-filter cursor-pointer"
+            @click="handlClickBrand(brand._id)">
             <img :src="brand.icon" :alt="brand.name" :title="brand.name" width="40" height="40" class="margin-0_5">
             <p>{{ brand.name }}</p>
           </div>

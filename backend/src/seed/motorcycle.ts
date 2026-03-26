@@ -4,7 +4,6 @@ import Brand from '../models/Brand'
 import { connectToMongo } from '.'
 
 const seedMotorcycles = async () => {
-  console.log('Je passe dans le seed motorcycles')
   await connectToMongo()
   await Motorcycle.deleteMany({})
 
@@ -21,7 +20,6 @@ const seedMotorcycles = async () => {
 
   await Motorcycle.insertMany([
     {
-      id: 'm-001',
       brand: brandByName('Honda'),
       engine_size: 599,
       name: 'CBR600RR',
@@ -40,7 +38,6 @@ const seedMotorcycles = async () => {
       soundLink: '/sounds/CBR600RR.mp3',
     },
     {
-      id: 'm-002',
       brand: brandByName('Kawasaki'),
       engine_size: 636,
       name: 'Ninja ZX-6R',
@@ -58,7 +55,6 @@ const seedMotorcycles = async () => {
       speedMax: 262,
     },
     {
-      id: 'm-003',
       brand: brandByName('Suzuki'),
       engine_size: 599,
       name: 'GSX-R600',
@@ -76,7 +72,6 @@ const seedMotorcycles = async () => {
       speedMax: 250,
     },
     {
-      id: 'm-004',
       brand: brandByName('Yamaha'),
       engine_size: 599,
       name: 'YZF-R6',
@@ -94,7 +89,6 @@ const seedMotorcycles = async () => {
       speedMax: 257,
     },
     {
-      id: 'm-005',
       brand: brandByName('Ducati'),
       engine_size: 955,
       name: 'Panigale V2',
@@ -116,7 +110,6 @@ const seedMotorcycles = async () => {
       speedMax: 270,
     },
     {
-      id: 'm-006',
       brand: brandByName('BMW'),
       engine_size: 999,
       name: 'S1000RR',
@@ -136,7 +129,6 @@ const seedMotorcycles = async () => {
       speedMax: 303,
     },
     {
-      id: 'm-007',
       brand: brandByName('Honda'),
       engine_size: 998,
       name: 'CBR1000RR-R Fireblade',
@@ -155,7 +147,6 @@ const seedMotorcycles = async () => {
       speedMax: 299,
     },
     {
-      id: 'm-008',
       brand: brandByName('Yamaha'),
       engine_size: 998,
       name: 'YZF-R1',
@@ -175,7 +166,6 @@ const seedMotorcycles = async () => {
       speedMax: 299,
     },
     {
-      id: 'm-009',
       brand: brandByName('Ducati'),
       engine_size: 1099,
       name: 'Streetfighter V4',
@@ -193,7 +183,6 @@ const seedMotorcycles = async () => {
       speedMax: 290,
     },
     {
-      id: 'm-010',
       brand: brandByName('Kawasaki'),
       engine_size: 1043,
       name: 'Z H2',
@@ -212,7 +201,6 @@ const seedMotorcycles = async () => {
       speedMax: 280,
     },
     {
-      id: 'm-011',
       brand: brandByName('Honda'),
       engine_size: 599,
       name: 'CBR600RR',
@@ -231,7 +219,6 @@ const seedMotorcycles = async () => {
     },
     // Motos A2
     {
-      id: 'm-012',
       brand: brandByName('Honda'),
       engine_size: 471,
       name: 'CB500F',
@@ -249,7 +236,6 @@ const seedMotorcycles = async () => {
       speedMax: 191,
     },
     {
-      id: 'm-013',
       brand: brandByName('Yamaha'),
       engine_size: 689,
       name: 'MT-07',
@@ -267,7 +253,6 @@ const seedMotorcycles = async () => {
       speedMax: 200,
     },
     {
-      id: 'm-014',
       brand: brandByName('Kawasaki'),
       engine_size: 649,
       name: 'Z650',
@@ -285,7 +270,6 @@ const seedMotorcycles = async () => {
       speedMax: 195,
     },
     {
-      id: 'm-015',
       brand: brandByName('Suzuki'),
       engine_size: 645,
       name: 'SV650',
@@ -304,7 +288,6 @@ const seedMotorcycles = async () => {
     },
     // Motos Adventure
     {
-      id: 'm-016',
       brand: brandByName('Honda'),
       engine_size: 1084,
       name: 'Africa Twin',
@@ -322,7 +305,6 @@ const seedMotorcycles = async () => {
       speedMax: 210,
     },
     {
-      id: 'm-017',
       brand: brandByName('BMW'),
       engine_size: 1254,
       name: 'R 1250 GS',
@@ -340,7 +322,6 @@ const seedMotorcycles = async () => {
       speedMax: 220,
     },
     {
-      id: 'm-018',
       brand: brandByName('Yamaha'),
       engine_size: 1199,
       name: 'Super Ténéré 1200',
@@ -358,7 +339,6 @@ const seedMotorcycles = async () => {
       speedMax: 215,
     },
     {
-      id: 'm-019',
       brand: brandByName('Ducati'),
       engine_size: 1158,
       name: 'Multistrada V4',
@@ -377,7 +357,6 @@ const seedMotorcycles = async () => {
     },
     // Motos A2 supplémentaires
     {
-      id: 'm-020',
       brand: brandByName('Kawasaki'),
       engine_size: 649,
       name: 'Ninja 650',
@@ -395,7 +374,6 @@ const seedMotorcycles = async () => {
       speedMax: 206,
     },
     {
-      id: 'm-021',
       brand: brandByName('Yamaha'),
       engine_size: 689,
       name: 'Ténéré 700',
@@ -413,7 +391,6 @@ const seedMotorcycles = async () => {
       speedMax: 187,
     },
     {
-      id: 'm-022',
       brand: brandByName('Honda'),
       engine_size: 471,
       name: 'CBR500R',
@@ -431,7 +408,6 @@ const seedMotorcycles = async () => {
       speedMax: 183,
     },
     {
-      id: 'm-023',
       brand: brandByName('Suzuki'),
       engine_size: 248,
       name: 'V-Strom 250 SX',
@@ -450,7 +426,6 @@ const seedMotorcycles = async () => {
     },
     // Adventure supplémentaires
     {
-      id: 'm-024',
       brand: brandByName('Kawasaki'),
       engine_size: 1043,
       name: 'Versys 1000 SE',
@@ -468,7 +443,6 @@ const seedMotorcycles = async () => {
       speedMax: 230,
     },
     {
-      id: 'm-025',
       brand: brandByName('BMW'),
       engine_size: 1254,
       name: 'R 1250 GS Adventure',
@@ -488,9 +462,6 @@ const seedMotorcycles = async () => {
   ])
 
   console.log('Motorcycles seeded')
-
-  const motorcycles = await Motorcycle.find()
-  console.log('Seeded motorcycles:', motorcycles)
 }
 
 export default seedMotorcycles

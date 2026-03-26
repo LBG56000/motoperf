@@ -4,7 +4,6 @@ import { IAcceleration } from './accelerations'
 import { MotorcycleCategory } from '../models/Motorcycle'
 
 export interface IMotorcycle {
-  id: string
   brand: IBrand
   name: string
   year: number

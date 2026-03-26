@@ -16,7 +16,7 @@ const handleOpenAPost = (id: string) => {
 }
 </script>
 <template>
-  <UCard class="card-forum" @click="handleOpenAPost(post.id)">
+  <UCard class="card-forum" @click="handleOpenAPost(post._id)">
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <UAvatar v-else :src="`/_nuxt/assets/images/users/${props.post.user.image}`" size="3xl" loading="lazy"
@@ -35,7 +35,7 @@ const handleOpenAPost = (id: string) => {
             </div>
 
             <p>Par {{ props.post.user.firstname }}, {{ formatTimeAgo(props.post.createdAt)
-            }}</p>
+              }}</p>
           </div>
           <div class="statsContainer">
             <div class="stats">

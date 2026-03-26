@@ -7,6 +7,7 @@ import seedMotorcycles from './motorcycle'
 import seedPost from './post'
 import seedCategory from './category'
 import seedRide from './ride'
+import seedPicture from './picture'
 
 const connectToMongo = async () => {
   return await mongoose.connect(process.env.MONGO_URI as string)
@@ -20,12 +21,12 @@ const seed = async () => {
 
     await seedUser()
     await seedBrand()
-    await seedMotorcycles()
     await seedCategory()
+    await seedPicture()
+    await seedRide()
     await seedPost()
     await seedMessage()
-    // await seedPicture()
-    await seedRide()
+    await seedMotorcycles()
 
     console.log('Seeding terminé')
     process.exit(0)

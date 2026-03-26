@@ -12,11 +12,6 @@ export enum MotorcycleCategory {
 }
 
 const motorcycleSchema = new Schema({
-  id: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   brand: {
     type: Types.ObjectId,
     ref: 'Brand',

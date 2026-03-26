@@ -2,11 +2,6 @@ import type { IBrand } from '../types/brand'
 import { Schema, model } from 'mongoose'
 
 const brandSchema = new Schema({
-  id: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   name: {
     type: String,
     required: true,
