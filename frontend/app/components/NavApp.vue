@@ -35,11 +35,25 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         <ToggleSwitch v-model="mode" />
       </div>
       <div class="list-right">
-        <UButton size="md" color="neutral" variant="ghost" to="/comparo">Comparateur</UButton>
-        <UButton size="md" color="neutral" variant="ghost" to="/forum">Forum</UButton>
-        <UButton size="md" color="neutral" variant="ghost" to="/ride">Balades</UButton>
-        <UButton size="md" color="neutral" variant="ghost" to="/knowUs">Nous connaitre</UButton>
-        <UButton trailing-icon="i-lucide-arrow-right" size="xl" color="neutral" class="rounded-full button">Connexion
+        <UButton size="md" color="neutral" variant="ghost" to="/comparo"
+          >Comparateur</UButton
+        >
+        <UButton size="md" color="neutral" variant="ghost" to="/forum"
+          >Forum</UButton
+        >
+        <UButton size="md" color="neutral" variant="ghost" to="/ride"
+          >Balades</UButton
+        >
+        <UButton size="md" color="neutral" variant="ghost" to="/knowUs"
+          >Nous connaitre</UButton
+        >
+        <UButton
+          trailing-icon="i-lucide-arrow-right"
+          size="xl"
+          color="neutral"
+          class="rounded-full button"
+          @click="() => (isModalOpen = true)"
+          >Connexion
         </UButton>
       </div>
     </div>

@@ -163,56 +163,86 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container-form">
-    <div class="form-button">
-      <div class="form">
-        <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
-        <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
+  <div>
+    <HeaderInfo :scroll-to-element-id="'form'">
+      <template #title>
+        <h1>
+          Comparez. Choisissez. <br />
+          <span style="color: red">Pilotez</span>
+        </h1>
+      </template>
+      <template #subtitle>
+        <p>
+          Comparez facilement les performances, prix et caractéristiques de vos
+          motos préférées.
+        </p>
+      </template>
+    </HeaderInfo>
+    <div class="container-form">
+      <div id="form" class="form-button">
+        <div class="form">
+          <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
+          <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
+        </div>
+        <UButton
+          icon="i-lucide-arrow-left-right"
+          class="w-fit rounded-4xl"
+          :disabled="!motorcycle1Id || !motorcycle2Id"
+          @click="fetchMotocycles"
+          >Comparo</UButton
+        >
       </div>
-      <UButton icon="i-lucide-arrow-left-right" class="w-fit rounded-4xl" :disabled="!motorcycle1Id || !motorcycle2Id"
-        @click="fetchMotocycles">Comparo</UButton>
+      <Transition>
+        <div v-if="showResultat" ref="resultat" class="resultat-section">
+          <div v-if="resultatNumber.length > 0" class="info-container">
+            <h3>Résultats</h3>
+            <div v-for="field in resultatNumber" :key="field.fieldName">
+              <ResultatFieldNumber
+                :field-name="field.fieldName"
+                :first-value="field.firstValue"
+                :second-value="field.secondValue"
+              />
+              <br />
+            </div>
+          </div>
+          <div v-if="resultatImg.length > 0">
+            <h3>Images</h3>
+            <div v-for="field in resultatImg" :key="field.fieldName">
+              <ResultatFieldImg
+                :field-name="field.fieldName"
+                :first-value="field.firstValue"
+                :second-value="field.secondValue"
+              />
+            </div>
+          </div>
+          <div v-if="resultatSound.length > 0">
+            <h3>Sons</h3>
+            <div v-for="field in resultatSound" :key="field.fieldName">
+              <ResultatFieldSound
+                :field-name="field.fieldName"
+                :first-value="field.firstValue"
+                :second-value="field.secondValue"
+              />
+            </div>
+          </div>
+        </div>
+      </Transition>
+      <div class="caroussel-container">
+        <div>
+          <h3>Pour la performance</h3>
+          <CarrouselMotorcycles :items="carousselSportBikes" />
+        </div>
+        <div>
+          <h3>Pour le A2</h3>
+          <CarrouselMotorcycles :items="carousselBeginnerBikes" />
+        </div>
+        <div>
+          <h3>Pour l'aventure</h3>
+          <CarrouselMotorcycles :items="carousselAdventureBikes" />
+        </div>
+      </div>
+      <br />
     </div>
-    <Transition>
-      <div v-if="showResultat" ref="resultat" class="resultat-section">
-        <div v-if="resultatNumber.length > 0" class="info-container">
-          <h3>Résultats</h3>
-          <div v-for="field in resultatNumber" :key="field.fieldName">
-            <ResultatFieldNumber :field-name="field.fieldName" :first-value="field.firstValue"
-              :second-value="field.secondValue" />
-            <br />
-          </div>
-        </div>
-        <div v-if="resultatImg.length > 0">
-          <h3>Images</h3>
-          <div v-for="field in resultatImg" :key="field.fieldName">
-            <ResultatFieldImg :field-name="field.fieldName" :first-value="field.firstValue"
-              :second-value="field.secondValue" />
-          </div>
-        </div>
-        <div v-if="resultatSound.length > 0">
-          <h3>Sons</h3>
-          <div v-for="field in resultatSound" :key="field.fieldName">
-            <ResultatFieldSound :field-name="field.fieldName" :first-value="field.firstValue"
-              :second-value="field.secondValue" />
-          </div>
-        </div>
-      </div>
-    </Transition>
-    <div class="caroussel-container">
-      <div>
-        <h3>Pour la performance</h3>
-        <CarrouselMotorcycles :items="carousselSportBikes" />
-      </div>
-      <div>
-        <h3>Pour le A2</h3>
-        <CarrouselMotorcycles :items="carousselBeginnerBikes" />
-      </div>
-      <div>
-        <h3>Pour l'aventure</h3>
-        <CarrouselMotorcycles :items="carousselAdventureBikes" />
-      </div>
-    </div>
-    <br>
   </div>
 </template>
 

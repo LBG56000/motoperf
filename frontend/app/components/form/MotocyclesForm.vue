@@ -107,7 +107,7 @@ async function fetchMotorcyclesByBrand() {
       {
         params: {
           project: 'id,name,year',
-          filter: JSON.stringify({ brandId: motorcycle.value.brand?._id })
+          filter: JSON.stringify({ brand: motorcycle.value.brand?._id })
         }
       }
     )
@@ -125,28 +125,37 @@ onMounted(() => {
   <div class="form">
     <h3>{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
-      <UInputMenu v-model="brandInput" :placeholder="placeholderMotorcycle.brand" :items="brandFilteredList" clear>
-        <template #empty>
-          Aucune marque trouvée
-        </template>
+      <UInputMenu
+        v-model="brandInput"
+        :placeholder="placeholderMotorcycle.brand"
+        :items="brandFilteredList"
+        clear
+      >
+        <template #empty> Aucune marque trouvée </template>
       </UInputMenu>
     </UFormField>
 
     <UFormField label="Modèle" name="model">
-      <UInputMenu v-model="modelInput" :placeholder="placeholderMotorcycle.name" :items="motorcycleFilteredList" clear
-        @update:open="fetchMotorcyclesByBrand">
-        <template #empty>
-          Aucun modèle trouvé
-        </template>
+      <UInputMenu
+        v-model="modelInput"
+        :placeholder="placeholderMotorcycle.name"
+        :items="motorcycleFilteredList"
+        clear
+        @update:open="fetchMotorcyclesByBrand"
+      >
+        <template #empty> Aucun modèle trouvé </template>
       </UInputMenu>
     </UFormField>
 
     <UFormField label="Année" name="year">
-      <UInputMenu v-model="motorcycle.year" :placeholder="String(placeholderMotorcycle.year)" :items="yearFilteredList"
-        clear @update:open="fetchMotorcyclesByBrand">
-        <template #empty>
-          Aucune année trouvée
-        </template>
+      <UInputMenu
+        v-model="motorcycle.year"
+        :placeholder="String(placeholderMotorcycle.year)"
+        :items="yearFilteredList"
+        clear
+        @update:open="fetchMotorcyclesByBrand"
+      >
+        <template #empty> Aucune année trouvée </template>
       </UInputMenu>
     </UFormField>
   </div>
