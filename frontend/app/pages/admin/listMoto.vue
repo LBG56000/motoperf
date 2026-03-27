@@ -77,13 +77,16 @@ onMounted(() => {
   fetchData()
 })
 const panelOpen = ref(false)
+const refreshing = ref(false)
+
+function openPanel() {
+  panelOpen.value = true
+}
 
 function closePanel() {
   panelOpen.value = false
   selectedMoto.value = null
 }
-
-const refreshing = ref(false)
 
 async function refreshAll() {
   refreshing.value = true
@@ -91,10 +94,14 @@ async function refreshAll() {
   refreshing.value = false
 }
 
-function onRowClick(row: any) {
-  selectedMoto.value = row.original
-  panelOpen.value = true
-  console.log('aaaaaaaa')
+function onRowClick(row) {
+  const rowIndex = row.srcElement.parentElement.rowIndex
+
+  const moto = motos.value[rowIndex - 2]
+
+  if (!moto) return console.error('moto introuvable')
+  selectedMoto.value = moto
+  openPanel()
 }
 </script>
 
@@ -104,26 +111,40 @@ function onRowClick(row: any) {
     <hr />
 
     <main>
-      <UDashboardSidebar side="right" resizable collapsible>
-        <h1>AAAAAAAA</h1>
-      </UDashboardSidebar>
       <div class="header-page">
-        <UInput icon="i-lucide-search" size="md" variant="outline" placeholder="Rechercher une moto..." />
-        <USlideover v-model:open="panelOpen" title="Ajout d'une moto">
-          <UButton size="md" color="primary" label="Open">Ajouter une moto</UButton>
-
-          <template #body>
-            <CardMoto :mode="selectedMoto ? 'edit' : 'create'" :moto="selectedMoto" :onClosePanel="closePanel"
-              :onRefresh="refreshAll" />
-          </template>
-        </USlideover>
+        <UInput
+          icon="i-lucide-search"
+          size="md"
+          variant="outline"
+          placeholder="Rechercher une moto..."
+        />
+        <UButton size="md" color="primary" label="Open" @click="openPanel"
+          >Ajouter une moto</UButton
+        >
       </div>
 
+      <h3 class="header-list">Liste des motos</h3>
       <div class="main-content">
-        <h3>Liste des motos</h3>
-        <UTable :data="motos" :columns="columns" :ui="{
-          tr: 'cursor-pointer hover:bg-gray-50'
-        }" @row:click="onRowClick" />
+        <div class="table-moto">
+          <UTable
+            sticky
+            :data="motos"
+            :columns="columns"
+            :ui="{
+              tr: 'cursor-pointer hover:bg-gray-50'
+            }"
+            @select="onRowClick"
+          />
+        </div>
+        <div v-if="panelOpen" class="panel-moto">
+          <CardMoto
+            :key="selectedMoto?.id ?? 'create'"
+            :mode="selectedMoto ? 'edit' : 'create'"
+            :moto="selectedMoto"
+            :onClosePanel="closePanel"
+            :onRefresh="refreshAll"
+          />
+        </div>
       </div>
     </main>
   </div>
@@ -137,7 +158,24 @@ function onRowClick(row: any) {
   margin: 3rem;
 }
 
+.table-moto {
+  flex: 1;
+  padding: 1em;
+}
+.panel-moto {
+  margin: 2em;
+  border: 1px solid var(--border-gray);
+  border-radius: 15px;
+  padding: 1em;
+}
+
 .main-content {
-  margin: 4em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-list {
+  margin-left: 1em;
 }
 </style>
