@@ -2,17 +2,27 @@
 import type { IBrand } from '~/types/brand'
 import type { ICategory } from '~/types/category'
 
+const props = defineProps({
+  loading: Boolean,
+  activeFilters: { type: Object, default: () => ({ brandIds: [], categoryIds: [], onlyMyPost: true }) }
+})
+
 const categories = ref<ICategory[]>([])
 const brands = ref<IBrand[]>([])
-const onlyMyPosts = ref(true)
+
 const filters = ref({
-  brandIds: [] as string[],
-  categoryIds: [] as string[],
-  onlyMyPost: false
+  brandIds: [...(props.activeFilters?.brandIds || [])],
+  categoryIds: [...(props.activeFilters?.categoriesIds || [])],
+  onlyMyPost: props.activeFilters?.onlyMyPost || false,
 })
-const props = defineProps({
-  loading: Boolean
-})
+
+watch(() => props.activeFilters, (newVal) => {
+  if (newVal) {
+    filters.value.brandIds = [...(newVal.brandIds || [])]
+    filters.value.categoryIds = [...(newVal.categoryIds || [])]
+    filters.value.onlyMyPost = newVal.onlyMyPost
+  }
+}, { deep: true })
 
 const emits = defineEmits(['filters'])
 
@@ -33,7 +43,11 @@ const getBrands = async () => {
 }
 
 const emitFilters = () => {
-  emits('filters', filters.value)
+  emits('filters', {
+    brandIds: filters.value.brandIds,
+    categoryIds: filters.value.categoryIds,
+    onlyMyPost: filters.value.onlyMyPost
+  })
 }
 
 const handleHaveMyFavorites = () => {
@@ -109,7 +123,7 @@ onMounted(async () => {
           </div>
         </div>
       </div>
-      <USwitch v-model="onlyMyPosts" label="Uniquement mes posts" class="filter" />
+      <USwitch v-model="filters.onlyMyPost" label="Uniquement mes posts" class="filter" />
     </UCard>
   </div>
 </template>
@@ -126,15 +140,14 @@ onMounted(async () => {
 }
 
 .filters {
-  margin-right: 2em;
   position: sticky;
-  width: 30%;
   top: 0;
   left: 0;
 }
 
 .sub-filter {
   margin: 0.5em 1em;
+  padding: 0.3em;
 }
 
 .margin-0_5 {
@@ -146,16 +159,17 @@ onMounted(async () => {
 }
 
 .background-selected {
-  background-color: rgba(109, 100, 100, 0.097);
+  background-color: rgba(109, 100, 100, 0.325);
   border-radius: 10px;
   padding-right: 0.3em;
   padding-left: 0.3em;
+  width: fit-content;
 }
 
 .sub-filter:hover {
   background-color: rgba(109, 100, 100, 0.097);
-  padding-right: 0.3em;
-  padding-left: 0.3em;
   border-radius: 10px;
+  width: fit-content;
+
 }
 </style>

@@ -8,7 +8,8 @@ const loading = ref(true)
 const filters = ref({
   brandIds: [] as string[],
   categoryIds: [] as string[],
-  onlyMyPost: true
+  onlyMyPost: true,
+  searchBar: ''
 })
 
 const filter = computed(() => {
@@ -26,6 +27,11 @@ const filter = computed(() => {
     })
   }
 
+  if (filters.value.searchBar && filters.value.searchBar.trim().length !== 0) {
+    conditions.push({
+      question: { $regex: filters.value.searchBar, $options: 'i' }
+    })
+  }
 
   if (!conditions.length) return undefined
 
@@ -69,14 +75,18 @@ const isUserOfPost = computed(() => {
   return true
 })
 
-const handleFilter = (newFilters: {
-  brandIds: string[],
-  categoryIds: string[],
-  onlyMyPost: boolean
-}) => {
-  filters.value = newFilters
-  getPosts()
-  // console.log(filters.value)
+const handleFilter = async (updateFilter: any) => {
+  filters.value = {
+    ...filters.value,
+    ...updateFilter
+  }
+  await getPosts()
+}
+
+const handleSearch = () => {
+  if (filters.value.searchBar.trim().length > 0) {
+    getPosts()
+  }
 }
 
 onMounted(async () => {
@@ -103,9 +113,17 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <ForumFilters :loading @filters="handleFilter" />
+      <ForumFilters :loading :active-filter="filters" @filters="handleFilter" />
       <div>
         <USkeleton v-if="loading" class="size-12 rounded-full" />
+        <UFormField label="Rechercher un post dans le forum">
+          <UInput v-model="filters.searchBar" placeholder="Rechercher un post" @update:model-value="handleSearch">
+            <template v-if="filters.searchBar?.length" #trailing>
+              <UButton color="neutral" variant="link" size="sm" icon="i-lucide-circle-x" aria-label="Clear input"
+                class="cursor-pointer" @click="filters.searchBar = ''; getPosts()" />
+            </template>
+          </UInput>
+        </UFormField>
         <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
         <div v-for="post in posts" :key="post._id">
           <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
