@@ -4,13 +4,46 @@ import HeaderInfo from '~/components/global/HeaderInfo.vue';
 import type { IPost } from '~/types/post';
 
 const posts = ref<IPost[]>([])
-
 const loading = ref(true)
+const filters = ref({
+  brandIds: [] as string[],
+  categoryIds: [] as string[],
+  onlyMyPost: true
+})
+
+const filter = computed(() => {
+  const conditions = []
+
+  if (filters.value.brandIds.length) {
+    conditions.push({
+      brand: { $in: filters.value.brandIds }
+    })
+  }
+
+  if (filters.value.categoryIds.length) {
+    conditions.push({
+      category: { $in: filters.value.categoryIds }
+    })
+  }
+
+
+  if (!conditions.length) return undefined
+
+  return JSON.stringify({
+    $or: conditions
+  })
+})
+
 const getPosts = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}posts?deep=true&project=content,question,id,createdAt,views`)
-  const data = await res.json()
+  const res = await $fetch<{ posts: IPost[] }>(`${useRuntimeConfig().public.apiBase}posts`, {
+    params: {
+      deep: true,
+      project: 'content,question,id,createdAt,views',
+      filter: filter.value
+    }
+  })
   posts.value = await Promise.all(
-    data.posts.map(async (post: IPost) => {
+    res.posts.map(async (post: IPost) => {
       post.responses = await getResponseOfPost(post._id)
       // await getResponsesOfResponses()
       return post
@@ -36,6 +69,16 @@ const isUserOfPost = computed(() => {
   return true
 })
 
+const handleFilter = (newFilters: {
+  brandIds: string[],
+  categoryIds: string[],
+  onlyMyPost: boolean
+}) => {
+  filters.value = newFilters
+  getPosts()
+  // console.log(filters.value)
+}
+
 onMounted(async () => {
   await Promise.all([
     getPosts()
@@ -60,7 +103,7 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <ForumFilters :loading />
+      <ForumFilters :loading @filters="handleFilter" />
       <div>
         <USkeleton v-if="loading" class="size-12 rounded-full" />
         <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
@@ -77,6 +120,12 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.forum {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .loading {
   display: flex;
   justify-content: center;
@@ -93,8 +142,13 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   align-items: start;
-  justify-content: space-between;
-  margin: 5em;
+  gap: 2em;
+  margin: 2em;
+}
+
+.forum-filters>div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
 }
 
 .forum-filters>div>div,
@@ -105,7 +159,8 @@ onMounted(async () => {
 .panel {
   display: flex;
   flex-direction: column;
-  margin-left: 2em;
+  gap: 1.5rem;
+  width: 300px;
   position: sticky;
   top: 0;
   right: 0;

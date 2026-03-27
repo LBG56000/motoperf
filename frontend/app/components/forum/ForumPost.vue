@@ -53,10 +53,17 @@ const handleOpenAPost = (id: string) => {
   </UCard>
 </template>
 <style scoped>
+.card-forum {
+  width: 100%;
+  max-width: 900px;
+  margin: 0.5rem auto;
+}
+
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .statsContainer {
@@ -67,11 +74,10 @@ const handleOpenAPost = (id: string) => {
 }
 
 .postCard {
-  width: 55vw;
-  margin: 1em auto;
-  padding: 1em;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
   display: flex;
-  gap: 1em;
+  gap: 1.5em;
   align-items: flex-start;
 }
 
@@ -83,9 +89,15 @@ const handleOpenAPost = (id: string) => {
   width: 100%;
 }
 
+.top h3 {
+  margin: 0;
+}
+
 .badges {
   display: flex;
-  gap: 0.5em;
+  flex-direction: row;
+  gap: 1.5rem;
+  align-items: center;
   margin-bottom: 1em;
   margin-top: 1em;
 }
@@ -96,14 +108,15 @@ const handleOpenAPost = (id: string) => {
 
 .stats {
   display: flex;
-  gap: 0.5em;
+  gap: 0.3em;
   margin-top: 1em;
+  align-items: center;
 }
 
 .grid {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-top: 0.5em;
   width: 100%;
 }

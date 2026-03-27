@@ -72,7 +72,7 @@ onMounted(async () => {
               <p>{{ responses.length || 0 }} réponses </p>
             </div>
             <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
-            }}</p>
+              }}</p>
             <div class="icon-and-text right">
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
               <p>{{ post?.views }} vues</p>
@@ -115,11 +115,18 @@ onMounted(async () => {
 .post-filters {
   display: flex;
   flex-direction: row;
-  margin: 5em;
+  align-items: start;
+  gap: 3rem;
+  margin: 2rem 5rem;
 }
 
-.post-filters>div:nth-child(1) {
-  margin-right: 10em;
+.post-filters>div:first-child {
+  flex-shrink: 0;
+}
+
+.post-filters>div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
 }
 
 .flex.row.end {
