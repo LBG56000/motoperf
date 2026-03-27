@@ -1,76 +1,53 @@
 <script setup lang="ts">
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import type { IUser } from '~/types/users'
 
 const isOpen = defineModel({ isModalOpen: Boolean })
 const form = useTemplateRef('form')
-
-type Schema = typeof state
-
-function validate(state: Partial<Schema>): FormError[] {
-  const errors = []
-  if (!state.email)
-    errors.push({ name: 'email', message: 'Le champ est requis' })
-  if (!state.password)
-    errors.push({ name: 'password', message: 'Le champ est requis' })
-  return errors
-}
 
 const state = ref({
   email: '',
   password: ''
 })
 
-const apiBack = useRuntimeConfig().public.apiback
+type Schema = typeof state
 
-async function userFinded<Boolean>() {
-  const data = await $fetch<{ user: IUser }>(`${apiBack}users`, {
-    params: {
-      filter: JSON.stringify({
-        email: state.value.email
-      }),
-      project: 'email'
-    }
-  })
-  return data.users[0] !== undefined
+function validate(state: Partial<Schema>): FormError[] {
+  const errors = []
+  return errors
 }
 
-async function passwordTest<Boolean>() {
-  const data = await $fetch<{ user: IUser }>(`${apiBack}users`, {
-    params: {
-      filter: JSON.stringify({
-        email: state.value.email
-      }),
-      project: 'password'
-    }
-  })
-  return data.users[0].password === state.value.password
+const apiBase = useRuntimeConfig().public.apiBase
+const error = ref<string>('')
+
+async function userFinded() {
+  try {
+    await $fetch(`${apiBase}auth`, {
+      method: 'POST',
+      body: {
+        email: state.value.email,
+        password: state.value.password
+      }
+    })
+    return true
+  } catch (err: any) {
+    error.value =
+      err.data?.message || 'Une erreur est survenue lors de la connexion.'
+    return false
+  }
 }
 
-const connexion = async (event: FormSubmitEvent) => {
-  if (!(await userFinded())) {
-    form.value?.setErrors([{ name: 'email', message: 'Email introuvable' }])
-    return
+const connexion = async () => {
+  if (await userFinded()) {
+    alert('Connexion réussie !')
+    isOpen.value = false
+    state.value.email = ''
+    state.value.password = ''
   }
-  if (!(await passwordTest())) {
-    form.value?.setErrors([
-      { name: 'password', message: 'Mot de passe incorrect' }
-    ])
-    return
-  }
-
-  alert('Connexion réussie !')
-  isOpen.value = false
-  state.value.email = ''
-  state.value.password = ''
 }
 </script>
 
 <template>
-  <UModal
-    :ui="{ overlay: { background: '--background-secondary' } }"
-    v-model:open="isOpen"
-  >
+  <UModal v-model:open="isOpen">
     <template #content>
       <div class="content">
         <h3>Se connecter</h3>
@@ -79,7 +56,7 @@ const connexion = async (event: FormSubmitEvent) => {
           :validate="validate"
           :state="state"
           class="space-y-4"
-          @submit="connexion"
+          @submit.prevent="connexion"
         >
           <UFormField label="E-mail" name="email" type="email" required>
             <UInput v-model="state.email" />
@@ -95,6 +72,7 @@ const connexion = async (event: FormSubmitEvent) => {
             style="width: 100%; justify-content: center; color: white"
           />
         </UForm>
+        <p class="error-message">{{ error }}</p>
       </div>
     </template>
   </UModal>
@@ -108,5 +86,11 @@ const connexion = async (event: FormSubmitEvent) => {
   justify-content: center;
 
   margin: 5rem;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.8em;
+  margin: 1rem;
 }
 </style>
