@@ -80,16 +80,8 @@ onMounted(async () => {
       </div>
 
       <div class="hero-images">
-        <img
-          src="/images/accueil/R1_fond.png"
-          alt="Moto"
-          class="img-cover"
-        />
-        <img
-          src="/images/accueil/BMW_fond.png"
-          alt="Moto"
-          class="img-cover"
-        />
+        <img src="/images/accueil/R1_fond.png" alt="Moto" class="img-cover" />
+        <img src="/images/accueil/BMW_fond.png" alt="Moto" class="img-cover" />
       </div>
     </section>
     <section>
@@ -104,14 +96,10 @@ onMounted(async () => {
             <span class="bold">vitesse</span>. Depuis
             <span class="bold">1868</span>, des milliers de modèles de motos ont
             vu le jour. Et si toi aussi tu veux savoir laquelle correspond le
-            mieux à ce que tu recherches ...
+            mieux à ce que tu recherches...
           </p>
         </article>
-        <img
-          src="/images/accueil/Hornet.png"
-          alt="Moto"
-          class="img-cover"
-        />
+        <img src="/images/accueil/Hornet.png" alt="Moto" class="img-cover" />
       </div>
     </section>
     <section class="basic-section">

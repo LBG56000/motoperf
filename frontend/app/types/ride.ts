@@ -34,3 +34,35 @@ export interface IFilterObject {
   startTown: string[]
   endTown: string[]
 }
+
+export type MapItem = {
+  label: string
+  id: string
+  icon: string
+  url: string
+  attribution: string
+}
+
+export interface RideResponse {
+  rides: IRide[]
+}
+
+export interface ICommune {
+  nom: string
+  codesPostaux: string[]
+}
+
+export interface IValueCommuneSelect {
+  label: string
+  value: string
+}
+
+export enum RideType {
+  SINUEUSE = 'Sinueuse',
+  GRANDES_ROUTES = 'Grandes routes',
+  LIGNES_DROITES = 'Lignes droites',
+  BORD_DE_MER = 'Bord de mer',
+  VALLONER = 'Valloner',
+  PLAINE = 'Plaine',
+  MIXTE = 'Mixte'
+}

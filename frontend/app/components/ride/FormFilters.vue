@@ -86,6 +86,7 @@ const resetFilter = () => {
   if (STORAGE_KEY_FILTER) {
     localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(filters))
   }
+  emit('apply', { ...filters })
 }
 </script>
 

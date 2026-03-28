@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import HeaderInfo from '../components/global/HeaderInfo.vue'
-import DisplayMapRide from '../components/ride/DisplayMapRide.vue'
+import HeaderInfo from '../../components/global/HeaderInfo.vue'
+import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
 </script>
 <template>
   <div>
@@ -19,11 +19,17 @@ import DisplayMapRide from '../components/ride/DisplayMapRide.vue'
       </template>
     </HeaderInfo>
 
-    <DisplayMapRide />
+    <DisplayMapRide
+      display-filters
+      display-enlarge-button
+      display-ride-list
+      display-map-loader
+      display-ride
+    />
 
     <div class="add-container">
       <p>Vous ne trouvez pas votre balade, vous pouvez l’ajouter :</p>
-      <UButton color="primary" to="/add-ride" icon="i-lucide-map-pinned"
+      <UButton color="primary" to="/ride/addRide" icon="i-lucide-map-pinned"
         >Ajouter une balade</UButton
       >
     </div>

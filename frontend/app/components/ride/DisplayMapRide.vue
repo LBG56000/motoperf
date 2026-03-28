@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue'
-import type { IFilterObject, IRide } from '~/types/ride'
+import type { IFilterObject, IRide, MapItem, RideResponse } from '~/types/ride'
 import PanelRides from './PanelRides.vue'
 import FormFilters from './FormFilters.vue'
-import { scrollToMap } from '../../utils/global'
 
-type MapItem = {
-  label: string
-  id: string
-  icon: string
-  url: string
-  attribution: string
+interface IProps {
+  displayFilters?: boolean
+  displayEnlargeButton?: boolean
+  displayRideList?: boolean
+  displayMapLoader?: boolean
+  displayRide?: boolean
+  displayEditorContainer?: boolean
 }
 
-interface RideResponse {
-  rides: IRide[]
-}
+// Correction de la définition des props
+const props = withDefaults(defineProps<IProps>(), {
+  displayFilters: false,
+  displayEnlargeButton: false,
+  displayRideList: false,
+  displayMapLoader: true,
+  displayRide: false,
+  displayEditorContainer: false
+})
 
 const map = ref<any>(null) // Instance de la carte Leaflet
 const currentTileLayer = ref<any>(null) // Couche de tuiles courante affichée sur la carte (permet de gérer notamment le zoom sur les balades trouvées)
@@ -34,20 +40,7 @@ const isLoading = ref<boolean>(true) // Valeur si la carte est entrain de charge
 const listRideTypes = ref<string[]>([]) // Liste de tous les types de balade présent
 const listStartTown = ref<string[]>([]) // Liste de toutes les villes de début des balades présent
 const listEndTown = ref<string[]>([]) // Liste de toutes les villes de fin des balaades présent
-const fullScreen = ref<boolean>(false)
-
-const toggleFullScreen = () => {
-  fullScreen.value = !fullScreen.value
-
-  // Permet à Leaflet de recalculer la taille de la carte
-  setTimeout(() => {
-    map.value?.invalidateSize()
-
-    if (!fullScreen.value) {
-      scrollToMap('map')
-    }
-  }, 300) // On attend un peu que la transition CSS se termine sinon ça bug
-}
+const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
 
 const STORAGE_KEY_FILTER = 'rides-filters'
 provide('STORAGE_KEY_FILTER', STORAGE_KEY_FILTER)
@@ -101,14 +94,6 @@ const mapItems = ref<MapItem[]>([
     attribution: '&copy; CartoDB'
   }
 ])
-
-const getMapPinSvg = (color: string) => {
-  return `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M20 10C20 14.993 14.461 20.193 12.601 21.799C12.4277 21.9293 12.2168 21.9998 12 21.9998C11.7832 21.9998 11.5723 21.9293 11.399 21.799C9.539 20.193 4 14.993 4 10C4 7.87827 4.84285 5.84344 6.34315 4.34315C7.84344 2.84285 9.87827 2 12 2C14.1217 2 16.1566 2.84285 17.6569 4.34315C19.1571 5.84344 20 7.87827 20 10Z" fill="${color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M12 14.1226C14.2091 14.1226 16 12.3317 16 10.1226C16 7.91342 14.2091 6.12256 12 6.12256C9.79086 6.12256 8 7.91342 8 10.1226C8 12.3317 9.79086 14.1226 12 14.1226Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-`
-}
 
 const filteredRides = computed(() => {
   return dataRides.value.filter((ride: IRide) => {
@@ -169,13 +154,6 @@ const filteredRides = computed(() => {
     )
   })
 })
-
-const getWeightByZoom = (zoom: number) => {
-  if (zoom < 8) return 3
-  if (zoom < 10) return 5
-  if (zoom < 13) return 7
-  return 9
-}
 
 // Fonction appelée quand le formulaire émet 'apply'
 const onApplyFilters = (payload: IFilterObject) => {
@@ -263,21 +241,6 @@ const handleFilters = () => {
   searchValue.value = ''
 }
 
-const getUniqueValues = (rides: IRide[], key: keyof IRide): string[] => {
-  const values = rides
-    .map((r) => r[key]?.toString()) // On extrait et convertit
-    .filter(Boolean) // On enlève les valeurs nulles ou undefined au cas où
-
-  return [...new Set(values)].sort() // Set + Tri alphabétique (optionnel mais recommandé)
-}
-
-const getMax = (rides: IRide[], key: keyof IRide) => {
-  const values = rides
-    .map((r) => parseFloat(r[key]?.toString() || '0'))
-    .filter((v) => !isNaN(v))
-  return values.length > 0 ? Math.max(...values) : 0
-}
-
 onMounted(async () => {
   isLoading.value = true
 
@@ -291,62 +254,62 @@ onMounted(async () => {
 
   updateMapBackground(selectedId.value, L)
 
-  const runtimeConfig = useRuntimeConfig()
-  try {
-    const res = await fetch(
-      `${runtimeConfig.public.apiBase}rides?project=title,description,color,geom,duration,distance,start_town,end_town,ride_type,like,picture`
+  if (props.displayRide) {
+    const runtimeConfig = useRuntimeConfig()
+    try {
+      const res = await fetch(
+        `${runtimeConfig.public.apiBase}rides?project=title,description,color,geom,duration,distance,start_town,end_town,ride_type,like,picture`
+      )
+      const data: RideResponse = await res.json()
+      if (data.rides && data.rides.length > 0) {
+        dataRides.value = data.rides
+
+        distanceMax.value = getMax(data.rides, 'distance')
+        durationMax.value = getMax(data.rides, 'duration')
+        listRideTypes.value = getUniqueValues(data.rides, 'ride_type')
+        listStartTown.value = getUniqueValues(data.rides, 'start_town')
+        listEndTown.value = getUniqueValues(data.rides, 'end_town')
+
+        renderRides()
+      }
+    } catch (e) {
+      console.error('Erreur fetch:', e)
+    } finally {
+      isLoading.value = false
+    }
+
+    // Permet d'épaissir le trait des balades en fonction du zoom
+    map.value.on('zoomend', () => {
+      const newZoom = map.value.getZoom()
+      const newWeight = getWeightByZoom(newZoom)
+
+      if (ridesLayerGroup.value) {
+        ridesLayerGroup.value.eachLayer((layer: any) => {
+          if (layer.setStyle) {
+            layer.setStyle({ weight: newWeight })
+          }
+        })
+      }
+    })
+  }
+
+  if (props.displayFilters) {
+    const saved = localStorage.getItem(STORAGE_KEY_FILTER)
+    if (saved) {
+      activeFilters.value = JSON.parse(saved)
+    }
+
+    // Dès que les filtres changent, on les enregistres dans le localStorage
+    watch(
+      activeFilters,
+      (newVal) => {
+        localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(newVal))
+      },
+      { deep: true }
     )
-    const data: RideResponse = await res.json()
-    if (data.rides && data.rides.length > 0) {
-      dataRides.value = data.rides
-
-      distanceMax.value = getMax(data.rides, 'distance')
-      durationMax.value = getMax(data.rides, 'duration')
-      listRideTypes.value = getUniqueValues(data.rides, 'ride_type')
-      listStartTown.value = getUniqueValues(data.rides, 'start_town')
-      listEndTown.value = getUniqueValues(data.rides, 'end_town')
-
-      renderRides()
-    }
-  } catch (e) {
-    console.error('Erreur fetch:', e)
-  } finally {
-    isLoading.value = false
   }
 
-  // Permet d'épaissir le trait des balades en fonction du zoom
-  map.value.on('zoomend', () => {
-    const newZoom = map.value.getZoom()
-    const newWeight = getWeightByZoom(newZoom)
-
-    if (ridesLayerGroup.value) {
-      ridesLayerGroup.value.eachLayer((layer: any) => {
-        if (layer.setStyle) {
-          layer.setStyle({ weight: newWeight })
-        }
-      })
-    }
-  })
-
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && fullScreen.value) {
-      toggleFullScreen()
-    }
-  })
-
-  const saved = localStorage.getItem(STORAGE_KEY_FILTER)
-  if (saved) {
-    activeFilters.value = JSON.parse(saved)
-  }
-
-  // Dès que les filtres changent, on les enregistres dans le localStorage
-  watch(
-    activeFilters,
-    (newVal) => {
-      localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(newVal))
-    },
-    { deep: true }
-  )
+  isLoading.value = false
 })
 
 watch(selectedId, (newId) => updateMapBackground(newId, L_instance.value))
@@ -354,14 +317,20 @@ watch(filteredRides, () => renderRides())
 </script>
 
 <template>
-  <div class="map-container" :class="{ 'is-fullscreen': fullScreen }">
-    <div v-if="isLoading" class="loader-overlay">
+  <div
+    class="map-container"
+    :class="{ 'is-fullscreen': isFullScreen }"
+    tabindex="0"
+    @keydown.esc="toggleFullScreen"
+  >
+    <div id="map"></div>
+    <div v-if="isLoading && props.displayMapLoader" class="loader-overlay">
       <div class="loader-content">
         <UIcon name="i-lucide-loader-2" class="loader-icon" />
         <span class="loader-text">Chargement de la carte...</span>
       </div>
     </div>
-    <div class="filters">
+    <div v-if="props.displayFilters" class="filters">
       <USelect
         v-model="selectedId"
         :items="mapItems"
@@ -410,14 +379,17 @@ watch(filteredRides, () => renderRides())
       </UButton>
     </div>
     <UButton
-      :icon="fullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
+      v-if="props.displayEnlargeButton"
+      :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
       class="button-enlarge"
+      color="neutral"
+      variant="subtle"
       style="cursor: pointer"
       @click="toggleFullScreen"
     />
 
     <FormFilters
-      v-if="showFilters && distanceMax > 1"
+      v-if="showFilters && distanceMax > 1 && props.displayFilters"
       :max-distance-slider="distanceMax"
       :max-duration-slider="durationMax"
       :list-ride-types="listRideTypes"
@@ -426,18 +398,39 @@ watch(filteredRides, () => renderRides())
       @apply="onApplyFilters"
     />
 
-    <PanelRides :filtered-rides="filteredRides" />
+    <div v-if="props.displayEditorContainer" class="editor-container">
+      <UButton
+        v-if="props.displayEnlargeButton"
+        icon="i-lucide-spline-pointer"
+        class="button-add-line"
+        color="primary"
+        variant="solid"
+        style="cursor: pointer"
+      />
+    </div>
 
-    <div id="map"></div>
+    <PanelRides v-if="props.displayRideList" :filtered-rides="filteredRides" />
   </div>
 </template>
 
 <style scoped>
+.editor-container {
+}
+
+.button-add-line {
+  position: absolute;
+  top: 25px;
+  right: 15px;
+  z-index: 1010;
+  pointer-events: auto;
+}
+
 .button-enlarge {
   position: absolute;
   bottom: 25px;
-  right: 10px;
-  z-index: 1001;
+  right: 15px;
+  z-index: 1010;
+  pointer-events: auto;
 }
 
 /* Loader de la carte */
@@ -486,22 +479,26 @@ watch(filteredRides, () => renderRides())
 
 /* Carte et ce qu'il y a au dessus */
 .map-container {
-  position: relative;
+  position: relative !important;
   width: 100%;
   height: 80dvh;
   margin-bottom: 20px;
   overflow: hidden;
   transition: all 0.3s ease-in-out;
+  background-color: #f8f9fa;
 }
 
 .map-container.is-fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100dvh;
-  z-index: 9999;
-  margin: 0;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  z-index: 99999 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
 }
 
 .is-fullscreen .button-enlarge {
@@ -510,6 +507,9 @@ watch(filteredRides, () => renderRides())
 }
 
 #map {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   z-index: 1;
@@ -519,11 +519,11 @@ watch(filteredRides, () => renderRides())
   position: absolute;
   top: 15px;
   left: 15px;
-  right: 15px;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
   gap: 10px;
-  z-index: 999;
+  z-index: 1001;
   pointer-events: none;
 }
 
