@@ -21,7 +21,7 @@ const handleAddResponse = () => {
 <template>
   <div class="comments-list">
     <div v-for="response in props.responses" :key="response._id" class="comment">
-      <UAvatar :src="`/_nuxt/assets/images/users/${response.user.image}`" :alt="response.user.firstname" size="3xl"
+      <UAvatar :src="`/images/users/${response.user.image}`" :alt="response.user.firstname" size="3xl"
         :title="response.user.firstname" class="margin-right-0_5" />
 
       <div class="comment-content">

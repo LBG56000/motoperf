@@ -31,8 +31,7 @@ const handleOpenAPost = async (id: string) => {
   <UCard class="card-forum" @click="handleOpenAPost(post._id)">
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <UAvatar v-else :src="`/_nuxt/assets/images/users/${props.post.user.image}`" size="3xl" loading="lazy"
-        class="margin-2" />
+      <UAvatar v-else :src="`/images/users/${props.post.user.image}`" size="3xl" loading="lazy" class="margin-2" />
       <div class="main">
         <div class="top">
           <h3>{{ props.post.question }}</h3>
