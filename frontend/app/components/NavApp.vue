@@ -1,7 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import ConnexionForm from './ConnexionForm.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
+import type { IUser } from '@/types/users'
 
 const isOpen = ref(false)
 const mode = ref(false)
@@ -21,6 +22,19 @@ watch(
   },
   { immediate: true }
 )
+
+const apiBase = useRuntimeConfig().public.apiBase
+async function testUser() {
+  const data = await $fetch<{ users: IUser }>(`${apiBase}users`, {
+    credentials: 'include',
+    params: { project: 'email,password' }
+  })
+  return data.users
+}
+
+onMounted(async () => {
+  console.log(await testUser())
+})
 
 // To update the color mode when the toggle switch is changed
 colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))

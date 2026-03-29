@@ -19,6 +19,7 @@
     "backend": "^0.0.0",
     "cd": "^0.3.3",
     "compose": "^0.1.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "docker": "^1.0.0",
     "dotenv": "^17.3.1",
@@ -39,6 +40,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/jsonwebtoken": "^9.0.10",
     "eslint": "^10.0.1",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.3.0",

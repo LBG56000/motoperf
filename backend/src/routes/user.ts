@@ -8,12 +8,11 @@ router.get(
   '/',
   authenticateToken,
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
-    const { project, sort, limit, filter } = prepareQuery(req.query)
+    const { project } = prepareQuery(req.query)
+    const { id } = req.user as { id: string }
+
     try {
-      const users = await User.findOne(filter)
-        .select(project)
-        .sort(sort)
-        .limit(limit)
+      const users = await User.findById(id).select(project)
       res.status(200).json({ users })
     } catch (error) {
       console.error('Error accessing user route:', error)

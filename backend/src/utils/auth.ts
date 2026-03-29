@@ -1,11 +1,9 @@
 import jwt from 'jsonwebtoken'
 
 export const authenticateToken = (req: any, res: any, next: any) => {
-  const token = req.headers['authorization']?.split(' ')[1]
+  const token = req.cookies.accessToken
 
-  if (!token) {
-    return res.status(401).json({ message: 'Access token is missing' })
-  }
+  if (!token) return res.status(401).json({ message: 'Non authentifié' })
 
   try {
     if (!process.env.JWT_SECRET) {

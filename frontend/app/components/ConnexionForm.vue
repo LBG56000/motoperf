@@ -23,6 +23,7 @@ async function userFinded() {
   try {
     await $fetch(`${apiBase}auth`, {
       method: 'POST',
+      credentials: 'include',
       body: {
         email: state.value.email,
         password: state.value.password
