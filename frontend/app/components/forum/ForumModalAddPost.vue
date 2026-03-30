@@ -105,11 +105,29 @@ onMounted(() => {
           <div>
             <UFormField label="Catégorie" required name="category">
               <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post"
-                :items="categoriesName" value-key="_id" label-key="name" />
+                :items="categoriesName" value-key="_id" label-key="name" :search-input="{
+                  placeholder: 'Rechercher',
+                  icon: 'i-lucide-search'
+                }">
+                <template #empty>
+                  <span class="text-gray-500 text-sm p-2">
+                    Aucune catégorie trouvée
+                  </span>
+                </template>
+              </USelectMenu>
             </UFormField>
             <UFormField label="Marques" required name="brand">
               <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brandsName"
-                value-key="_id" label-key="name" />
+                value-key="_id" label-key="name" :search-input="{
+                  placeholder: 'Rechercher',
+                  icon: 'i-lucide-search'
+                }">
+                <template #empty>
+                  <span class="text-gray-500 text-sm p-2">
+                    Aucune marque trouvée
+                  </span>
+                </template>
+              </USelectMenu>
             </UFormField>
           </div>
           <UFormField label="Description" required name="description">
