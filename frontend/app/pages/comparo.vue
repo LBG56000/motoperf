@@ -20,8 +20,8 @@ const apiBase = useRuntimeConfig().public.apiBase
 const showResultat = ref(false)
 const motorcycle1 = ref<IMotorcycle>()
 const motorcycle2 = ref<IMotorcycle>()
-const motorcycle1Id = ref<string>('69cbe6342e0cabab31678276')
-const motorcycle2Id = ref<string>('69cbe6342e0cabab3167827a')
+const motorcycle1Id = ref<string>('')
+const motorcycle2Id = ref<string>('')
 const fieldCategories = {
   numbers: [
     'year',
