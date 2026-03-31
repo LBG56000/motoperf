@@ -80,22 +80,23 @@ router.post('/', async (req, res) => {
   try {
     const body = req.body
     const brand = await Brand.findOne({ _id: body.brand })
-    const category = await Category.findOne({ _id: body.category })
+    const category = await Category.findOne({ name: body.category })
     // TODO: a modifier dans le front et le back avec des vrai user et des vrai images
     const user = await User.findOne({ firstname: 'Alice' })
 
     if (!brand || !category || !user) {
+      console.error('brand:', brand, 'category:', category, 'user:', user)
       return res.status(500).json({ error: 'Internal server error' })
     }
     const postCreated = await Post.insertOne({
       title: body.title,
-      content: body.description,
+      content: body.content,
       user: user,
       brand: brand,
       category: category,
       image: 'test1.png'
     })
-    res.status(201).json({ id: postCreated._id })
+    res.status(201).json({ _id: postCreated._id })
   } catch (error) {
     console.error('Error accessing message route:', error)
     res.status(500).json({ error: 'Internal server error' })

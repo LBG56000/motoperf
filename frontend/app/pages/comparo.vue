@@ -276,7 +276,7 @@ async function postComment() {
     console.error('Error posting comment:', error)
   }
 
-  fetchMessages()
+  await fetchMessages()
 }
 
 onMounted(() => {
