@@ -62,7 +62,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         <UAvatar
           v-else
           icon="i-lucide-user"
-          :src="user?.image"
+          :src="'/images/users/' + user?.image"
           size="xl"
           loading="lazy"
           @click="logout"
