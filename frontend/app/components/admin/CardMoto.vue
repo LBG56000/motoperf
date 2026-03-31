@@ -8,15 +8,17 @@ const apiBase = useRuntimeConfig().public.apiBase
 
 async function uploadFile(
   file: File,
-  type: 'image' | 'sound'
+  type: 'image' | 'sound',
+  directory: string
 ): Promise<string> {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('type', type)
+  formData.append('directory', directory)
   formData.append('motoName', state.name)
   formData.append('motoYear', String(state.year))
 
-  const res = await $fetch<{ url: string }>('/api/upload', {
+  const res = await $fetch<{ url: string }>('/api/uploadFile', {
     method: 'POST',
     body: formData
   })
@@ -25,12 +27,15 @@ async function uploadFile(
 
 async function onImageChange(file: File | null | undefined) {
   if (!file) return
-  state.imageUrl = await uploadFile(file, 'image')
+  const directory = 'motorcycles'
+  const url = await uploadFile(file, 'image', directory)
+  state.imageUrl = `${url}?t=${Date.now()}` // timestamp pour refresh l'image -_-
 }
 
 async function onSoundChange(file: File | null | undefined) {
   if (!file) return
-  state.soundLink = await uploadFile(file, 'sound')
+  const directory = 'motorcycles'
+  state.soundLink = await uploadFile(file, 'sound', directory)
 }
 const props = defineProps({
   mode: { type: String, default: 'create' },
@@ -49,6 +54,7 @@ async function fetchMotoDetails(id: string) {
       }
     }
   )
+  console.log(data)
 
   const m = data.motorcycles[0]
 
@@ -68,7 +74,7 @@ async function fetchMotoDetails(id: string) {
   state.is_public = m.is_public ?? false
   state.speedMax = m.speedMax
   state.numberOfComparison = m.numberOfComparison
-  state.withAllField = m.withAllFiled ?? false
+  state.withAllField = m.withAllField ?? false
   state.price = m.price
   state.acceleration = {
     time_0_100: m.acceleration?.time_0_100,
@@ -84,15 +90,36 @@ const listMotorcycleCategory = Object.values(MotorcycleCategory).filter(
 )
 
 const schema = v.object({
-  brand: v.string('La marque est requise'),
-  name: v.pipe(v.string(), v.minLength(3)),
-  year: v.number(),
-  category: v.enum(MotorcycleCategory),
-  engine_size: v.number(),
-  horsePower: v.number(),
-  torque: v.number(),
-  weight: v.number(),
-  consumption: v.number(),
+  brand: v.pipe(v.string(), v.minLength(1, 'La marque est requise')),
+  name: v.pipe(
+    v.string(),
+    v.minLength(3, 'Le modèle doit contenir au moins 3 caractères')
+  ),
+  year: v.pipe(
+    v.number("L'année est requise"),
+    v.minValue(1900, 'Année invalide')
+  ),
+  category: v.pipe(v.enum(MotorcycleCategory, 'La catégorie est requise')),
+  engine_size: v.pipe(
+    v.number('La cylindrée est requise'),
+    v.minValue(1, 'Cylindrée invalide')
+  ),
+  horsePower: v.pipe(
+    v.number('Les chevaux sont requis'),
+    v.minValue(1, 'Valeur invalide')
+  ),
+  torque: v.pipe(
+    v.number('Le couple est requis'),
+    v.minValue(1, 'Valeur invalide')
+  ),
+  weight: v.pipe(
+    v.number('Le poids est requis'),
+    v.minValue(1, 'Valeur invalide')
+  ),
+  consumption: v.pipe(
+    v.number('La consommation est requise'),
+    v.minValue(0.1, 'Valeur invalide')
+  ),
   soundLink: v.optional(v.string()),
   imageUrl: v.optional(v.string()),
   isAvailableA2: v.boolean(),
@@ -149,8 +176,8 @@ async function fetchData() {
 onMounted(async () => {
   await fetchData()
 
-  if (props.mode === 'edit' && props.moto?.id) {
-    await fetchMotoDetails(props.moto.id)
+  if (props.mode === 'edit' && props.moto?._id) {
+    await fetchMotoDetails(props.moto._id)
   }
 })
 
@@ -164,13 +191,32 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     if (!selectedBrand?._id) {
       return
     }
-
     const { brand, ...rest } = event.data
-    const motorcycleData = { brand: selectedBrand._id, ...rest }
-
-    if (props.mode === 'edit' && props.moto?.id) {
+    const allFieldCompleted = !!(
+      rest.name &&
+      rest.year &&
+      rest.category &&
+      rest.engine_size &&
+      rest.horsePower &&
+      rest.torque &&
+      rest.weight &&
+      rest.consumption &&
+      rest.speedMax &&
+      rest.price &&
+      rest.imageUrl &&
+      rest.soundLink &&
+      rest.acceleration?.time_0_100 &&
+      rest.acceleration?.time_100_200 &&
+      rest.acceleration?.time_200_300
+    )
+    const motorcycleData = {
+      brand: selectedBrand._id,
+      ...rest,
+      withAllField: allFieldCompleted
+    }
+    if (props.mode === 'edit' && props.moto?._id) {
       // Put edit
-      await $fetch(`${apiBase}motorcycles/${props.moto.id}`, {
+      await $fetch(`${apiBase}motorcycles/${props.moto._id}`, {
         method: 'PUT',
         body: motorcycleData
       })
@@ -178,7 +224,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       // Post creation
       await $fetch(`${apiBase}motorcycles`, {
         method: 'POST',
-        body: { motorcycleData, createdAt: new Date().toISOString() }
+        body: { ...motorcycleData }
       })
     }
 
@@ -197,7 +243,31 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     })
   }
 }
+
+async function removeMotorcycle() {
+  if (!props.moto?._id) return
+
+  try {
+    await $fetch(`${apiBase}motorcycles/${props.moto._id}`, {
+      method: 'DELETE'
+    })
+    toast.add({
+      title: 'Supprimée',
+      description: 'La moto a bien été supprimée',
+      color: 'success'
+    })
+    props.onClosePanel()
+    props.onRefresh()
+  } catch (err) {
+    toast.add({
+      title: 'Erreur',
+      description: 'Échec de la suppression',
+      color: 'error'
+    })
+  }
+}
 </script>
+
 <template>
   <div class="header-cardMoto">
     <h3>{{ mode === 'edit' ? 'Modifier la moto' : "Ajout d'une moto" }}</h3>
@@ -220,7 +290,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UInputMenu v-model="state.category" :items="listMotorcycleCategory" />
     </UFormField>
 
-    <UFormField label="Prix" name="price">
+    <UFormField label="Prix (€)" name="price">
       <UInputNumber v-model="state.price" />
     </UFormField>
 
@@ -228,7 +298,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UInputNumber v-model="state.year" />
     </UFormField>
 
-    <UFormField label="Cylindrée" name="engine_size" required>
+    <UFormField label="Cylindrée (cm3)" name="engine_size" required>
       <UInputNumber v-model="state.engine_size" />
     </UFormField>
 
@@ -236,19 +306,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UInputNumber v-model="state.horsePower" />
     </UFormField>
 
-    <UFormField label="Couple" name="torque" required>
+    <UFormField label="Couple (N.m)" name="torque" required>
       <UInputNumber v-model="state.torque" />
     </UFormField>
 
-    <UFormField label="Poids" name="weight" required>
+    <UFormField label="Poids (Kg)" name="weight" required>
       <UInputNumber v-model="state.weight" />
     </UFormField>
 
-    <UFormField label="Consommation" name="consumption" required>
+    <UFormField label="Consommation (L/100Km)" name="consumption" required>
       <UInputNumber v-model="state.consumption" />
     </UFormField>
 
-    <UFormField label="Vitesse max" name="speedMax">
+    <UFormField label="Vitesse max (Km/h)" name="speedMax">
       <UInputNumber v-model="state.speedMax" />
     </UFormField>
 
@@ -256,7 +326,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <UFileUpload
         icon="i-lucide-music"
         label="Glisser le son ici"
-        description="MP3, WAV"
+        description="MP3, MP4, WAV"
         accept="audio/mpeg,audio/wav,audio/ogg"
         @update:model-value="onSoundChange"
       />
@@ -281,15 +351,15 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     <h4>Accélération</h4>
 
-    <UFormField label="0 à 100" name="acceleration.time_0_100">
+    <UFormField label="0 à 100 (s)" name="acceleration.time_0_100">
       <UInputNumber v-model="state.acceleration.time_0_100" />
     </UFormField>
 
-    <UFormField label="100 à 200" name="acceleration.time_100_200">
+    <UFormField label="100 à 200 (s)" name="acceleration.time_100_200">
       <UInputNumber v-model="state.acceleration.time_100_200" />
     </UFormField>
 
-    <UFormField label="200 à 300" name="acceleration.time_200_300">
+    <UFormField label="200 à 300 (s)" name="acceleration.time_200_300">
       <UInputNumber v-model="state.acceleration.time_200_300" />
     </UFormField>
 
@@ -305,11 +375,15 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       <USwitch v-model="state.is_public" label="Public" />
     </UFormField>
 
-    <UFormField name="withAllField">
-      <USwitch v-model="state.withAllField" label="Complet" />
-    </UFormField>
-
-    <UButton type="submit" color="primary"> Enregistrer </UButton>
+    <div class="form-end">
+      <UButton type="submit" color="primary"> Enregistrer </UButton>
+      <UIcon
+        v-if="mode === 'edit'"
+        name="i-lucide-trash-2"
+        class="cursor-pointer size-6"
+        @click="removeMotorcycle()"
+      />
+    </div>
   </UForm>
 </template>
 
@@ -321,6 +395,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 }
 
 .header-cardMoto {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-end {
   display: flex;
   justify-content: space-between;
   align-items: center;

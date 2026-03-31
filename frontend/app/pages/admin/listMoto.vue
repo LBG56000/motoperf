@@ -12,36 +12,109 @@ const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase
 const motos = ref<IMotorcycle[]>([])
 const selectedMoto = ref<IMotorcycle | null>(null)
+const search = ref<string>()
+const panelOpen = ref(false)
+const refreshing = ref(false)
+const UButton = resolveComponent('UButton')
 
 const columns = [
-  { accessorKey: 'brand', header: 'Marque' },
-  { accessorKey: 'name', header: 'Modèle' },
-  { accessorKey: 'year', header: 'Année' },
   {
-    accessorKey: 'published',
-    header: 'Statut',
+    accessorKey: 'brand',
+    header: ({ column }) =>
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Marque',
+        icon:
+          column.getIsSorted() === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : column.getIsSorted() === 'desc'
+              ? 'i-lucide-arrow-down-wide-narrow'
+              : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+  },
+  {
+    accessorKey: 'name',
+    header: ({ column }) =>
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Modèle',
+        icon:
+          column.getIsSorted() === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : column.getIsSorted() === 'desc'
+              ? 'i-lucide-arrow-down-wide-narrow'
+              : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+  },
+  {
+    accessorKey: 'year',
+    header: ({ column }) =>
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Année',
+        icon:
+          column.getIsSorted() === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : column.getIsSorted() === 'desc'
+              ? 'i-lucide-arrow-down-wide-narrow'
+              : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      })
+  },
+  {
+    accessorKey: 'withAllField',
+    header: ({ column }) =>
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Statut',
+        icon:
+          column.getIsSorted() === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : column.getIsSorted() === 'desc'
+              ? 'i-lucide-arrow-down-wide-narrow'
+              : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      }),
     cell: ({ row }) => {
-      const value = row.getValue('published') as boolean
-
-      const color = value ? 'success' : 'error'
-      const label = value ? 'complète' : 'Incomplète'
-
+      const value = row.getValue('withAllField') as boolean
       return h(
         UBadge,
-        { variant: 'subtle', color, class: 'capitalize' },
-        () => label
+        {
+          variant: 'subtle',
+          color: value ? 'success' : 'error',
+          class: 'capitalize'
+        },
+        () => (value ? 'Complète' : 'Incomplète')
       )
     }
   },
   {
     accessorKey: 'is_public',
-    header: 'Publiée',
-    cell: ({ row }) => {
-      const value = row.getValue('is_public') as boolean
-      const label = value ? 'Oui' : 'Non'
-
-      return h(() => label)
-    }
+    header: ({ column }) =>
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        label: 'Publiée',
+        icon:
+          column.getIsSorted() === 'asc'
+            ? 'i-lucide-arrow-up-narrow-wide'
+            : column.getIsSorted() === 'desc'
+              ? 'i-lucide-arrow-down-wide-narrow'
+              : 'i-lucide-arrow-up-down',
+        class: '-mx-2.5',
+        onClick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+      }),
+    cell: ({ row }) => h(() => (row.getValue('is_public') ? 'Oui' : 'Non'))
   }
 ]
 
@@ -52,12 +125,11 @@ async function fetchData() {
       {
         //http://localhost:5000/api/v1/motorcycles?project=name,year,is_new,withAllField
         params: {
-          project: 'name,year,is_new,withAllField',
+          project: 'name,year,is_public,withAllField',
           limit: 10000
         }
       }
     )
-
     if (data?.motorcycles) {
       motos.value = data.motorcycles.map((moto) => ({
         id: moto._id,
@@ -65,19 +137,13 @@ async function fetchData() {
         name: moto.name || '',
         year: moto.year || '',
         is_public: moto.is_public,
-        published: moto.withAllFiled
+        withAllField: moto.withAllField
       }))
     }
   } catch (err) {
     console.error('Erreur fetch motos:', err)
   }
 }
-
-onMounted(() => {
-  fetchData()
-})
-const panelOpen = ref(false)
-const refreshing = ref(false)
 
 function openPanel() {
   panelOpen.value = true
@@ -103,6 +169,24 @@ function onRowClick(row) {
   selectedMoto.value = moto
   openPanel()
 }
+
+const listMotosearch = computed(() => {
+  if (search.value) {
+    return motos.value.filter(
+      (moto) =>
+        moto.name.toLowerCase().includes(search.value.toLowerCase()) ||
+        moto.brand.toLowerCase().includes(search.value.toLowerCase())
+    )
+  } else {
+    return motos.value
+  }
+})
+
+onMounted(() => {
+  fetchData()
+})
+
+console.log(motos)
 </script>
 
 <template>
@@ -113,6 +197,7 @@ function onRowClick(row) {
     <main>
       <div class="header-page">
         <UInput
+          v-model="search"
           icon="i-lucide-search"
           size="md"
           variant="outline"
@@ -128,7 +213,7 @@ function onRowClick(row) {
         <div class="table-moto">
           <UTable
             sticky
-            :data="motos"
+            :data="listMotosearch"
             :columns="columns"
             :ui="{
               tr: 'cursor-pointer hover:bg-gray-50'
@@ -138,7 +223,7 @@ function onRowClick(row) {
         </div>
         <div v-if="panelOpen" class="panel-moto">
           <CardMoto
-            :key="selectedMoto?.id ?? 'create'"
+            :key="selectedMoto?._id ?? 'create'"
             :mode="selectedMoto ? 'edit' : 'create'"
             :moto="selectedMoto"
             :onClosePanel="closePanel"
@@ -172,10 +257,21 @@ function onRowClick(row) {
 .main-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .header-list {
   margin-left: 1em;
+}
+
+.panel-moto {
+  margin: 2em;
+  border: 1px solid var(--border-gray);
+  border-radius: 15px;
+  padding: 1em;
+  height: calc(150vh - 200px);
+  overflow-y: auto;
+  position: sticky;
+  top: 60px;
 }
 </style>

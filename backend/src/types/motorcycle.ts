@@ -20,7 +20,7 @@ export interface IMotorcycle {
   acceleration?: IAcceleration
   speedMax?: number
   numberOfComparison?: number
-  withAllFiled?: boolean
+  withAllField?: boolean
   price: number
   createdAt: string
 }

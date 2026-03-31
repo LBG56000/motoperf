@@ -60,4 +60,17 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 })
 
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
+    if (!deletedMotorcycle) {
+      return res.status(404).json({ error: 'Motorcycle not found' })
+    }
+    res.status(200).json({ message: 'Motorcycle deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting motorcycle:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 export default router
