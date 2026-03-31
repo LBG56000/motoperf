@@ -14,6 +14,7 @@ const filters = ref({
   brandIds: [...(props.activeFilters?.brandIds || [])],
   categoryIds: [...(props.activeFilters?.categoriesIds || [])],
   onlyMyPost: props.activeFilters?.onlyMyPost || false,
+  searchBar: ''
 })
 
 watch(() => props.activeFilters, (newVal) => {
@@ -21,6 +22,7 @@ watch(() => props.activeFilters, (newVal) => {
     filters.value.brandIds = [...(newVal.brandIds || [])]
     filters.value.categoryIds = [...(newVal.categoryIds || [])]
     filters.value.onlyMyPost = newVal.onlyMyPost
+    filters.value.searchBar = newVal.searchBar
   }
 }, { deep: true })
 
@@ -50,7 +52,8 @@ const emitFilters = () => {
   emits('filters', {
     brandIds: filters.value.brandIds,
     categoryIds: filters.value.categoryIds,
-    onlyMyPost: filters.value.onlyMyPost
+    onlyMyPost: filters.value.onlyMyPost,
+    searchBar: filters.value.searchBar
   })
 }
 
@@ -76,6 +79,10 @@ const handleClickOnBrand = (filterBrandId: string) => {
   emitFilters()
 }
 
+const handleSearch = () => {
+  emitFilters()
+}
+
 onMounted(async () => {
   await Promise.all([getBrands(), getCategories()])
 })
@@ -87,17 +94,18 @@ onMounted(async () => {
       <LazyForumModalAddPost :is-new-post="true" :categories :brands />
     </div>
     <UCard class="margin-top_0_5">
-      <div
-        class="icon-and-text filter cursor-pointer"
-        @click="handleHaveAllPosts"
-      >
+      <UInput v-model="filters.searchBar" placeholder="Rechercher un post dans le forum"
+        @update:model-value="handleSearch">
+        <template v-if="filters.searchBar?.length" #trailing>
+          <UButton color="neutral" variant="link" size="sm" icon="i-lucide-circle-x" aria-label="Clear input"
+            class="cursor-pointer" @click="filters.searchBar = ''; emitFilters()" />
+        </template>
+      </UInput>
+      <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">
         <UIcon class="size-7 margin-0_5" name="i-lucide-messages-square" />
         <p>Tous les posts</p>
       </div>
-      <div
-        class="icon-and-text filter cursor-pointer"
-        @click="handleHaveMyFavorites"
-      >
+      <div class="icon-and-text filter cursor-pointer" @click="handleHaveMyFavorites">
         <UIcon class="size-7 margin-0_5" name="i-lucide-star" />
         <p>Mes favoris</p>
       </div>
