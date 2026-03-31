@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IMessage } from '~/types/messages';
+import type { IMessage } from '~/types/messages'
 
 const props = defineProps<{
   responses: IMessage[]
@@ -16,13 +16,26 @@ const handleAddDislike = () => {
 const handleAddResponse = () => {
   console.log('Add response')
 }
+
+onMounted(() => {
+  console.log('Responses:', props.responses)
+})
 </script>
 
 <template>
   <div class="comments-list">
-    <div v-for="response in props.responses" :key="response._id" class="comment">
-      <UAvatar :src="`/_nuxt/assets/images/users/${response.user.image}`" :alt="response.user.firstname" size="3xl"
-        :title="response.user.firstname" class="margin-right-0_5" />
+    <div
+      v-for="response in props.responses"
+      :key="response._id"
+      class="comment"
+    >
+      <UAvatar
+        :src="`/_nuxt/assets/images/users/${response.user.image}`"
+        :alt="response.user.firstname"
+        size="3xl"
+        :title="response.user.firstname"
+        class="margin-right-0_5"
+      />
 
       <div class="comment-content">
         <div class="comment-header">
