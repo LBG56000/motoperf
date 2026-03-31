@@ -34,7 +34,7 @@ const handleOpenAPost = async (id: string) => {
       <UAvatar v-else :src="`/images/users/${props.post.user.image}`" size="3xl" loading="lazy" class="margin-2" />
       <div class="main">
         <div class="top">
-          <h3>{{ props.post.title }}</h3>
+          <h4>{{ props.post.title }}</h4>
           <!--TODO: à compléter pour la gestion utilisateur-->
           <UIcon v-if="props.isUser" class="size-6" name="i-lucide-square-pen" @click.stop="handleEditAPost" />
         </div>
@@ -70,7 +70,7 @@ const handleOpenAPost = async (id: string) => {
 <style scoped>
 .card-forum {
   width: 100%;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0.5rem auto;
 }
 
