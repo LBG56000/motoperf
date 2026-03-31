@@ -7,7 +7,7 @@ const posts = ref<IPost[]>([])
 
 const loading = ref(true)
 const getPosts = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}posts?deep=true&project=content,question,id,createdAt,views`)
+  const res = await fetch(`${useRuntimeConfig().public.apiBase}posts?deep=true&project=content,title,id,createdAt,views`)
   const data = await res.json()
   posts.value = await Promise.all(
     data.posts.map(async (post: IPost) => {
