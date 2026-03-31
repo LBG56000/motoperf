@@ -54,13 +54,8 @@ onMounted(async () => {
       </div>
       <div>
         <div class="icon-and-text">
-          <UAvatar
-            :src="`/_nuxt/assets/images/users/${post?.user.image}`"
-            size="3xl"
-            loading="lazy"
-            class="margin-2"
-          />
-          <h2>{{ post?.title }}</h2>
+          <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
+          <h2>{{ post?.question }}</h2>
         </div>
         <div>
           <div class="grid margin-1_5">
@@ -85,12 +80,10 @@ onMounted(async () => {
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
-          <img
-            :src="`/_nuxt/assets/images/posts/${post?.image}`"
-            :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            :title="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            class="img margin-1_5 margin-bottom-1"
-          />
+          <img :src="`/images/posts/${post?.image}`"
+            :alt="`Image du post ${post?.question} par ${post?.user.firstname}`"
+            :title="`Image du post ${post?.question} par ${post?.user.firstname}`"
+            class="img margin-1_5 margin-bottom-1">
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
         <UFormField
@@ -128,11 +121,18 @@ onMounted(async () => {
 .post-filters {
   display: flex;
   flex-direction: row;
-  margin: 5em;
+  align-items: start;
+  gap: 3rem;
+  margin: 2rem 5rem;
 }
 
-.post-filters > div:nth-child(1) {
-  margin-right: 10em;
+.post-filters>div:first-child {
+  flex-shrink: 0;
+}
+
+.post-filters>div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
 }
 
 .flex.row.end {
