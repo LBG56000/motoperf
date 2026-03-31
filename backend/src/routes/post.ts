@@ -32,18 +32,24 @@ router.get(
   },
 )
 
-router.get('/:id/responses', async (req, res) => {
+router.get('/:id/responses', async (req: Request<{ id: string }, unknown, unknown, ReqQuery>, res) => {
+  const { project, sort, deep, limit } = prepareQuery(req.query)
   try {
     const post = await Post.findOne({ _id: req.params.id })
     if (!post) {
       return res.status(404).json({ error: 'Post not found' })
     }
-    const query = Message.find({
+    let query = Message.find({ // TODO: mettre filter
       reference: post._id,
       referenceModel: 'Post'
     })
+      .select(project)
+      .sort(sort)
+      .limit(limit)
 
-    query.populate('user')
+    if (deep) {
+      query = query.populate('user')
+    }
 
     const messages = await query
 

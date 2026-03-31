@@ -42,6 +42,7 @@ const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
 const isConnected = ref<boolean>(true) // Simule l'état de connexion de l'utilisateur
+const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
   return [
@@ -191,34 +192,43 @@ async function fetchCarrouselMotorcycles() {
 async function fetchMessages() {
   const post1 = motorcycle1.value?.post
   const post2 = motorcycle2.value?.post
-  
+
   if (post1) {
-    const data = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${post1}/responses`, {
-      params: {
-        project: 'content, user, createdAt',
-        deep: true,
-        limit: 5,
+    const data = await $fetch<{ messages: IMessage[] }>(
+      `${apiBase}posts/${post1}/responses`,
+      {
+        params: {
+          project: 'content, user, createdAt',
+          deep: true,
+          limit: 5,
+        }
       }
-    })
+    )
     commentsMotorcycle1.value = data.messages
   }
 
   if (post2) {
-    const data = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${post2}/responses`, {
-      params: {
-        project: 'content, user, createdAt',
-        deep: true,
-        limit: 5,
+    const data = await $fetch<{ messages: IMessage[] }>(
+      `${apiBase}posts/${post2}/responses`,
+      {
+        params: {
+          project: 'content, user, createdAt',
+          deep: true,
+          limit: 5
+        }
       }
-    })
+    )
     commentsMotorcycle2.value = data.messages
   }
 }
 
 async function postComment() {
   if (!comment.value.content || !comment.value.motorcycleId) return
-   
-  const selectedMotorcycle = motorcycle1.value?._id === comment.value.motorcycleId ? motorcycle1.value : motorcycle2.value
+
+  const selectedMotorcycle =
+    motorcycle1.value?._id === comment.value.motorcycleId
+      ? motorcycle1.value
+      : motorcycle2.value
   if (!selectedMotorcycle) return
 
   let postId = selectedMotorcycle.post
@@ -232,7 +242,7 @@ async function postComment() {
           brand: selectedMotorcycle.brand._id,
           category: 'Modèle',
           user: comment.value.user,
-          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
+          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`
         }
       })
 
@@ -261,6 +271,7 @@ async function postComment() {
         referenceModel: 'Post'
       }
     })
+    messagePosted.value = true
   } catch (error) {
     console.error('Error posting comment:', error)
   }
@@ -339,12 +350,18 @@ onMounted(() => {
           <div class="display-comment-container">
             <div class="left-display-comment">
               <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
-              <Comment v-if="commentsMotorcycle1.length > 0" :responses="commentsMotorcycle1" />
+              <Comment
+                v-if="commentsMotorcycle1.length > 0"
+                :responses="commentsMotorcycle1"
+              />
               <p v-else>Postez le premier commentaire !</p>
             </div>
             <div class="right-display-comment">
               <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
-              <Comment v-if="commentsMotorcycle2.length > 0" :responses="commentsMotorcycle2" />
+              <Comment
+                v-if="commentsMotorcycle2.length > 0"
+                :responses="commentsMotorcycle2"
+              />
               <p v-else>Postez le premier commentaire !</p>
             </div>
           </div>
@@ -362,6 +379,7 @@ onMounted(() => {
               >
             </div>
             <div
+              v-if="!messagePosted"
               class="input-comment-container"
               :class="{ blurred: !isConnected }"
             >
@@ -389,6 +407,13 @@ onMounted(() => {
                 @click="postComment"
                 >Poster</UButton
               >
+            </div>
+            <div v-else class="input-posted-container">
+              <h4>Merci pour votre contribution !</h4>
+              <p>
+                Votre commentaire a été posté avec succès. Il apparaîtra dans la
+                section des commentaires correspondante.
+              </p>
             </div>
           </div>
         </div>
@@ -488,8 +513,6 @@ onMounted(() => {
   text-align: center;
 }
 
-
-
 /* Commentaires Input */
 .input-comment-box {
   position: relative;
@@ -510,6 +533,24 @@ onMounted(() => {
 }
 
 .input-comment-container h4 {
+  text-align: center;
+}
+
+.input-posted-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: fit-content;
+  min-height: 25rem;
+  padding: 2rem;
+  gap: 30px;
+}
+
+.input-posted-container h4 {
+  text-align: center;
+}
+
+.input-posted-container p {
   text-align: center;
 }
 
