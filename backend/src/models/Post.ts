@@ -2,7 +2,7 @@ import { model, Schema, Types } from "mongoose";
 import type { IPost } from "../types/post";
 
 const postSchema = new Schema({
-  question: {
+  title: {
     type: String,
     required: true
   },
@@ -25,17 +25,16 @@ const postSchema = new Schema({
     ref: 'Brand',
     required: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
   views: {
     type: Number,
     default: 0,
   },
   image: {
     type: String,
-    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   }
 })
 

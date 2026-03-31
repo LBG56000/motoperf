@@ -3,11 +3,11 @@ import { ICategory } from "./category";
 import { IUser } from "./user";
 
 export interface IPost {
-    question: string,
+    title: string,
     content: string,
     category: ICategory,
     user: IUser,
     brand: IBrand,
     views: number,
-    image: string
+    image?: string
 }
