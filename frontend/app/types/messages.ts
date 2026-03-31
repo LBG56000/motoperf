@@ -9,9 +9,8 @@ export interface IMessage {
   isRep: boolean
   isPublicationResponse: boolean
   parentId: string | null
-  motorcycleId: boolean | null
   user: IUser
-  createAt: string
+  createdAt: string
 }
 
 export interface IPublicationResponse extends IMessage {
