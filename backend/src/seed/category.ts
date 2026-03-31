@@ -22,6 +22,10 @@ const seedCategory = async () => {
     {
       name: 'Opinion',
       icon: 'megaphone'
+    },
+    {
+      name: 'Modèle',
+      icon: 'motorcycle'
     }
   ])
 
