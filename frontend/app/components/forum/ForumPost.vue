@@ -84,7 +84,7 @@ const handleOpenAPost = async (id: string) => {
 .statsContainer {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: flex-end;
 }
 
@@ -126,6 +126,7 @@ const handleOpenAPost = async (id: string) => {
   gap: 0.3em;
   margin-top: 1em;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .grid {
