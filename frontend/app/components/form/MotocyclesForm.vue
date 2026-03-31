@@ -183,6 +183,8 @@ onMounted(() => {
   padding: 1rem;
   width: fit-content;
   border-radius: 13px;
+  background-color: var(--background);
+  box-shadow: 20px 20px 5em var(--border-gray);
 }
 
 h3 {
