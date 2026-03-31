@@ -43,12 +43,28 @@ router.get('/count', async (req: Request, res: Response) => {
   }
 })
 
+router.get('/stats', async (req: Request, res: Response) => {
+  try {
+    const totalHorsePower = await Motorcycle.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalHorsePower: { $sum: '$horsePower' },
+        },
+      },
+    ])
+    res.status(200).json(totalHorsePower[0].totalHorsePower)
+  } catch (error) {
+    console.error('Error accessing motorcycle route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true, runValidators: true },
     ).populate('brand')
     if (!updatedMotorcycle) {
       return res.status(404).json({ error: 'Motorcycle not found' })

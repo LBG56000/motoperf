@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IBrand } from '@/types/brands'
+import type { IBrand } from '@/types/brand'
 import type { IMotorcycle } from '@/types/motorcycles'
 
 // Moto 1 || Moto 2
@@ -94,7 +94,7 @@ watch(
 
 async function fetchBrands() {
   const data = await $fetch<{ brands: IBrand[] }>(`${apiBase}brands`, {
-    params: { project: 'name' }
+    params: { project: 'name,icon' }
   })
   brandsList.value = data.brands
 }
@@ -106,7 +106,7 @@ async function fetchMotorcyclesByBrand() {
       `${apiBase}motorcycles`,
       {
         params: {
-          project: 'id,name,year',
+          project: '_id,name,year',
           filter: JSON.stringify({ brand: motorcycle.value.brand?._id })
         }
       }

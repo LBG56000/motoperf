@@ -24,9 +24,9 @@ const seed = async () => {
     await seedCategory()
     await seedPicture()
     await seedRide()
+    await seedMotorcycles()
     await seedPost()
     await seedMessage()
-    await seedMotorcycles()
 
     console.log('Seeding terminé')
     process.exit(0)

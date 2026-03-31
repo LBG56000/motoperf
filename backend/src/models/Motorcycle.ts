@@ -86,6 +86,10 @@ const motorcycleSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  post: {
+    type: Types.ObjectId,
+    ref: 'Post',
+  }
 })
 
 export default model<IMotorcycle>('Motorcycle', motorcycleSchema)
