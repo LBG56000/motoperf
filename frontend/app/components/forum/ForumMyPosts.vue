@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <UCard variant="outline" class="my-posts">
+    <UCard variant="outline" class="my-posts custom-border">
       <template #header>
         <h3>Mes posts</h3>
       </template>
@@ -18,5 +18,9 @@
 <style scoped>
 .my-posts {
   width: 100%;
+}
+
+.custom-border {
+  border: 0.5px solid var(--border-gray);
 }
 </style>

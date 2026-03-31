@@ -28,7 +28,7 @@ const handleOpenAPost = async (id: string) => {
 }
 </script>
 <template>
-  <UCard class="card-forum" @click="handleOpenAPost(post._id)">
+  <UCard class="card-forum custom-border" @click="handleOpenAPost(post._id)">
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <UAvatar v-else :src="`/images/users/${props.post.user.image}`" size="3xl" loading="lazy" class="margin-2" />
@@ -36,19 +36,14 @@ const handleOpenAPost = async (id: string) => {
         <div class="top">
           <h3>{{ props.post.title }}</h3>
           <!--TODO: à compléter pour la gestion utilisateur-->
-          <UIcon
-            v-if="props.isUser"
-            class="size-6"
-            name="i-lucide-square-pen"
-            @click.stop="handleEditAPost"
-          />
+          <UIcon v-if="props.isUser" class="size-6" name="i-lucide-square-pen" @click.stop="handleEditAPost" />
         </div>
         <div class="grid">
           <div>
             <div class="badges">
               <UBadge size="lg" class="margin-2">{{
                 props.post.brand.name
-              }}</UBadge>
+                }}</UBadge>
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
 
@@ -139,5 +134,9 @@ const handleOpenAPost = async (id: string) => {
   align-items: center;
   margin-top: 0.5em;
   width: 100%;
+}
+
+.custom-border {
+  border: 0.5px solid var(--border-gray);
 }
 </style>
