@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 
+import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composable/useAuth'
+
 const { login, isAuthenticated } = useAuth()
 
-const isOpen = defineModel({ type: Boolean, default: false })
+const connexionModal = useConnexionModal()
 const form = useTemplateRef('form')
 
 const state = ref({
@@ -16,7 +19,7 @@ const error = ref<string>('')
 const connexion = async () => {
   await login(state.value.email, state.value.password)
   if (isAuthenticated) {
-    isOpen.value = false
+    connexionModal.isOpen.value = false
     state.value.email = ''
     state.value.password = ''
   }
@@ -24,7 +27,7 @@ const connexion = async () => {
 </script>
 
 <template>
-  <UModal v-model:open="isOpen">
+  <UModal v-model:open="connexionModal.isOpen.value">
     <template #content>
       <div class="content">
         <h3>Se connecter</h3>
