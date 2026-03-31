@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import { RideType, type ICommune, type IValueCommuneSelect } from '~/types/ride'
+import {
+  RideType,
+  type ICommune,
+  type IValueCommuneSelect,
+  type IValueForm
+} from '~/types/ride'
 import DisplayMapRide from './DisplayMapRide.vue'
+import * as turf from '@turf/turf'
 
 const isLoading = ref<boolean>(false)
-
-const title = ref<string>('')
-const description = ref<string>('')
-const startTown = ref<IValueCommuneSelect | undefined>(undefined)
-const endTown = ref<IValueCommuneSelect | undefined>(undefined)
-const rideType = ref<string>('')
 
 // Termes de recherche séparés pour chaque select
 const startTownSearch = ref<string>('')
 const endTownSearch = ref<string>('')
-
-const map = ref<any>(null) // Instance de la carte Leaflet
-const L_instance = ref<any>(null) // Layer instances courant de leaflet
 
 const rideTypeOptions = Object.values(RideType).map((type: string) => ({
   label: type,
@@ -23,6 +20,28 @@ const rideTypeOptions = Object.values(RideType).map((type: string) => ({
 }))
 
 const listCommunes = ref<IValueCommuneSelect[]>([])
+
+const rideDistance = computed(() => {
+  // On vérifie que la géométrie existe et possède des features
+  if (
+    !stateForm.geom ||
+    !stateForm.geom.features ||
+    stateForm.geom.features.length === 0
+  ) {
+    return 0
+  }
+
+  try {
+    // Calcul de la longueur en kilomètres
+    const distanceKm = turf.length(stateForm.geom as any, {
+      units: 'kilometers'
+    })
+    return parseFloat(distanceKm.toFixed(2))
+  } catch (e) {
+    console.error('Erreur de calcul Turf:', e)
+    return 0
+  }
+})
 
 const searchCommunes = async (query: string) => {
   // Permet de re fetch seulement s'il y a 3 charactères
@@ -50,8 +69,8 @@ const searchCommunes = async (query: string) => {
 }
 
 // Watch les termes de recherche, pas les valeurs sélectionnées
-watch(startTownSearch, (val) => searchCommunes(val))
-watch(endTownSearch, (val) => searchCommunes(val))
+watch(startTownSearch, (val: string) => searchCommunes(val))
+watch(endTownSearch, (val: string) => searchCommunes(val))
 
 // Fonction pour charger les 50 premières communes
 const loadInitialCommunes = async () => {
@@ -79,8 +98,8 @@ const handleMenuClose = (isOpen: boolean) => {
     !isOpen &&
     startTownSearch.value === '' &&
     endTownSearch.value === '' &&
-    startTown.value?.label === '' &&
-    endTown.value?.label === ''
+    stateForm.startTown?.label === '' &&
+    stateForm.endTown?.label === ''
   ) {
     loadInitialCommunes()
     startTownSearch.value = ''
@@ -90,29 +109,75 @@ const handleMenuClose = (isOpen: boolean) => {
 
 onMounted(async () => {
   loadInitialCommunes()
-
-  const L = await import('leaflet')
-  await import('leaflet/dist/leaflet.css')
-  L_instance.value = L
-
-  map.value = L.map('map', { zoomControl: false }).setView([48.21, -3], 8)
-  L.control.zoom({ position: 'bottomleft' }).addTo(map.value)
-  L.control.scale({ imperial: false }).addTo(map.value)
-
-  L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-    attribution: '&copy; Google',
-    maxZoom: 20
-  }).addTo(map.value)
 })
+
+const stateForm = reactive<IValueForm>({
+  title: '',
+  duration: 0,
+  description: '',
+  startTown: undefined,
+  endTown: undefined,
+  rideType: '',
+  geom: null,
+  picture: null
+})
+
+async function onSubmit() {
+  console.log('stateForm : ', stateForm)
+  const runtimeConfig = useRuntimeConfig()
+  try {
+    const payload = {
+      ...stateForm,
+      distance: parseFloat(rideDistance.value.toString())
+    }
+
+    await $fetch(`${runtimeConfig.public.apiBase}rides`, {
+      method: 'POST',
+      body: payload
+    })
+
+    await navigateTo('/ride')
+
+    const toast = useToast()
+    toast.add({
+      title: 'Succès',
+      description: 'Votre balade a été ajouté.',
+      color: 'success'
+    })
+  } catch (error) {
+    console.error("Erreur lors de l'envoi:", error)
+  }
+}
+
+async function validate(data: Partial<typeof stateForm>) {
+  if (!data.title?.length)
+    return [{ name: 'title', message: 'Le titre de la balade est requis' }]
+  if (!data.startTown?.label.length)
+    return [{ name: 'startTown', message: 'La ville de départ est requise' }]
+  if (!data.endTown?.label.length)
+    return [{ name: 'endTown', message: "La ville d'arrivée est requise" }]
+  if (!data.rideType?.length)
+    return [{ name: 'rideType', message: 'Le type de balade est requis' }]
+  if (!data.picture)
+    return [{ name: 'picture', message: "L'image de la balade est requise" }]
+  if (!data.geom)
+    return [{ name: 'geom', message: 'Le tracé de la balade est requis' }]
+  return []
+}
 </script>
 <template>
   <div id="container-form" class="container-form">
     <h3>Ajouter votre balade</h3>
 
-    <div class="form-wrapper">
+    <UForm
+      class="form-wrapper"
+      :state="stateForm"
+      :validate="validate"
+      @submit="onSubmit"
+    >
       <UFormField label="Titre de la balade" name="title" required>
         <UInput
-          v-model="title"
+          v-model="stateForm.title"
           class="w-full"
           placeholder="Entrez un titre..."
           size="xl"
@@ -121,7 +186,7 @@ onMounted(async () => {
 
       <UFormField label="Description de la balade" name="description">
         <UTextarea
-          v-model="description"
+          v-model="stateForm.description"
           class="w-full"
           placeholder="Entrez une description..."
           size="xl"
@@ -132,14 +197,15 @@ onMounted(async () => {
       <div class="row-towns">
         <UFormField label="Ville de départ" name="startTown" required>
           <USelectMenu
-            v-model="startTown"
+            v-model="stateForm.startTown"
             :items="listCommunes"
             class="w-full"
             placeholder="Chercher une ville..."
+            style="cursor: pointer"
             :search-input="{
               placeholder: 'Rechercher...',
-              modelValue: startTown, // Fonctionne même si erreur
-              'onUpdate:modelValue': (val: string) => (endTownSearch = val) // Fonctionne même si erreur
+              modelValue: startTownSearch,
+              'onUpdate:modelValue': (val: string) => (startTownSearch = val)
             }"
             size="xl"
             option-attribute="label"
@@ -151,14 +217,15 @@ onMounted(async () => {
 
         <UFormField label="Ville d'arrivée" name="endTown" required>
           <USelectMenu
-            v-model="endTown"
+            v-model="stateForm.endTown"
             :items="listCommunes"
             class="w-full"
             placeholder="Chercher une ville..."
+            style="cursor: pointer"
             :search-input="{
               placeholder: 'Rechercher...',
-              modelValue: endTownSearch, // Fonctionne même si erreur
-              'onUpdate:modelValue': (val: string) => (endTownSearch = val) // Fonctionne même si erreur
+              modelValue: endTownSearch,
+              'onUpdate:modelValue': (val: string) => (endTownSearch = val)
             }"
             size="xl"
             option-attribute="label"
@@ -169,72 +236,70 @@ onMounted(async () => {
         </UFormField>
       </div>
 
-      <UFormField label="Type de la balade" name="rideType" required>
-        <USelect
-          v-model="rideType"
-          :items="rideTypeOptions"
+      <UFormField label="Durée de la balade (h)" name="duration" required>
+        <UInputNumber
+          v-model="stateForm.duration"
           class="w-full"
-          placeholder="Sélectionnez le type..."
+          placeholder="Entrez une durée..."
           size="xl"
         />
       </UFormField>
-      <DisplayMapRide display-enlarge-button display-editor-container />
-    </div>
+
+      <UFormField label="Type de la balade" name="rideType" required>
+        <USelect
+          v-model="stateForm.rideType"
+          :items="rideTypeOptions"
+          class="w-full"
+          placeholder="Sélectionnez le type..."
+          style="cursor: pointer"
+          size="xl"
+        />
+      </UFormField>
+
+      <UFormField label="Image de la balade" name="picture" required>
+        <div class="card-image" style="cursor: pointer">
+          <UFileUpload
+            v-model="stateForm.picture"
+            class="w-full h-full"
+            :ui="{
+              base: 'h-full w-full',
+              container: 'h-full w-full flex items-center justify-center'
+            }"
+          />
+        </div>
+      </UFormField>
+
+      <UFormField label="Tracé de la balade" name="geom" required>
+        <DisplayMapRide
+          v-model:geom="stateForm.geom"
+          display-enlarge-button
+          display-editor-container
+        />
+      </UFormField>
+
+      <UButton
+        type="submit"
+        label="Ajouter la balade"
+        color="primary"
+        size="xl"
+        class="self-end"
+        icon="i-lucide-check"
+        style="cursor: pointer"
+        loading-auto
+      />
+    </UForm>
   </div>
 </template>
 
 <style scoped>
-/* Carte et ce qu'il y a au dessus 
-.map-container {
-  position: relative !important;
-  width: 100%;
-  height: 100%;
-  margin-bottom: 20px;
-  overflow: hidden;
-  transition: all 0.3s ease-in-out;
-}
-
-.map-container.is-fullscreen {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  z-index: 99999 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
-}
-
-.is-fullscreen .button-enlarge {
-  bottom: 20px;
-  right: 20px;
-}
-
-.button-enlarge {
-  position: absolute;
-  bottom: 25px;
-  right: 15px;
-  z-index: 1010;
-  pointer-events: auto;
-}
-
-#map {
-  width: 100%;
-  height: 100%;
-  min-height: 24rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-}*/
-
 .container-form {
-  width: 100%;
+  width: 60%;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin: auto;
 }
 
 h3 {
@@ -242,6 +307,16 @@ h3 {
   font-weight: bold;
   margin-bottom: 1.5rem;
   color: var(--text-color);
+}
+
+.card-image {
+  width: 40dvw;
+  height: 25dvh;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .form-wrapper {

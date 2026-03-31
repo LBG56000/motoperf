@@ -74,3 +74,85 @@ export function useFullScreenMap(mapInstance: Ref<any>) {
     toggleFullScreen
   }
 }
+
+export function convertToFrench(LDraw: any) {
+  LDraw.drawLocal = {
+    draw: {
+      toolbar: {
+        actions: { title: 'Annuler le tracé', text: 'Annuler' },
+        finish: { title: 'Terminer le tracé', text: 'Terminer' },
+        undo: {
+          title: 'Supprimer le dernier point',
+          text: 'Effacer dernier point'
+        },
+        buttons: {
+          polyline: 'Tracer une balade',
+          polygon: 'Tracer un polygone',
+          rectangle: 'Tracer un rectangle',
+          circle: 'Tracer un cercle',
+          marker: 'Placer un marqueur',
+          circlemarker: 'Placer un marqueur circulaire'
+        }
+      },
+      handlers: {
+        circle: {
+          tooltip: { start: 'Cliquez et glissez pour dessiner le cercle.' },
+          radius: 'Rayon'
+        },
+        circlemarker: {
+          tooltip: { start: 'Cliquez sur la carte pour placer le marqueur.' }
+        },
+        marker: {
+          tooltip: { start: 'Cliquez sur la carte pour placer le marqueur.' }
+        },
+        polygon: {
+          tooltip: {
+            start: 'Cliquez pour commencer la forme.',
+            cont: 'Cliquez pour continuer la forme.',
+            end: 'Cliquez sur le premier point pour fermer la forme.'
+          }
+        },
+        polyline: {
+          error: 'Erreur : les lignes ne peuvent pas se croiser !',
+          tooltip: {
+            start: 'Cliquez pour commencer le tracé.',
+            cont: 'Cliquez pour continuer le tracé.',
+            end: 'Cliquez sur le dernier point pour terminer.'
+          }
+        },
+        rectangle: {
+          tooltip: { start: 'Cliquez et glissez pour dessiner le rectangle.' }
+        },
+        simpleshape: {
+          tooltip: { end: 'Relâchez la souris pour finir le dessin.' }
+        }
+      }
+    },
+    edit: {
+      toolbar: {
+        actions: {
+          save: { title: 'Sauvegarder les modifications', text: 'Enregistrer' },
+          cancel: { title: "Annuler l'édition", text: 'Annuler' },
+          clearAll: { title: 'Tout supprimer', text: 'Tout effacer' }
+        },
+        buttons: {
+          edit: 'Modifier le tracé',
+          editDisabled: 'Rien à modifier',
+          remove: 'Supprimer le tracé',
+          removeDisabled: 'Rien à supprimer'
+        }
+      },
+      handlers: {
+        edit: {
+          tooltip: {
+            text: 'Déplacez les points pour modifier le tracé.',
+            subtext: 'Cliquez sur annuler pour rejeter les changements.'
+          }
+        },
+        remove: {
+          tooltip: { text: 'Cliquez sur un tracé pour le supprimer' }
+        }
+      }
+    }
+  }
+}

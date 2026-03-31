@@ -1,13 +1,13 @@
-import { Request, Router } from "express"
-import { prepareQuery, ReqQuery } from "../utils/find"
-import Post from "../models/Post"
-import { IPost } from "../types/post"
-import Message from "../models/Message"
+import { Request, Router } from 'express'
+import { prepareQuery, ReqQuery } from '../utils/find'
+import Post from '../models/Post'
+import { IPost } from '../types/post'
+import Message from '../models/Message'
 
 const router = Router()
 router.get(
   '/',
-  async (req: Request<unknown, unknown, unknown, ReqQuery>, res) => {
+  async (req: Request<unknown, unknown, unknown, ReqQuery>, res: any) => {
     const { project, sort, deep, limit, filter } = prepareQuery(req.query)
     try {
       let query = Post.find()
@@ -16,10 +16,7 @@ router.get(
         .sort(sort)
         .limit(limit)
       if (deep) {
-        query = query
-          .populate('user')
-          .populate('brand')
-          .populate('category')
+        query = query.populate('user').populate('brand').populate('category')
       }
       const posts: Array<IPost> = await query
       res.status(200).json({ posts })
@@ -30,7 +27,7 @@ router.get(
   },
 )
 
-router.get('/:id/responses', async (req, res) => {
+router.get('/:id/responses', async (req, res: any) => {
   try {
     const post = await Post.findOne({ _id: req.params.id })
     if (!post) {
@@ -38,7 +35,7 @@ router.get('/:id/responses', async (req, res) => {
     }
     const query = Message.find({
       reference: post._id,
-      referenceModel: 'Post'
+      referenceModel: 'Post',
     })
 
     query.populate('user')

@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, computed } from 'vue'
-import type { IFilterObject, IRide, MapItem, RideResponse } from '~/types/ride'
+import type {
+  IFilterObject,
+  IGeoJSON,
+  IRide,
+  MapItem,
+  RideResponse
+} from '~/types/ride'
 import PanelRides from './PanelRides.vue'
 import FormFilters from './FormFilters.vue'
+import { getWeightByZoom, getMapPinSvg } from '~/utils/ride'
 
 interface IProps {
   displayFilters?: boolean
@@ -41,6 +48,11 @@ const listRideTypes = ref<string[]>([]) // Liste de tous les types de balade pr�
 const listStartTown = ref<string[]>([]) // Liste de toutes les villes de début des balades présent
 const listEndTown = ref<string[]>([]) // Liste de toutes les villes de fin des balaades présent
 const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
+
+const geom = defineModel('geom', {
+  type: Object as () => IGeoJSON | null,
+  default: null
+})
 
 const STORAGE_KEY_FILTER = 'rides-filters'
 provide('STORAGE_KEY_FILTER', STORAGE_KEY_FILTER)
@@ -95,7 +107,7 @@ const mapItems = ref<MapItem[]>([
   }
 ])
 
-const filteredRides = computed(() => {
+const filteredRides = computed<IRide[]>(() => {
   return dataRides.value.filter((ride: IRide) => {
     // Recherche des champs de texte (filtre et input au dessus de la map)
     const searchString = (
@@ -162,7 +174,7 @@ const onApplyFilters = (payload: IFilterObject) => {
 
 // Changer le fond de plan de la carte
 const updateMapBackground = (id: string, L: any) => {
-  const style = mapItems.value.find((m) => m.id === id)
+  const style = mapItems.value.find((m: MapItem) => m.id === id)
   if (!map.value || !style) return
   if (currentTileLayer.value) map.value.removeLayer(currentTileLayer.value)
 
@@ -191,7 +203,7 @@ const renderRides = () => {
   const currentZoom = map.value.getZoom()
 
   // Pour chaque balade correspondant à la recherche
-  filteredRides.value.forEach((ride) => {
+  filteredRides.value.forEach((ride: IRide) => {
     // On créé une couche GeoJSON pour afficher les balades
     const geojsonLayer = L.geoJSON(ride.geom as any, {
       style: {
@@ -241,16 +253,84 @@ const handleFilters = () => {
   searchValue.value = ''
 }
 
+const startDrawingLine = () => {
+  const L = L_instance.value
+  if (!map.value || !L) return
+
+  // On lance l'outil de dessin de ligne manuellement
+  const polylineDrawer = new L.Draw.Polyline(map.value, {
+    shapeOptions: { color: '#3B82F6', weight: 4 }
+  })
+
+  polylineDrawer.enable()
+}
+
 onMounted(async () => {
   isLoading.value = true
 
   const L = await import('leaflet')
   await import('leaflet/dist/leaflet.css')
+  await import('leaflet-draw/dist/leaflet.draw.css')
+  await import('leaflet-draw')
   L_instance.value = L
 
   map.value = L.map('map', { zoomControl: false }).setView([48.26, -3], 9)
   L.control.zoom({ position: 'bottomleft' }).addTo(map.value)
   L.control.scale({ imperial: false }).addTo(map.value)
+
+  const LDraw = (window as any).L
+  convertToFrench(LDraw)
+
+  // On crée une couche pour stocker les éléments dessinés
+  const drawnItems = new LDraw.FeatureGroup()
+  map.value.addLayer(drawnItems)
+
+  if (props.displayEditorContainer && LDraw.Control?.Draw) {
+    const drawControl = new LDraw.Control.Draw({
+      edit: { featureGroup: drawnItems, poly: { allowIntersection: false } },
+      draw: {
+        polyline: { shapeOptions: { color: '#3B82F6', weight: 4 } },
+        polygon: false,
+        circle: false,
+        marker: false,
+        circlemarker: false,
+        rectangle: false
+      }
+    })
+    map.value.addControl(drawControl)
+
+    // Ferme le mode édition si on commence à dessiner
+    map.value.on(LDraw.Draw.Event.DRAWSTART, () => {
+      if (drawControl._toolbars.edit._activeMode) {
+        drawControl._toolbars.edit._activeMode.handler.disable()
+      }
+    })
+
+    // Ferme le mode dessin si on commence à éditer
+    map.value.on(LDraw.Draw.Event.EDITSTART, () => {
+      if (drawControl._toolbars.draw._activeMode) {
+        drawControl._toolbars.draw._activeMode.handler.disable()
+      }
+    })
+  }
+
+  // Quand une ligne est créée
+  map.value.on(LDraw.Draw.Event.CREATED, (e: any) => {
+    const layer = e.layer
+    drawnItems.addLayer(layer)
+    updateGeomModel(drawnItems)
+  })
+
+  // Quand une ligne est modifiée ou supprimée
+  map.value.on(LDraw.Draw.Event.EDITED, () => updateGeomModel(drawnItems))
+  map.value.on(LDraw.Draw.Event.DELETED, () => updateGeomModel(drawnItems))
+
+  // Fonction pour transformer la couche en GeoJSON pour le modelValue
+  const updateGeomModel = (group: any) => {
+    const data = group.toGeoJSON()
+    // data sera une FeatureCollection, on met à jour le model
+    geom.value = data
+  }
 
   updateMapBackground(selectedId.value, L)
 
@@ -291,6 +371,7 @@ onMounted(async () => {
         })
       }
     })
+    isLoading.value = false
   }
 
   if (props.displayFilters) {
@@ -302,7 +383,7 @@ onMounted(async () => {
     // Dès que les filtres changent, on les enregistres dans le localStorage
     watch(
       activeFilters,
-      (newVal) => {
+      (newVal: IFilterObject) => {
         localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(newVal))
       },
       { deep: true }
@@ -312,7 +393,9 @@ onMounted(async () => {
   isLoading.value = false
 })
 
-watch(selectedId, (newId) => updateMapBackground(newId, L_instance.value))
+watch(selectedId, (newId: string) =>
+  updateMapBackground(newId, L_instance.value)
+)
 watch(filteredRides, () => renderRides())
 </script>
 
@@ -398,25 +481,11 @@ watch(filteredRides, () => renderRides())
       @apply="onApplyFilters"
     />
 
-    <div v-if="props.displayEditorContainer" class="editor-container">
-      <UButton
-        v-if="props.displayEnlargeButton"
-        icon="i-lucide-spline-pointer"
-        class="button-add-line"
-        color="primary"
-        variant="solid"
-        style="cursor: pointer"
-      />
-    </div>
-
     <PanelRides v-if="props.displayRideList" :filtered-rides="filteredRides" />
   </div>
 </template>
 
 <style scoped>
-.editor-container {
-}
-
 .button-add-line {
   position: absolute;
   top: 25px;
@@ -543,5 +612,187 @@ watch(filteredRides, () => renderRides())
 :deep(.u-input) {
   background-color: var(--background) !important;
   backdrop-filter: blur(4px);
+}
+
+/* Passer au dessus du CSS de leaflet draw pour que sa soit plus moderne (pas très propre mais aucun autre moyen je pense) */
+:deep(.leaflet-draw-toolbar),
+:deep(.leaflet-draw-actions),
+:deep(.leaflet-draw-tooltip),
+:deep(.leaflet-popup-content) {
+  font-family: 'Poppins', sans-serif !important;
+}
+
+:deep(.leaflet-draw-section) {
+  margin-top: 15px !important;
+  margin-left: 15px !important;
+}
+
+:deep(.leaflet-draw-toolbar) {
+  margin-top: 0 !important;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 0.25px solid rgba(0, 0, 0, 0.25) !important;
+}
+
+:deep(.leaflet-draw-toolbar a) {
+  background-image: none !important;
+  background-color: var(--background) !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color) !important;
+  border-bottom: 0.25px solid rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease;
+}
+
+:deep(.leaflet-draw-toolbar a:hover) {
+  background-color: var(--ui-primary) !important;
+  color: white !important;
+}
+
+/* Les différentes icons dans les menus */
+:deep(.leaflet-draw-draw-polyline)::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  display: block;
+  mask: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXBlbi1pY29uIGx1Y2lkZS1wZW4iPjxwYXRoIGQ9Ik0yMS4xNzQgNi44MTJhMSAxIDAgMCAwLTMuOTg2LTMuOTg3TDMuODQyIDE2LjE3NGEyIDIgMCAwIDAtLjUuODNsLTEuMzIxIDQuMzUyYS41LjUgMCAwIDAgLjYyMy42MjJsNC4zNTMtMS4zMmEyIDIgMCAwIDAgLjgzLS40OTd6Ii8+PC9zdmc+')
+    no-repeat center / contain;
+}
+
+:deep(.leaflet-draw-edit-edit)::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  display: block;
+  mask: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXNwbGluZS1wb2ludGVyLWljb24gbHVjaWRlLXNwbGluZS1wb2ludGVyIj48cGF0aCBkPSJNMTIuMDM0IDEyLjY4MWEuNDk4LjQ5OCAwIDAgMSAuNjQ3LS42NDdsOSAzLjVhLjUuNSAwIDAgMS0uMDMzLjk0M2wtMy40NDQgMS4wNjhhMSAxIDAgMCAwLS42Ni42NmwtMS4wNjcgMy40NDNhLjUuNSAwIDAgMS0uOTQzLjAzM3oiLz48cGF0aCBkPSJNNSAxN0ExMiAxMiAwIDAgMSAxNyA1Ii8+PGNpcmNsZSBjeD0iMTkiIGN5PSI1IiByPSIyIi8+PGNpcmNsZSBjeD0iNSIgY3k9IjE5IiByPSIyIi8+PC9zdmc+')
+    no-repeat center / contain;
+}
+
+:deep(.leaflet-draw-edit-remove)::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  display: block;
+  mask: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLXRyYXNoLWljb24gbHVjaWRlLXRyYXNoIj48cGF0aCBkPSJNMTkgNnYxNGEyIDIgMCAwIDEtMiAySDdhMiAyIDAgMCAxLTItMlY2Ii8+PHBhdGggZD0iTTMgNmgxOCIvPjxwYXRoIGQ9Ik04IDZWNGEyIDIgMCAwIDEgMi0yaDRhMiAyIDAgMCAxIDIgMnYyIi8+PC9zdmc+')
+    no-repeat center / contain;
+}
+
+:deep(.leaflet-draw-actions) {
+  left: 36px !important;
+  top: 0 !important;
+  height: 32px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+:deep(.leaflet-draw-actions li) {
+  height: 32px !important;
+}
+
+:deep(.leaflet-draw-actions a) {
+  background: var(--background) !important;
+  color: var(--text-color) !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 32px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  border-left: 1px solid var(--border-gray) !important;
+  border-bottom: none !important;
+}
+
+:deep(.leaflet-draw-actions a:hover) {
+  background: var(--ui-primary) !important;
+  color: white !important;
+}
+
+:deep(.leaflet-draw-actions li:first-child a) {
+  border-radius: 8px 0 0 8px !important;
+  border-left: none !important;
+}
+:deep(.leaflet-draw-actions li:last-child a) {
+  border-radius: 0 8px 8px 0 !important;
+}
+
+:deep(.leaflet-draw-tooltip) {
+  background: var(--background) !important;
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border-gray) !important;
+  color: var(--text-color) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-weight: 400 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+:deep(.leaflet-draw-tooltip-subtext) {
+  color: var(--text-color) !important;
+  opacity: 0.7;
+}
+
+:deep(.leaflet-draw-tooltip::before) {
+  border-right-color: var(--background) !important;
+}
+
+:deep(.leaflet-editing-icon) {
+  background: var(--circle-draw-line) !important;
+  border: 2px solid var(--circle-draw-line-outline) !important;
+  border-radius: 50% !important;
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: -6px !important;
+  margin-top: -6px !important;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+:deep(.leaflet-draw-guide-dash) {
+  background-color: transparent !important;
+  background-image: radial-gradient(
+    circle,
+    var(--line-creation) 1.5px,
+    transparent 2px
+  ) !important;
+  background-size: 8px 8px !important;
+}
+
+:deep(.leaflet-mouse-marker) {
+  cursor: crosshair;
+}
+
+:deep(.leaflet-control) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-left: 15px !important;
+  margin-bottom: 15px !important;
+  border: none !important;
+}
+
+/* Attribution du fond de plan en bas à droite, remettre comme avant */
+:deep(.leaflet-control-attribution) {
+  display: block !important;
+  margin: 0 !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  padding: 0 5px;
+}
+
+:deep(.leaflet-draw-section) {
+  margin: 0 !important;
 }
 </style>

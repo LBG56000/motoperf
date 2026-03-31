@@ -57,6 +57,16 @@ export interface IValueCommuneSelect {
   value: string
 }
 
+export interface IValueForm {
+  title: string
+  duration: number
+  description: string
+  startTown: IValueCommuneSelect | undefined
+  endTown: IValueCommuneSelect | undefined
+  rideType: string
+  geom: IGeoJSON | null
+}
+
 export enum RideType {
   SINUEUSE = 'Sinueuse',
   GRANDES_ROUTES = 'Grandes routes',
