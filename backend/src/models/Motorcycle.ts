@@ -74,7 +74,7 @@ const motorcycleSchema = new Schema({
     type: Number,
     default: 0,
   },
-  withAllFiled: {
+  withAllField: {
     type: Boolean,
     default: false,
   },

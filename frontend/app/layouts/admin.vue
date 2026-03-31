@@ -41,8 +41,7 @@ function getItems() {
           :items="getItems()"
           orientation="vertical"
           :ui="{
-            link: 'p-1.5 overflow-hidden text-white',
-            linkLeadingIcon: '!text-white'
+            link: 'text-white'
           }"
         />
       </template>
@@ -50,6 +49,8 @@ function getItems() {
 
     <div class="flex-1">
       <slot />
+      <UToaster />
     </div>
   </div>
 </template>
+<style scoped></style>
