@@ -12,7 +12,6 @@ const placeholderMotorcycle = {
   name: 'MT-07',
   year: 2020
 }
-
 // Motorcycle choice
 const motorcycle = ref<{
   brand: IBrand | undefined
@@ -23,22 +22,32 @@ const motorcycle = ref<{
   model: undefined,
   year: undefined
 })
+
 // Full Brands list
+const apiBase = useRuntimeConfig().public.apiBase
 const brandsList = ref<IBrand[]>([])
 const motorcyclesList = ref<IMotorcycle[]>([])
 const isMotorcyclesFetched = ref<boolean>(false)
-const apiBase = useRuntimeConfig().public.apiBase
-// Pont string ↔ objet pour UInputMenu
-const brandInput = computed({
-  get: () => motorcycle.value.brand?.name ?? '',
-  set: (name: string) => {
-    motorcycle.value.brand = brandsList.value.find((b) => b.name === name)
-    motorcycle.value.model = undefined
-    motorcycle.value.year = undefined
-    isMotorcyclesFetched.value = false
-  }
-})
+const selectedBrand = ref<BrandItem | undefined>()
 
+type BrandItem = IBrand & { 
+  label: string; 
+  avatar: { 
+    src: string 
+  } 
+}
+
+// Items avec avatar pour afficher les icônes dans le dropdown
+const brandItems = computed(() =>
+  brandsList.value.map(({ icon, ...brand }) => ({
+    ...brand,
+    label: brand.name,
+    avatar: { src: icon }
+  }))
+)
+
+
+// Model list filtered by user input
 const modelInput = computed({
   get: () => motorcycle.value.model?.name ?? '',
   set: (name: string) => {
@@ -47,14 +56,6 @@ const modelInput = computed({
   }
 })
 
-// Brands list filtered by user input
-const brandFilteredList = computed(() => {
-  const search = brandInput.value.toLowerCase()
-  return brandsList.value
-    .filter((brand) => brand.name?.toLowerCase().includes(search))
-    .map((brand) => brand.name)
-    .filter((name): name is string => !!name)
-})
 // Model list filtered by user input
 const motorcycleFilteredList = computed(() => {
   const search = modelInput.value.toLowerCase()
@@ -76,6 +77,13 @@ const yearFilteredList = computed(() => {
         .map((m) => m.year)
     )
   ]
+})
+
+watch(selectedBrand, (item) => {
+  motorcycle.value.brand = item
+  motorcycle.value.model = undefined
+  motorcycle.value.year = undefined
+  isMotorcyclesFetched.value = false
 })
 
 watch(
@@ -126,10 +134,13 @@ onMounted(() => {
     <h3>{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu
-        v-model="brandInput"
+        v-model="selectedBrand"
         :placeholder="placeholderMotorcycle.brand"
-        :items="brandFilteredList"
+        :items="brandItems"
+        :avatar="selectedBrand?.avatar"
+        label-key="name"
         clear
+        class="w-75"
       >
         <template #empty> Aucune marque trouvée </template>
       </UInputMenu>
@@ -141,6 +152,7 @@ onMounted(() => {
         :placeholder="placeholderMotorcycle.name"
         :items="motorcycleFilteredList"
         clear
+        class="w-75"
         @update:open="fetchMotorcyclesByBrand"
       >
         <template #empty> Aucun modèle trouvé </template>
@@ -153,6 +165,7 @@ onMounted(() => {
         :placeholder="String(placeholderMotorcycle.year)"
         :items="yearFilteredList"
         clear
+        class="w-75"
         @update:open="fetchMotorcyclesByBrand"
       >
         <template #empty> Aucune année trouvée </template>
