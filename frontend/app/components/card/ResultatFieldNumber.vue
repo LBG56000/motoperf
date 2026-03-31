@@ -5,9 +5,15 @@ const props = defineProps<{
   secondValue: number
 }>()
 
-const max = computed(() => Math.max(props.firstValue, props.secondValue))
-const firstPercent = computed(() => max.value ? (props.firstValue / max.value) * 100 : 0)
-const secondPercent = computed(() => max.value ? (props.secondValue / max.value) * 100 : 0)
+const BASE_YEAR = 1950
+
+function normalizeValue(value: number) {
+  return props.fieldName === 'year' ? value - BASE_YEAR : value
+}
+
+const max = computed(() => Math.max(normalizeValue(props.firstValue), normalizeValue(props.secondValue)))
+const firstPercent = computed(() => max.value ? (normalizeValue(props.firstValue) / max.value) * 100 : 0)
+const secondPercent = computed(() => max.value ? (normalizeValue(props.secondValue) / max.value) * 100 : 0)
 
 function formatNumber(number: number) {
   if (props.fieldName === 'price') {
@@ -27,14 +33,41 @@ function formatNumber(number: number) {
   }else if (props.fieldName === 'horsePower') {
     return new Intl.NumberFormat("fr-FR", { maximumSignificantDigits: 3 }).format(number) + ' ch';
   }else if (props.fieldName === 'year') {
+    
     return number.toString();
   }
+}
+
+function tradFieldName(fieldName:string) {
+  switch (fieldName) {
+    case 'price':
+      return 'Prix';
+    case 'consumption':
+      return 'Consommation';
+    case 'acceleration':
+      return '0-100 km/h';
+    case 'speedMax':
+      return 'Vitesse max';
+    case 'torque':
+      return 'Couple';
+    case 'weight':
+      return 'Poids';
+    case 'engine_size':
+      return 'Cylindrée';
+    case 'horsePower':
+      return 'Puissance';
+    case 'year':
+      return 'Année';
+    default:
+      return fieldName;
+  }
+  
 }
 </script>
 
 <template>
   <div class="resultat">
-    <p>{{ props.fieldName }}</p>
+    <p>{{ tradFieldName(props.fieldName) }}</p>
     <div class="container-row">
       <div class="left">
         <p>{{ formatNumber(props.firstValue) }}</p>
