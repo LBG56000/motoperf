@@ -23,4 +23,5 @@ export interface IMotorcycle {
   withAllFiled?: boolean
   price: number
   createdAt: string
+  post?: string
 }
