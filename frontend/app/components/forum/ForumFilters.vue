@@ -14,13 +14,17 @@ const handleHaveAllPosts = () => {
 }
 
 const getCategories = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}categories?project=name,id,icon`)
+  const res = await fetch(
+    `${useRuntimeConfig().public.apiBase}categories?project=name,id,icon`
+  )
   const data = await res.json()
   categories.value = data.categories
 }
 
 const getBrands = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}brand?project=name,icon`)
+  const res = await fetch(
+    `${useRuntimeConfig().public.apiBase}brand?project=name,icon`
+  )
   const data = await res.json()
   brands.value = data.brands
   console.log('test')
@@ -39,9 +43,7 @@ const handlClickBrand = (id: string) => {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    getBrands(), getCategories()
-  ])
+  await Promise.all([getBrands(), getCategories()])
 })
 </script>
 
@@ -51,11 +53,17 @@ onMounted(async () => {
       <LazyForumModalAddPost />
     </div>
     <UCard class="margin-top_0_5">
-      <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">
+      <div
+        class="icon-and-text filter cursor-pointer"
+        @click="handleHaveAllPosts"
+      >
         <UIcon class="size-7 margin-0_5" name="i-lucide-messages-square" />
         <p>Tous les posts</p>
       </div>
-      <div class="icon-and-text filter cursor-pointer" @click="handleHaveMyFavorites">
+      <div
+        class="icon-and-text filter cursor-pointer"
+        @click="handleHaveMyFavorites"
+      >
         <UIcon class="size-7 margin-0_5" name="i-lucide-star" />
         <p>Mes favoris</p>
       </div>
@@ -66,9 +74,17 @@ onMounted(async () => {
         </div>
         <div class="filter">
           <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-          <div v-else v-for="category in categories" :key="category._id" class="icon-and-text sub-filter cursor-pointer"
-            @click="handlClickOnCategory(category._id)">
-            <UIcon class="size-7 margin-0_5" :name="'i-lucide-' + category.icon" />
+          <div
+            v-for="category in categories"
+            v-else
+            :key="category._id"
+            class="icon-and-text sub-filter cursor-pointer"
+            @click="handlClickOnCategory(category._id)"
+          >
+            <UIcon
+              class="size-7 margin-0_5"
+              :name="'i-lucide-' + category.icon"
+            />
             <p>{{ category.name }}</p>
           </div>
         </div>
@@ -80,14 +96,30 @@ onMounted(async () => {
         </div>
         <div class="filter">
           <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-          <div v-else v-for="brand in brands" :key="brand._id" class="icon-and-text sub-filter cursor-pointer"
-            @click="handlClickBrand(brand._id)">
-            <img :src="brand.icon" :alt="brand.name" :title="brand.name" width="40" height="40" class="margin-0_5">
+          <div
+            v-for="brand in brands"
+            v-else
+            :key="brand._id"
+            class="icon-and-text sub-filter cursor-pointer"
+            @click="handlClickBrand(brand._id)"
+          >
+            <img
+              :src="brand.icon"
+              :alt="brand.name"
+              :title="brand.name"
+              width="40"
+              height="40"
+              class="margin-0_5"
+            />
             <p>{{ brand.name }}</p>
           </div>
         </div>
       </div>
-      <USwitch v-model="onlyMyPosts" label="Uniquement mes posts" class="filter" />
+      <USwitch
+        v-model="onlyMyPosts"
+        label="Uniquement mes posts"
+        class="filter"
+      />
     </UCard>
   </div>
 </template>

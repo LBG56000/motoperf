@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { IPost } from '~/types/post';
+import type { IPost } from '~/types/post'
 
 const props = defineProps<{
-  post: IPost,
-  isUser: boolean,
+  post: IPost
+  isUser: boolean
   loading: boolean
 }>()
 
@@ -19,23 +19,37 @@ const handleOpenAPost = (id: string) => {
   <UCard class="card-forum" @click="handleOpenAPost(post._id)">
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <UAvatar v-else :src="`/_nuxt/assets/images/users/${props.post.user.image}`" size="3xl" loading="lazy"
-        class="margin-2" />
+      <UAvatar
+        v-else
+        :src="`/_nuxt/assets/images/users/${props.post.user.image}`"
+        size="3xl"
+        loading="lazy"
+        class="margin-2"
+      />
       <div class="main">
         <div class="top">
-          <h3>{{ props.post.question }}</h3>
+          <h3>{{ props.post.title }}</h3>
           <!--TODO: à compléter pour la gestion utilisateur-->
-          <UIcon v-if="props.isUser" class="size-6" name="i-lucide-square-pen" @click.stop="handleEditAPost" />
+          <UIcon
+            v-if="props.isUser"
+            class="size-6"
+            name="i-lucide-square-pen"
+            @click.stop="handleEditAPost"
+          />
         </div>
         <div class="grid">
           <div>
             <div class="badges">
-              <UBadge size="lg" class="margin-2">{{ props.post.brand.name }}</UBadge>
+              <UBadge size="lg" class="margin-2">{{
+                props.post.brand.name
+              }}</UBadge>
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
 
-            <p>Par {{ props.post.user.firstname }}, {{ formatTimeAgo(props.post.createdAt)
-              }}</p>
+            <p>
+              Par {{ props.post.user.firstname }},
+              {{ formatTimeAgo(props.post.createdAt) }}
+            </p>
           </div>
           <div class="statsContainer">
             <div class="stats">
