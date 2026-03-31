@@ -90,10 +90,7 @@ onMounted(async () => {
 
 <template>
   <div class="filters">
-    <div>
-      <LazyForumModalAddPost :is-new-post="true" :categories :brands />
-    </div>
-    <UCard class="margin-top_0_5 custom-border">
+    <UCard class="custom-border">
       <UInput v-model="filters.searchBar" placeholder="Rechercher un post dans le forum"
         @update:model-value="handleSearch">
         <template v-if="filters.searchBar?.length" #trailing>
@@ -168,10 +165,6 @@ onMounted(async () => {
 
 .margin-0_5 {
   margin-right: 0.5em;
-}
-
-.margin-top_0_5 {
-  margin-top: 0.5em;
 }
 
 .background-selected {

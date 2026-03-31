@@ -43,7 +43,7 @@ const handleOpenAPost = async (id: string) => {
             <div class="badges">
               <UBadge size="lg" class="margin-2">{{
                 props.post.brand.name
-                }}</UBadge>
+              }}</UBadge>
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
 
@@ -71,7 +71,7 @@ const handleOpenAPost = async (id: string) => {
 .card-forum {
   width: 100%;
   max-width: 1100px;
-  margin: 0.5rem auto;
+  /* margin: 0.5rem auto; */
 }
 
 .main {

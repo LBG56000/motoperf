@@ -107,8 +107,10 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <ForumFilters :loading :active-filter="filters" @filters="handleFilter" />
       <div>
+        <ForumFilters :loading :active-filter="filters" @filters="handleFilter" />
+      </div>
+      <div class="posts">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
         <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
         <div v-for="post in posts" :key="post._id">
@@ -147,16 +149,12 @@ onMounted(async () => {
   flex-direction: row;
   align-items: start;
   margin: 2em;
+  gap: 2em;
 }
 
 .forum-filters>div:nth-child(2) {
   flex: 1;
   min-width: 0;
-}
-
-.forum-filters>div>div,
-.my-favorites {
-  margin-top: 2em;
 }
 
 .panel {
@@ -167,5 +165,11 @@ onMounted(async () => {
   position: sticky;
   top: 0;
   right: 0;
+}
+
+.posts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
 }
 </style>
