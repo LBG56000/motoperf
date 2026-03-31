@@ -20,7 +20,7 @@ const apiBase = useRuntimeConfig().public.apiBase
 const showResultat = ref(false)
 const motorcycle1 = ref<IMotorcycle>()
 const motorcycle2 = ref<IMotorcycle>()
-const motorcycle1Id = ref<string>('69cab4ab18bebe86822f8c49')
+const motorcycle1Id = ref<string>('')
 const motorcycle2Id = ref<string>('')
 const fieldCategories = {
   numbers: [
@@ -338,7 +338,7 @@ onMounted(() => {
             <div class="left-display-comment">
               <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
               <Comment v-if="commentsMotorcycle1.length > 0" :responses="commentsMotorcycle1" />
-              <h5 v-else>Postez le premier commentaire !</h5>
+              <p v-else>Postez le premier commentaire !</p>
             </div>
             <div class="right-display-comment">
               <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>

@@ -29,7 +29,7 @@ const filter = computed(() => {
 
   if (filters.value.searchBar && filters.value.searchBar.trim().length !== 0) {
     conditions.push({
-      question: { $regex: filters.value.searchBar, $options: 'i' }
+      title: { $regex: filters.value.searchBar, $options: 'i' }
     })
   }
 
@@ -44,7 +44,7 @@ const getPosts = async () => {
   const res = await $fetch<{ posts: IPost[] }>(`${useRuntimeConfig().public.apiBase}posts`, {
     params: {
       deep: true,
-      project: 'content,question,id,createdAt,views',
+      project: 'content,title,id,createdAt,views',
       filter: filter.value
     }
   })

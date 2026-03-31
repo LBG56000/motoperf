@@ -82,7 +82,7 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' })
     }
     const postCreated = await Post.insertOne({
-      question: body.title,
+      title: body.title,
       content: body.description,
       user: user,
       brand: brand,

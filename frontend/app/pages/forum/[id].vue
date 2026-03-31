@@ -55,7 +55,7 @@ onMounted(async () => {
       <div>
         <div class="icon-and-text">
           <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
-          <h2>{{ post?.question }}</h2>
+          <h2>{{ post?.title }}</h2>
         </div>
         <div>
           <div class="grid margin-1_5">
@@ -81,8 +81,8 @@ onMounted(async () => {
             <p>Mettre ce post en favori</p>
           </div>
           <img :src="`/images/posts/${post?.image}`"
-            :alt="`Image du post ${post?.question} par ${post?.user.firstname}`"
-            :title="`Image du post ${post?.question} par ${post?.user.firstname}`"
+            :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
+            :title="`Image du post ${post?.title} par ${post?.user.firstname}`"
             class="img margin-1_5 margin-bottom-1">
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
