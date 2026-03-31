@@ -73,21 +73,17 @@ router.post('/add-view', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const body = req.body
-    const brand = await Brand.findOne({ _id: body.post_brand })
-    const category = await Category.findOne({ _id: body.post_category })
+    const brand = await Brand.findOne({ _id: body.brand })
+    const category = await Category.findOne({ _id: body.category })
     // TODO: a modifier dans le front et le back avec des vrai user et des vrai images
     const user = await User.findOne({ firstname: 'Alice' })
 
     if (!brand || !category || !user) {
-      console.log(brand)
-      console.log(category)
-      console.log(user)
-      console.log(body.post_category)
       return res.status(500).json({ error: 'Internal server error' })
     }
     const postCreated = await Post.insertOne({
-      question: body.post_title,
-      content: body.post_description,
+      question: body.title,
+      content: body.description,
       user: user,
       brand: brand,
       category: category,

@@ -34,18 +34,10 @@ const state = reactive({
 
 const onSubmit = async () => {
   try {
-    // Construction de la requête
-    const formData = new FormData()
-    formData.append('post_title', state.title)
-    formData.append('post_category', state.category)
-    formData.append('post_brand', state.brand)
-    formData.append('post_description', state.description)
-    if (state.file) formData.append('post_file', state.file)
-
     // Constrcution et envoi de la requête
     const response = await $fetch.raw(`${useRuntimeConfig().public.apiBase}posts`, {
       method: 'POST',
-      body: formData
+      body: state
     })
 
     if (response.status === 201) {
