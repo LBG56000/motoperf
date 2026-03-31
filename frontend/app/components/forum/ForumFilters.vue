@@ -31,13 +31,17 @@ const handleHaveAllPosts = () => {
 }
 
 const getCategories = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}categories?project=name,icon`)
+  const res = await fetch(
+    `${useRuntimeConfig().public.apiBase}categories?project=name,id,icon`
+  )
   const data = await res.json()
   categories.value = data.categories
 }
 
 const getBrands = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}brand?project=name,icon`)
+  const res = await fetch(
+    `${useRuntimeConfig().public.apiBase}brand?project=name,icon`
+  )
   const data = await res.json()
   brands.value = data.brands
 }
@@ -73,9 +77,7 @@ const handleClickOnBrand = (filterBrandId: string) => {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    getBrands(), getCategories()
-  ])
+  await Promise.all([getBrands(), getCategories()])
 })
 </script>
 
@@ -85,11 +87,17 @@ onMounted(async () => {
       <LazyForumModalAddPost :is-new-post="true" :categories :brands />
     </div>
     <UCard class="margin-top_0_5">
-      <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">
+      <div
+        class="icon-and-text filter cursor-pointer"
+        @click="handleHaveAllPosts"
+      >
         <UIcon class="size-7 margin-0_5" name="i-lucide-messages-square" />
         <p>Tous les posts</p>
       </div>
-      <div class="icon-and-text filter cursor-pointer" @click="handleHaveMyFavorites">
+      <div
+        class="icon-and-text filter cursor-pointer"
+        @click="handleHaveMyFavorites"
+      >
         <UIcon class="size-7 margin-0_5" name="i-lucide-star" />
         <p>Mes favoris</p>
       </div>

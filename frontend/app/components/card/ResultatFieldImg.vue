@@ -10,10 +10,12 @@ const props = defineProps<{
   <div class="resultat">
     <div class="container-row">
       <div class="left">
-        <img :src="`${props.firstValue}`" alt="Pas d'image" />
+        <img v-if="props.firstValue" :src="`${props.firstValue}`" alt="Image de la moto 1" />
+        <p v-else>Pas d'image</p>
       </div>
       <div class="right">
-        <img :src="`${props.secondValue}`" alt="Pas d'image" />
+        <img v-if="props.secondValue" :src="`${props.secondValue}`" alt="Image de la moto 2" />
+        <p v-else>Pas d'image</p>
       </div>
     </div>
   </div>
@@ -35,7 +37,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 80%;
+  width: 60%;
   gap: 20px;
 }
 
@@ -45,6 +47,12 @@ h3 {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
+}
+
+
+p {
+  text-align: center;
   width: 100%;
 }
 </style>

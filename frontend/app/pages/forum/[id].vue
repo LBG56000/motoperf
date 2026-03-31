@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Comment from '~/components/forum/Comment.vue'
 import HeaderInfo from '~/components/global/HeaderInfo.vue'
 import type { IMessage } from '~/types/messages'
 import type { IPost } from '~/types/post'
@@ -12,10 +13,10 @@ const apiBase = useRuntimeConfig().public.apiBase
 const newReponseOfPost = ref('')
 
 const getPost = async () => {
-  const data = await $fetch<({ data: IPost })>(`${apiBase}posts`, {
+  const data = await $fetch<{ data: IPost }>(`${apiBase}posts`, {
     params: {
       filter: JSON.stringify({ _id: route.params.id }),
-      project: 'image,content,question,createdAt,views',
+      project: 'image,content,title,createdAt,views',
       deep: true
     }
   })
@@ -30,10 +31,7 @@ const getResponsesOfPost = async () => {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    getPost(),
-    getResponsesOfPost()
-  ])
+  await Promise.all([getPost(), getResponsesOfPost()])
 })
 </script>
 
@@ -47,9 +45,7 @@ onMounted(async () => {
         </h1>
       </template>
       <template #subtitle>
-        <p>
-          Échanger librement sur votre sujet favori en lien avec la moto.
-        </p>
+        <p>Échanger librement sur votre sujet favori en lien avec la moto.</p>
       </template>
     </HeaderInfo>
     <div id="post" class="post-filters">
@@ -59,7 +55,7 @@ onMounted(async () => {
       <div>
         <div class="icon-and-text">
           <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
-          <h2>{{ post?.question }}</h2>
+          <h2>{{ post?.title }}</h2>
         </div>
         <div>
           <div class="grid margin-1_5">
@@ -69,10 +65,12 @@ onMounted(async () => {
             </div>
             <div class="icon-and-text right">
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
-              <p>{{ responses.length || 0 }} réponses </p>
+              <p>{{ responses.length || 0 }} réponses</p>
             </div>
-            <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
-              }}</p>
+            <p>
+              Par {{ post?.user.firstname }},
+              {{ formatTimeAgo(post?.createdAt) }}
+            </p>
             <div class="icon-and-text right">
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
               <p>{{ post?.views }} vues</p>
@@ -83,18 +81,26 @@ onMounted(async () => {
             <p>Mettre ce post en favori</p>
           </div>
           <img :src="`/images/posts/${post?.image}`"
-            :alt="`Image du post ${post?.question} par ${post?.user.firstname}`"
-            :title="`Image du post ${post?.question} par ${post?.user.firstname}`"
+            :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
+            :title="`Image du post ${post?.title} par ${post?.user.firstname}`"
             class="img margin-1_5 margin-bottom-1">
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
-        <UFormField label="Ecrire une réponse" required :ui="{ container: 'w-5/6' }">
+        <UFormField
+          label="Ecrire une réponse"
+          required
+          :ui="{ container: 'w-5/6' }"
+        >
           <UTextarea v-model="newReponseOfPost" class="w-5/6" />
         </UFormField>
-        <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''">Ajouter ma réponse</UButton>
-        <p v-if="responses.length === 0">Aucune réponse à ce post, ajouter la première</p>
+        <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''"
+          >Ajouter ma réponse</UButton
+        >
+        <p v-if="responses.length === 0">
+          Aucune réponse à ce post, ajouter la première
+        </p>
         <div v-else class="margin-bottom-1 w-5/6">
-          <LazyForumResponse :responses="responses" />
+          <Comment :responses="responses" />
         </div>
       </div>
     </div>

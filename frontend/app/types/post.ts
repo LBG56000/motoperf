@@ -5,7 +5,7 @@ import type { IUser } from "./users";
 
 export interface IPost {
     _id: string,
-    question: string,
+    title: string,
     content: string,
     category: ICategory,
     user: IUser,
@@ -13,5 +13,5 @@ export interface IPost {
     createdAt: string,
     views: string,
     responses: IMessage[],
-    image: string
+    image?: string
 }
