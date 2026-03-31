@@ -58,7 +58,7 @@ onMounted(async () => {
       </div>
       <div>
         <div class="icon-and-text">
-          <UAvatar :src="`/_nuxt/assets/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
+          <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
           <h2>{{ post?.question }}</h2>
         </div>
         <div>
@@ -72,7 +72,7 @@ onMounted(async () => {
               <p>{{ responses.length || 0 }} réponses </p>
             </div>
             <p>Par {{ post?.user.firstname }}, {{ formatTimeAgo(post?.createdAt)
-            }}</p>
+              }}</p>
             <div class="icon-and-text right">
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
               <p>{{ post?.views }} vues</p>
@@ -82,7 +82,7 @@ onMounted(async () => {
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
-          <img :src="`/_nuxt/assets/images/posts/${post?.image}`"
+          <img :src="`/images/posts/${post?.image}`"
             :alt="`Image du post ${post?.question} par ${post?.user.firstname}`"
             :title="`Image du post ${post?.question} par ${post?.user.firstname}`"
             class="img margin-1_5 margin-bottom-1">
@@ -115,11 +115,18 @@ onMounted(async () => {
 .post-filters {
   display: flex;
   flex-direction: row;
-  margin: 5em;
+  align-items: start;
+  gap: 3rem;
+  margin: 2rem 5rem;
 }
 
-.post-filters>div:nth-child(1) {
-  margin-right: 10em;
+.post-filters>div:first-child {
+  flex-shrink: 0;
+}
+
+.post-filters>div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
 }
 
 .flex.row.end {
