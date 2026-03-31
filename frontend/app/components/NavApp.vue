@@ -204,7 +204,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
   background-color: var(--background);
 }
 
-.button {
+:deep(.button) {
   font-size: small;
   padding: 10px 40px;
 }
