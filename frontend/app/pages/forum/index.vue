@@ -118,8 +118,8 @@ onMounted(async () => {
         </div>
       </div>
       <div class="panel">
-        <ForumMyFavoritesPost class="my-favorites" />
         <ForumMyPosts class="my-favorites" />
+        <ForumMyFavoritesPost class="my-favorites" />
       </div>
     </div>
   </div>
