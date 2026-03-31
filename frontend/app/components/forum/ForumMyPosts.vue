@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <UCard variant="outline">
+    <UCard variant="outline" class="my-posts">
       <template #header>
         <h3>Mes posts</h3>
       </template>
@@ -15,4 +15,8 @@
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.my-posts {
+  width: 100%;
+}
+</style>

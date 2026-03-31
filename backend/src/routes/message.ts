@@ -1,5 +1,5 @@
 import Message from '../models/Message'
-import { type Request, Router } from 'express'
+import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 
 const router = Router()
@@ -38,6 +38,18 @@ router.get('/:id/responses', async (req, res) => {
     res.json({ messages })
   } catch (error) {
     console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+
+router.post('/', async (req: Request, res: Response) => {
+  try {
+    const message = new Message(req.body)
+    await message.save()
+    res.status(201).json(message)
+  }catch (error) {
+    console.error('Error creating message:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

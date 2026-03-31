@@ -1,5 +1,5 @@
 import Brand from '../models/Brand'
-import { type Request, Router } from 'express'
+import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 
 const router = Router()
@@ -19,5 +19,15 @@ router.get(
     }
   },
 )
+
+router.get('/count', async (req: Request, res: Response) => {
+  try {
+    const totalBrands: number = await Brand.countDocuments()
+    res.status(200).json(totalBrands)
+  } catch (error) {
+    console.error('Error accessing brand route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 
 export default router

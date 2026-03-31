@@ -29,9 +29,6 @@ const messageSchema = new Schema(
       type: String,
       enum: ['Post', 'Message']
     },
-    motorcycleId: {
-      type: String,
-    },
     user: {
       type: Types.ObjectId,
       ref: 'User'
