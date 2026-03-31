@@ -16,7 +16,7 @@ const props = defineProps<{
         <p v-else>Pas d'audio</p>
       </div>
       <div class="right">
-        <audio v-if="props.secondValue" :src="props.secondValue" controls></audio>
+        <AudioPlayer v-if="props.secondValue" :src="props.secondValue" />
         <p v-else>Pas d'audio</p>
       </div>
     </div>
