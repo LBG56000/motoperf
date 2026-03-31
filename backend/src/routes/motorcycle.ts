@@ -42,4 +42,32 @@ router.get('/count', async (req: Request, res: Response) => {
   }
 })
 
+router.get('/stats', async (req: Request, res: Response) => {
+  try {
+    const totalHorsePower = await Motorcycle.aggregate([{
+      $group: {
+        _id: null,
+        totalHorsePower: { $sum: '$horsePower' }
+      }
+    }])
+    res.status(200).json(totalHorsePower[0].totalHorsePower)
+  } catch (error) {
+    console.error('Error accessing motorcycle route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+
+router.put('/:id', async (req: Request, res: Response) => {
+  const motorcycleId = req.params.id
+  const updateData = req.body
+  try {
+    const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(motorcycleId, updateData)
+    res.status(200).json(updatedMotorcycle)
+  } catch (error) {
+    console.error('Error updating motorcycle:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 export default router
