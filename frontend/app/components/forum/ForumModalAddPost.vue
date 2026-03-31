@@ -4,11 +4,11 @@ import type { IBrand } from '~/types/brand'
 import type { ICategory } from '~/types/category'
 
 const props = defineProps({
-  isNewPost: Boolean
+  isNewPost: Boolean,
+  categories: Array<ICategory>,
+  brands: Array<IBrand>
 })
 
-const categoriesName = ref<ICategory[]>([])
-const brandsName = ref<IBrand[]>([])
 const toast = useToast()
 const emit = defineEmits<{ close: [boolean] }>()
 
@@ -31,24 +31,6 @@ const state = reactive({
   description: '',
   file: undefined as File | undefined
 })
-
-const getCategories = async () => {
-  const data = await $fetch<{ categories: ICategory[] }>(`${useRuntimeConfig().public.apiBase}categories`, {
-    params: {
-      project: 'name'
-    }
-  })
-  categoriesName.value = data.categories
-}
-
-const getBrands = async () => {
-  const data = await $fetch<{ brands: IBrand[] }>(`${useRuntimeConfig().public.apiBase}brands`, {
-    params: {
-      project: 'name'
-    }
-  })
-  brandsName.value = data.brands
-}
 
 const onSubmit = async () => {
   try {
@@ -82,12 +64,6 @@ const resetForm = () => {
   state.description = ''
   state.file = undefined
 }
-
-onMounted(() => {
-  Promise.all([
-    getCategories(), getBrands()
-  ])
-})
 </script>
 
 <template>
@@ -102,34 +78,32 @@ onMounted(() => {
           <UFormField label="Titre du post" required name="title">
             <UInput v-model="state.title" placeholder="Titre du post" />
           </UFormField>
-          <div>
-            <UFormField label="Catégorie" required name="category">
-              <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post"
-                :items="categoriesName" value-key="_id" label-key="name" :search-input="{
-                  placeholder: 'Rechercher',
-                  icon: 'i-lucide-search'
-                }">
-                <template #empty>
-                  <span class="text-gray-500 text-sm p-2">
-                    Aucune catégorie trouvée
-                  </span>
-                </template>
-              </USelectMenu>
-            </UFormField>
-            <UFormField label="Marques" required name="brand">
-              <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brandsName"
-                value-key="_id" label-key="name" :search-input="{
-                  placeholder: 'Rechercher',
-                  icon: 'i-lucide-search'
-                }">
-                <template #empty>
-                  <span class="text-gray-500 text-sm p-2">
-                    Aucune marque trouvée
-                  </span>
-                </template>
-              </USelectMenu>
-            </UFormField>
-          </div>
+          <UFormField label="Catégorie" required name="category">
+            <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
+              value-key="_id" label-key="name" :search-input="{
+                placeholder: 'Rechercher',
+                icon: 'i-lucide-search'
+              }">
+              <template #empty>
+                <span class="text-gray-500 text-sm p-2">
+                  Aucune catégorie trouvée
+                </span>
+              </template>
+            </USelectMenu>
+          </UFormField>
+          <UFormField label="Marques" required name="brand">
+            <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
+              value-key="_id" label-key="name" :search-input="{
+                placeholder: 'Rechercher',
+                icon: 'i-lucide-search'
+              }">
+              <template #empty>
+                <span class="text-gray-500 text-sm p-2">
+                  Aucune marque trouvée
+                </span>
+              </template>
+            </USelectMenu>
+          </UFormField>
           <UFormField label="Description" required name="description">
             <UTextarea v-model="state.description" placeholder="Ecrivez votre description" />
           </UFormField>
