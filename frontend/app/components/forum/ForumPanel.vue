@@ -1,0 +1,76 @@
+<script setup lang="ts">
+import FilterContent from './FilterContent.vue';
+
+const emits = defineEmits(['filters'])
+const isOpen = ref(false)
+
+const handleFiltersChange = (payload: any) => {
+  emits('filters', payload)
+}
+</script>
+
+<template>
+  <div class="filters">
+    <div id="dekstop-filters" class="filters">
+      <UCard class="custom-border filters">
+        <FilterContent @change="handleFiltersChange" />
+      </UCard>
+    </div>
+    <div id="mobile-filters">
+      <USlideover side="left">
+        <UButton color="neutral" variant="subtle" class="button-mobile" icon="i-lucide-arrow-right"
+          @click="isOpen = true" />
+        <template #body>
+          <FilterContent @change="handleFiltersChange" />
+          <div class="panel-mobile">
+            <ForumMyPosts />
+            <ForumMyFavoritesPost />
+          </div>
+        </template>
+      </USlideover>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.custom-border {
+  border: 0.5px solid var(--border-gray);
+}
+
+.filters {
+  position: sticky;
+  top: 0;
+  left: 0;
+}
+
+/** Style version mobile */
+@media (max-width: 1024px) {
+  #mobile-filter {
+    display: block;
+  }
+
+  #dekstop-filters {
+    display: none;
+  }
+
+  .button-mobile {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .panel-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+  }
+}
+
+/** Style version PC */
+@media (min-width: 1024px) {
+  #mobile-filters {
+    display: none;
+  }
+}
+</style>

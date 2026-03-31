@@ -108,7 +108,7 @@ onMounted(async () => {
     </HeaderInfo>
     <div id="forum" class="forum-filters">
       <div>
-        <ForumFilters :loading :active-filter="filters" @filters="handleFilter" />
+        <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
       <div class="posts">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
@@ -118,14 +118,43 @@ onMounted(async () => {
         </div>
       </div>
       <div class="panel">
-        <ForumMyPosts class="my-favorites" />
-        <ForumMyFavoritesPost class="my-favorites" />
+        <ForumMyPosts />
+        <ForumMyFavoritesPost />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/** Style version PC */
+@media (max-width: 1024px) {
+  #navbar-pc {
+    display: none;
+  }
+
+  .panel {
+    display: none;
+  }
+}
+
+/** Style version mobile */
+
+@media (min-width: 1024px) {
+  #navbar-mobile {
+    display: none;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 300px;
+    position: sticky;
+    top: 0;
+    right: 0;
+  }
+}
+
 .forum {
   display: flex;
   flex-direction: row;
@@ -155,16 +184,6 @@ onMounted(async () => {
 .forum-filters>div:nth-child(2) {
   flex: 1;
   min-width: 0;
-}
-
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 300px;
-  position: sticky;
-  top: 0;
-  right: 0;
 }
 
 .posts {
