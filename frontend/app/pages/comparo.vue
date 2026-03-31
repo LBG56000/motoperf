@@ -20,8 +20,8 @@ const apiBase = useRuntimeConfig().public.apiBase
 const showResultat = ref(false)
 const motorcycle1 = ref<IMotorcycle>()
 const motorcycle2 = ref<IMotorcycle>()
-const motorcycle1Id = ref<string>('')
-const motorcycle2Id = ref<string>('')
+const motorcycle1Id = ref<string>('69cbe6342e0cabab31678276')
+const motorcycle2Id = ref<string>('69cbe6342e0cabab3167827a')
 const fieldCategories = {
   numbers: [
     'year',
@@ -54,7 +54,7 @@ const comment = ref<ICommentInput>({
   motorcycleName: '',
   brand: '',
   content: '',
-  user: '69c5b03af6ccda9980998ec6'
+  user: '69cbe6342e0cabab3167824a' // TODO: update quand l'auth sera en place
 })
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -230,7 +230,9 @@ async function postComment() {
         body: {
           title: selectedMotorcycle.name,
           brand: selectedMotorcycle.brand._id,
-          user: comment.value.user
+          category: 'Modèle',
+          user: comment.value.user,
+          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
         }
       })
 
