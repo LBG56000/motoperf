@@ -82,7 +82,7 @@ onMounted(async () => {
 <template>
   <div class="filters">
     <div>
-      <LazyForumModalAddPost />
+      <LazyForumModalAddPost :is-new-post="true" :categories :brands />
     </div>
     <UCard class="margin-top_0_5">
       <div class="icon-and-text filter cursor-pointer" @click="handleHaveAllPosts">

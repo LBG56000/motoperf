@@ -3,6 +3,9 @@ import { prepareQuery, ReqQuery } from "../utils/find"
 import Post from "../models/Post"
 import { IPost } from "../types/post"
 import Message from "../models/Message"
+import Brand from "../models/Brand"
+import User from "../models/User"
+import Category from "../models/Category"
 
 const router = Router()
 router.get(
@@ -66,5 +69,33 @@ router.post('/add-view', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' })
   }
 })
+
+router.post('/', async (req, res) => {
+  try {
+    const body = req.body
+    const brand = await Brand.findOne({ _id: body.brand })
+    const category = await Category.findOne({ _id: body.category })
+    // TODO: a modifier dans le front et le back avec des vrai user et des vrai images
+    const user = await User.findOne({ firstname: 'Alice' })
+
+    if (!brand || !category || !user) {
+      return res.status(500).json({ error: 'Internal server error' })
+    }
+    const postCreated = await Post.insertOne({
+      question: body.title,
+      content: body.description,
+      user: user,
+      brand: brand,
+      category: category,
+      image: 'test1.png'
+    })
+    res.status(201).json({ id: postCreated._id })
+  } catch (error) {
+    console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+//Renvoyer lors de la création l'id du post =
 
 export default router
