@@ -2,7 +2,9 @@
 import ConnexionForm from './ConnexionForm.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
-import type { IUser } from '@/types/users'
+import { useAuth } from '@/utils/useAuth'
+
+const { isAuthenticated, logout, user } = useAuth()
 
 const isOpen = ref(false)
 const mode = ref(false)
@@ -22,19 +24,6 @@ watch(
   },
   { immediate: true }
 )
-
-const apiBase = useRuntimeConfig().public.apiBase
-async function testUser() {
-  const data = await $fetch<{ users: IUser }>(`${apiBase}users`, {
-    credentials: 'include',
-    params: { project: 'email,password' }
-  })
-  return data.users
-}
-
-onMounted(async () => {
-  console.log(await testUser())
-})
 
 // To update the color mode when the toggle switch is changed
 colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
@@ -62,6 +51,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
           >Nous connaitre</UButton
         >
         <UButton
+          v-if="!isAuthenticated"
           trailing-icon="i-lucide-arrow-right"
           size="xl"
           color="neutral"
@@ -69,6 +59,14 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
           @click="() => (isModalOpen = true)"
           >Connexion
         </UButton>
+        <UAvatar
+          v-else
+          icon="i-lucide-user"
+          :src="user?.image"
+          size="xl"
+          loading="lazy"
+          @click="logout"
+        />
       </div>
     </div>
   </div>
@@ -168,6 +166,8 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
   flex-direction: row;
   align-items: center;
   gap: 10px;
+
+  margin: 0 2%;
 }
 
 .list-right {
@@ -175,6 +175,8 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
   flex-direction: row;
   align-items: center;
   gap: 40px;
+
+  margin: 0 2%;
 }
 
 /** Style version PC */

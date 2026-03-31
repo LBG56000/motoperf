@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 
-const isOpen = defineModel({ isModalOpen: Boolean })
+const { login, isAuthenticated } = useAuth()
+
+const isOpen = defineModel({ type: Boolean, default: false })
 const form = useTemplateRef('form')
 
 const state = ref({
@@ -9,37 +11,11 @@ const state = ref({
   password: ''
 })
 
-type Schema = typeof state
-
-function validate(state: Partial<Schema>): FormError[] {
-  const errors = []
-  return errors
-}
-
-const apiBase = useRuntimeConfig().public.apiBase
 const error = ref<string>('')
 
-async function userFinded() {
-  try {
-    await $fetch(`${apiBase}auth`, {
-      method: 'POST',
-      credentials: 'include',
-      body: {
-        email: state.value.email,
-        password: state.value.password
-      }
-    })
-    return true
-  } catch (err: any) {
-    error.value =
-      err.data?.message || 'Une erreur est survenue lors de la connexion.'
-    return false
-  }
-}
-
 const connexion = async () => {
-  if (await userFinded()) {
-    alert('Connexion réussie !')
+  await login(state.value.email, state.value.password)
+  if (isAuthenticated) {
     isOpen.value = false
     state.value.email = ''
     state.value.password = ''
@@ -54,7 +30,6 @@ const connexion = async () => {
         <h3>Se connecter</h3>
         <UForm
           ref="form"
-          :validate="validate"
           :state="state"
           class="space-y-4"
           @submit.prevent="connexion"
