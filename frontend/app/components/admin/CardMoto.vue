@@ -35,7 +35,9 @@ async function onImageChange(file: File | null | undefined) {
 async function onSoundChange(file: File | null | undefined) {
   if (!file) return
   const directory = 'motorcycles'
-  state.soundLink = await uploadFile(file, 'sound', directory)
+  const url = await uploadFile(file, 'sound', directory)
+
+  state.soundLink = `${url}?t=${Date.now()}` // meme que l'image
 }
 const props = defineProps({
   mode: { type: String, default: 'create' },
@@ -44,17 +46,16 @@ const props = defineProps({
   onRefresh: { type: Function, required: true }
 })
 
-async function fetchMotoDetails(id: string) {
+async function fetchMotoDetails(_id: string) {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
     {
       params: {
-        filter: JSON.stringify({ _id: id }),
+        filter: JSON.stringify({ _id: _id }),
         project: 'all'
       }
     }
   )
-  console.log(data)
 
   const m = data.motorcycles[0]
 
@@ -73,7 +74,6 @@ async function fetchMotoDetails(id: string) {
   state.isAvailableA2 = m.isAvailableA2 ?? false
   state.is_public = m.is_public ?? false
   state.speedMax = m.speedMax
-  state.numberOfComparison = m.numberOfComparison
   state.withAllField = m.withAllField ?? false
   state.price = m.price
   state.acceleration = {
@@ -130,7 +130,6 @@ const schema = v.object({
     time_200_300: v.optional(v.number())
   }),
   speedMax: v.optional(v.number()),
-  numberOfComparison: v.optional(v.number()),
   withAllField: v.optional(v.boolean()),
   price: v.optional(v.number())
 })
@@ -141,7 +140,7 @@ const state = reactive<Schema>({
   brand: '',
   name: '',
   year: 2026,
-  category: '',
+  category: undefined as unknown as MotorcycleCategory,
   engine_size: undefined,
   horsePower: undefined,
   torque: undefined,
@@ -157,7 +156,6 @@ const state = reactive<Schema>({
     time_200_300: undefined
   },
   speedMax: undefined,
-  numberOfComparison: undefined,
   withAllField: false,
   price: undefined
 })
@@ -361,10 +359,6 @@ async function removeMotorcycle() {
 
     <UFormField label="200 à 300 (s)" name="acceleration.time_200_300">
       <UInputNumber v-model="state.acceleration.time_200_300" />
-    </UFormField>
-
-    <UFormField label="Nombre de comparaisons" name="numberOfComparison">
-      <UInputNumber v-model="state.numberOfComparison" />
     </UFormField>
 
     <UFormField name="isAvailableA2">

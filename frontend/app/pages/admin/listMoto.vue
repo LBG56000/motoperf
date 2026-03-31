@@ -132,7 +132,7 @@ async function fetchData() {
     )
     if (data?.motorcycles) {
       motos.value = data.motorcycles.map((moto) => ({
-        id: moto._id,
+        _id: moto._id,
         brand: moto.brand?.name || '',
         name: moto.name || '',
         year: moto.year || '',
@@ -185,8 +185,6 @@ const listMotosearch = computed(() => {
 onMounted(() => {
   fetchData()
 })
-
-console.log(motos)
 </script>
 
 <template>
