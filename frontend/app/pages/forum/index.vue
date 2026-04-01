@@ -112,7 +112,10 @@ onMounted(async () => {
       </div>
       <div class="posts">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
+        <div v-if="loading === false && posts.length === 0" class="center add-post-empty">
+          <p>Aucun post disponible, ajouter le premier</p>
+          <LazyForumModalAddPost />
+        </div>
         <div v-for="post in posts" :key="post._id">
           <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
         </div>
@@ -153,6 +156,16 @@ onMounted(async () => {
     top: 0;
     right: 0;
   }
+}
+
+.center {
+  text-align: center;
+}
+
+.add-post-empty {
+  display: flex;
+  gap: 0.5em;
+  margin: auto;
 }
 
 .forum {
