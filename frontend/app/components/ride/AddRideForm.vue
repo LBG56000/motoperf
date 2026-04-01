@@ -44,8 +44,8 @@ const rideDistance = computed(() => {
 })
 
 const searchCommunes = async (query: string) => {
-  // Permet de re fetch seulement s'il y a 3 charactères
-  if (!query || query.length < 3) return
+  // Permet de re fetch seulement s'il y a 1 charactères
+  if (!query || query.length <= 1) return
 
   isLoading.value = true
   try {

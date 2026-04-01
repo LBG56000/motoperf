@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { IPicture } from '~/types/picture.js'
 import type { IRide } from '~/types/ride'
 
 interface IProps {
@@ -8,26 +7,11 @@ interface IProps {
 
 const props = defineProps<IProps>()
 
-const pictureData = ref<{ pictures: IPicture[] } | null>(null)
-onMounted(async () => {
-  const runtimeConfig = useRuntimeConfig()
-  try {
-    const res = await $fetch<{ pictures: IPicture[] }>(
-      `${runtimeConfig.public.apiBase}pictures`,
-      {
-        params: {
-          filter: JSON.stringify({
-            _id: { $in: props.ride.picture }
-          }),
-          project: 'title,image_link',
-          limit: 1
-        }
-      }
-    )
-    pictureData.value = res
-  } catch (e) {
-    console.error("Erreur lors du chargement de l'image", e)
-  }
+const imageUrl = computed(() => {
+  const link = props.ride.image_link
+  return link
+    ? `${link}`
+    : 'https://images.unsplash.com/photo-1515777315835-281b94c9589f'
 })
 
 const participantsAvatars = [
@@ -35,15 +19,21 @@ const participantsAvatars = [
   { src: 'https://i.pravatar.cc/100?u=2' },
   { src: 'https://i.pravatar.cc/100?u=3' }
 ]
+
+const likeGestion = () => {
+  // const runtimeConfig = useRuntimeConfig()
+  // const res = await $fetch<{ url: string }>(
+  //   `${runtimeConfig.public.apiBase}rides//like`,
+  //   {
+  //     method: 'POST',
+  //     body: formData
+  //   }
+  // )
+}
 </script>
 
 <template>
-  <div
-    class="card-image"
-    :style="{
-      backgroundImage: `url(${pictureData?.pictures[0]?.image_link || 'https://images.unsplash.com/photo-1515777315835-281b94c9589f'})`
-    }"
-  >
+  <div class="card-image" :style="{ backgroundImage: `url(${imageUrl})` }">
     <div class="overlay"></div>
 
     <div class="card-content">
@@ -65,6 +55,7 @@ const participantsAvatars = [
           style="cursor: pointer"
           class="like-button"
           aria-label="Liker cette balade"
+          @click="likeGestion"
         />
       </header>
 

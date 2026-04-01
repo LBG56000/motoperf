@@ -9,6 +9,7 @@ export interface IRide {
   end_town: string
   ride_type: string
   like: number
+  liked_id: string[]
   image_link: string
   create_date: string
 }

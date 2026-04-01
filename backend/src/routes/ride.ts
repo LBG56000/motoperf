@@ -18,6 +18,47 @@ router.get(
   },
 )
 
+router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
+  const { userId } = req.body
+
+  if (!userId) {
+    return res.status(400).json({ error: "L'ID de l'utilisateur est requis" })
+  }
+
+  try {
+    const ride = await Ride.findById(req.params.id)
+
+    if (!ride) {
+      return res.status(404).json({ error: 'Balade introuvable' })
+    }
+
+    const hasLiked = ride.liked_id.includes(userId)
+    let update
+    if (hasLiked) {
+      update = {
+        $pull: { liked_id: userId },
+        $inc: { like: -1 },
+      }
+    } else {
+      update = {
+        $addToSet: { liked_id: userId },
+        $inc: { like: 1 },
+      }
+    }
+
+    const updatedRide = await Ride.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+    })
+
+    res.status(200).json({
+      like: updatedRide?.like,
+      isLiked: !hasLiked,
+    })
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur pendant l’opération de like' })
+  }
+})
+
 router.post(
   '/',
   async (
