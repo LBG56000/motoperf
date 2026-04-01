@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import * as v from 'valibot'
+import { useAuth } from '~/composable/useAuth';
 import type { IBrand } from '~/types/brand';
 import type { ICategory } from '~/types/category';
 
@@ -9,21 +10,19 @@ const props = defineProps({
 
 const categories = ref<ICategory[]>([])
 const brands = ref<IBrand[]>([])
-const openConnexion = ref(false)
 
 const toast = useToast()
 const emit = defineEmits<{ close: [boolean] }>()
 
-const { user } = useAuth()
+const { user, isAuthenticated } = useAuth()
 
 const getCategories = async () => {
   const res = await $fetch<{ categories: ICategory[] }>(
     `${useRuntimeConfig().public.apiBase}categories`, {
     params: {
-      project: 'name,id'
+      project: 'name,_id'
     }
-  }
-  )
+  })
   categories.value = res.categories
 }
 
@@ -33,8 +32,7 @@ const getBrands = async () => {
     params: {
       project: 'name,_id'
     }
-  }
-  )
+  })
   brands.value = res.brands
 }
 
@@ -100,12 +98,6 @@ const onSubmit = async () => {
   }
 }
 
-const handleAddPost = () => {
-  if (!user) {
-    openConnexion.value = true
-  }
-}
-
 const resetForm = () => {
   state.brand = ''
   state.title = ''
@@ -123,60 +115,63 @@ onMounted(async () => {
 
 <template>
   <div>
-    <ConnexionForm v-model="openConnexion" />
-    <UModal v-if="openConnexion === false" :transition="true" :close="{ onClick: () => emit('close', false) }">
-      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" @click="handleAddPost" />
+    <UModal :close="{ onClick: () => emit('close', false) }">
+      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" />
       <template #header>
-        <h3>Ajouter un post</h3>
+        <div>
+          <h3>Ajouter un post</h3>
+        </div>
       </template>
       <template #body>
-        <UForm :schema :state="state" @submit="onSubmit">
-          <UFormField label="Titre du post" required name="title">
-            <UInput v-model="state.title" placeholder="Titre du post" />
-          </UFormField>
-          <UFormField label="Catégorie" required name="category">
-            <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
-              value-key="name" label-key="name" :search-input="{
-                placeholder: 'Rechercher',
-                icon: 'i-lucide-search'
-              }">
-              <template #empty>
-                <span class="text-gray-500 text-sm p-2">
-                  Aucune catégorie trouvée
-                </span>
-              </template>
-            </USelectMenu>
-          </UFormField>
-          <UFormField label="Marques" required name="brand">
-            <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
-              value-key="_id" label-key="name" :search-input="{
-                placeholder: 'Rechercher',
-                icon: 'i-lucide-search'
-              }">
-              <template #empty>
-                <span class="text-gray-500 text-sm p-2">
-                  Aucune marque trouvée
-                </span>
-              </template>
-            </USelectMenu>
-          </UFormField>
-          <UFormField label="Description" required name="description">
-            <UTextarea v-model="state.description" placeholder="Ecrivez votre description" />
-          </UFormField>
-          <UFormField required label="Image associé à mon post" name="file">
-            <!-- TODO: a faire avec une vraie image -->
-            <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG" />
-          </UFormField>
-          <div class="flex gap-2 mt-8">
-            <UButton type="submit" @click="emit('close', true)">
-              Valider
-            </UButton>
+        <div>
+          <UForm :schema :state="state" @submit="onSubmit">
+            <UFormField label="Titre du post" required name="title">
+              <UInput v-model="state.title" placeholder="Titre du post" />
+            </UFormField>
+            <UFormField label="Catégorie" required name="category">
+              <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
+                value-key="name" label-key="name" :search-input="{
+                  placeholder: 'Rechercher',
+                  icon: 'i-lucide-search'
+                }">
+                <template #empty>
+                  <span class="text-gray-500 text-sm p-2">
+                    Aucune catégorie trouvée
+                  </span>
+                </template>
+              </USelectMenu>
+            </UFormField>
+            <UFormField label="Marques" required name="brand">
+              <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
+                value-key="_id" label-key="name" :search-input="{
+                  placeholder: 'Rechercher',
+                  icon: 'i-lucide-search'
+                }">
+                <template #empty>
+                  <span class="text-gray-500 text-sm p-2">
+                    Aucune marque trouvée
+                  </span>
+                </template>
+              </USelectMenu>
+            </UFormField>
+            <UFormField label="Description" required name="description">
+              <UTextarea v-model="state.description" placeholder="Ecrivez votre description" />
+            </UFormField>
+            <UFormField required label="Image associé à mon post" name="file">
+              <!-- TODO: a faire avec une vraie image -->
+              <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG" />
+            </UFormField>
+            <div class="flex gap-2 mt-8">
+              <UButton type="submit" @click="emit('close', true)">
+                Valider
+              </UButton>
 
-            <UButton variant="outline">
-              Réinitialiser
-            </UButton>
-          </div>
-        </UForm>
+              <UButton variant="outline">
+                Réinitialiser
+              </UButton>
+            </div>
+          </UForm>
+        </div>
       </template>
     </UModal>
   </div>

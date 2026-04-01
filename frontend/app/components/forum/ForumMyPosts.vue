@@ -1,5 +1,14 @@
 <script setup lang="ts">
+import { useAuth } from '~/composable/useAuth';
+import { useConnexionModal } from '~/composable/useConnexionModal';
 
+
+const { isAuthenticated } = useAuth()
+const { open } = useConnexionModal()
+
+const handleAddPost = () => {
+  open()
+}
 </script>
 
 <template>
@@ -8,7 +17,9 @@
       <template #header>
         <div class="header">
           <h3>Mes posts</h3>
-          <LazyForumModalAddPost />
+          <UButton v-if="!isAuthenticated" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
+            @click="handleAddPost" />
+          <LazyForumModalAddPost v-else />
         </div>
       </template>
       <template #default>
