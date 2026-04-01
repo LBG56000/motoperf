@@ -6,7 +6,7 @@ const isAuthenticated = computed(() => !!user.value)
 export function useAuth() {
   const apiBase = useRuntimeConfig().public.apiBase
 
-  async function fetchUser(projects: string = 'image') {
+  async function fetchUser(projects: string = '') {
     try {
       const data = await $fetch<{ users: IUser }>(`${apiBase}users/account`, {
         credentials: 'include',
