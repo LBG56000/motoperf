@@ -431,7 +431,7 @@ onMounted(async () => {
     const runtimeConfig = useRuntimeConfig()
     try {
       const res = await fetch(
-        `${runtimeConfig.public.apiBase}rides?project=title,description,color,geom,duration,distance,start_town,end_town,ride_type,like,picture`
+        `${runtimeConfig.public.apiBase}rides?project=title,description,color,geom,duration,distance,start_town,end_town,ride_type,like,image_link`
       )
       const data: RideResponse = await res.json()
       if (data.rides && data.rides.length > 0) {

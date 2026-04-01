@@ -9,7 +9,7 @@ export interface IRide {
   start_town: string
   end_town: string
   ride_type: string
-  picture: string
+  image_link: string
   like: number
   create_date: string
 }
@@ -64,6 +64,7 @@ export interface IValueForm {
   startTown: IValueCommuneSelect | undefined
   endTown: IValueCommuneSelect | undefined
   rideType: string
+  picture: File | undefined
   geom: IGeoJSON | null
 }
 

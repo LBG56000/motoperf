@@ -33,7 +33,7 @@ router.post(
         startTown,
         endTown,
         rideType,
-        picture,
+        imageLink,
         geom,
       } = req.body
 
@@ -50,7 +50,7 @@ router.post(
         start_town: startTown?.value,
         end_town: endTown?.value,
         ride_type: rideType,
-        picture: picture,
+        image_link: imageLink,
       })
 
       const savedRide = await newRide.save()

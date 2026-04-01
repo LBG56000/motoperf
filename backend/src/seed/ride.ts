@@ -1,18 +1,9 @@
 import Ride from '../models/Ride'
 import { connectToMongo } from '.'
-import Picture from '../models/Picture'
 
 const seedRide = async () => {
   await connectToMongo()
   await Ride.deleteMany({})
-
-  const createdPictures = await Picture.insertMany([
-    { image_link: './admin/rides/images/images.jpg', title: 'Bord de mer' },
-    { image_link: './admin/rides/images/images2.jpeg', title: 'Test moto' },
-    { image_link: './admin/rides/images/images3.jpg', title: 'Virages' },
-    { image_link: './admin/rides/images/images4.jpg', title: 'Guingamp' },
-    { image_link: './admin/rides/images/images5.jpg', title: 'Longue' },
-  ])
 
   await Ride.insertMany([
     {
@@ -76,7 +67,7 @@ const seedRide = async () => {
       like: 24,
       create_date: '2024-03-20T10:00:00Z',
       user_id: 101,
-      picture: createdPictures[0]._id,
+      image_link: './admin/rides/images/images.jpg',
     },
     {
       title: 'Courte balade pour tester sa moto',
@@ -142,7 +133,7 @@ const seedRide = async () => {
       like: 12,
       create_date: '2024-03-21T14:30:00Z',
       user_id: 102,
-      picture: createdPictures[1]._id,
+      image_link: './admin/rides/images/images2.jpeg',
     },
     {
       title: 'Balade centre Bretagne avec beaucoup de virages',
@@ -263,7 +254,7 @@ const seedRide = async () => {
       like: 56,
       create_date: '2024-03-22T09:15:00Z',
       user_id: 101,
-      picture: createdPictures[2]._id,
+      image_link: './admin/rides/images/images3.jpg',
     },
     {
       title: 'Balade à Guingamp',
@@ -376,7 +367,7 @@ const seedRide = async () => {
       like: 15,
       create_date: '2024-03-22T09:15:00Z',
       user_id: 101,
-      picture: createdPictures[3]._id,
+      image_link: './admin/rides/images/images4.jpg',
     },
     {
       title: 'Longue balade',
@@ -497,7 +488,7 @@ const seedRide = async () => {
       like: 48,
       create_date: '2024-03-22T09:15:00Z',
       user_id: 101,
-      picture: createdPictures[4]._id,
+      image_link: './admin/rides/images/images5.jpg',
     },
   ])
 

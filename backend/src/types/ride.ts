@@ -9,6 +9,7 @@ export interface IRide {
   end_town: string
   ride_type: string
   like: number
+  image_link: string
   create_date: string
 }
 
@@ -40,6 +41,6 @@ export interface ICreateRideBody {
   startTown: { value: string }
   endTown: { value: string }
   rideType: string
-  picture?: string
+  imageLink?: string
   geom: IGeoJSON
 }

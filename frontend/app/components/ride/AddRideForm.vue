@@ -118,16 +118,47 @@ const stateForm = reactive<IValueForm>({
   startTown: undefined,
   endTown: undefined,
   rideType: '',
-  geom: null,
-  picture: null
+  picture: undefined,
+  geom: null
 })
+
+async function uploadFile(
+  file: File,
+  type: 'image' | 'sound',
+  directory: string
+): Promise<string> {
+  const clearString = (s: string | undefined) => {
+    return s ? s.replace(' ', '_').toLowerCase() : ''
+  }
+
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('type', type)
+  formData.append('directory', directory)
+  formData.append(
+    'name',
+    `${clearString(stateForm.startTown?.value)}_${clearString(stateForm.endTown?.value)}-${new Date().getTime()}`
+  )
+
+  const res = await $fetch<{ url: string }>('/api/uploadFile', {
+    method: 'POST',
+    body: formData
+  })
+  return res.url
+}
 
 async function onSubmit() {
   console.log('stateForm : ', stateForm)
   const runtimeConfig = useRuntimeConfig()
   try {
+    let directoryImageRide
+    if (stateForm.picture) {
+      directoryImageRide = await uploadFile(stateForm.picture, 'image', 'rides')
+    }
+
     const payload = {
       ...stateForm,
+      imageLink: directoryImageRide,
       distance: parseFloat(rideDistance.value.toString())
     }
 

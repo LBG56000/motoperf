@@ -69,9 +69,9 @@ const rideSchema = new Schema({
     type: Number,
     default: 0,
   },
-  picture: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Picture',
+  image_link: {
+    type: String,
+    required: true,
   },
   createdAt: {
     type: Date,
