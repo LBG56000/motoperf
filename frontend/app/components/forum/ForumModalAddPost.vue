@@ -61,7 +61,7 @@ const resetForm = () => {
 <template>
   <div>
     <UModal :transition="true" :close="{ onClick: () => emit('close', false) }">
-      <UButton :label="labelOfModal" />
+      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" />
       <template #header>
         <h3>Ajouter un post</h3>
       </template>

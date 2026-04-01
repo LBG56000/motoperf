@@ -50,7 +50,7 @@ onMounted(async () => {
     </HeaderInfo>
     <div id="post" class="post-filters">
       <div>
-        <ForumFilters />
+        <ForumPanel />
       </div>
       <div>
         <div class="icon-and-text">
@@ -80,22 +80,14 @@ onMounted(async () => {
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
-          <img :src="`/images/posts/${post?.image}`"
-            :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            :title="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            class="img margin-1_5 margin-bottom-1">
+          <img :src="`/images/posts/${post?.image}`" :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
+            :title="`Image du post ${post?.title} par ${post?.user.firstname}`" class="img margin-1_5 margin-bottom-1">
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
-        <UFormField
-          label="Ecrire une réponse"
-          required
-          :ui="{ container: 'w-5/6' }"
-        >
+        <UFormField label="Ecrire une réponse" required :ui="{ container: 'w-5/6' }">
           <UTextarea v-model="newReponseOfPost" class="w-5/6" />
         </UFormField>
-        <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''"
-          >Ajouter ma réponse</UButton
-        >
+        <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''">Ajouter ma réponse</UButton>
         <p v-if="responses.length === 0">
           Aucune réponse à ce post, ajouter la première
         </p>

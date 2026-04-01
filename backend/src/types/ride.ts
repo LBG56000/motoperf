@@ -2,7 +2,7 @@ export interface IRide {
   title: string
   description: string
   color: string
-  geom: GeoJSON.GeometryObject
+  geom: IGeoJSON
   duration: number
   distance: number
   start_town: string
@@ -22,4 +22,24 @@ export interface IGeoJSON {
     }
     properties: any
   }[]
+}
+
+export enum RideColor {
+  BLUE = '#0072B2',
+  ORANGE = '#E69F00',
+  PINK = '#CC79A7',
+  YELLOW = '#F0E442',
+  GREEN = '#7EDE6B',
+}
+
+export interface ICreateRideBody {
+  title: string
+  description?: string
+  duration: number
+  distance: number
+  startTown: { value: string }
+  endTown: { value: string }
+  rideType: string
+  picture?: string
+  geom: IGeoJSON
 }

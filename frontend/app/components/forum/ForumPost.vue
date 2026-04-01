@@ -28,20 +28,15 @@ const handleOpenAPost = async (id: string) => {
 }
 </script>
 <template>
-  <UCard class="card-forum" @click="handleOpenAPost(post._id)">
+  <UCard class="card-forum custom-border" @click="handleOpenAPost(post._id)">
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
       <UAvatar v-else :src="`/images/users/${props.post.user.image}`" size="3xl" loading="lazy" class="margin-2" />
       <div class="main">
         <div class="top">
-          <h3>{{ props.post.title }}</h3>
+          <h4>{{ props.post.title }}</h4>
           <!--TODO: à compléter pour la gestion utilisateur-->
-          <UIcon
-            v-if="props.isUser"
-            class="size-6"
-            name="i-lucide-square-pen"
-            @click.stop="handleEditAPost"
-          />
+          <UIcon v-if="props.isUser" class="size-6" name="i-lucide-square-pen" @click.stop="handleEditAPost" />
         </div>
         <div class="grid">
           <div>
@@ -75,8 +70,8 @@ const handleOpenAPost = async (id: string) => {
 <style scoped>
 .card-forum {
   width: 100%;
-  max-width: 900px;
-  margin: 0.5rem auto;
+  max-width: 1100px;
+  /* margin: 0.5rem auto; */
 }
 
 .main {
@@ -89,7 +84,7 @@ const handleOpenAPost = async (id: string) => {
 .statsContainer {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: flex-end;
 }
 
@@ -131,6 +126,7 @@ const handleOpenAPost = async (id: string) => {
   gap: 0.3em;
   margin-top: 1em;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .grid {
@@ -139,5 +135,9 @@ const handleOpenAPost = async (id: string) => {
   align-items: center;
   margin-top: 0.5em;
   width: 100%;
+}
+
+.custom-border {
+  border: 0.5px solid var(--border-gray);
 }
 </style>

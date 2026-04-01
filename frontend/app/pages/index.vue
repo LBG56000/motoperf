@@ -135,7 +135,7 @@ onMounted(async () => {
             <span class="bold">vitesse</span>. Depuis
             <span class="bold">1868</span>, des milliers de modèles de motos ont
             vu le jour. Et si toi aussi tu veux savoir laquelle correspond le
-            mieux à ce que tu recherches ...
+            mieux à ce que tu recherches...
           </p>
         </article>
         <img src="/images/accueil/Hornet.png" alt="Moto" class="img-cover" />
