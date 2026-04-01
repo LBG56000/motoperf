@@ -6,16 +6,15 @@ export default defineEventHandler(async (event) => {
   const file = formData.get('file') as File
   const type = formData.get('type') as string
   const directory = formData.get('directory') as string
-  const motoName = formData.get('motoName') as string
-  const motoYear = formData.get('motoYear') as string
+  const name = formData.get('name') as string
 
   if (!file) throw createError({ statusCode: 400, message: 'Fichier manquant' })
   if (!directory)
     throw createError({ statusCode: 400, message: 'Répertoire manquant' })
 
-  const safeName = motoName.toLowerCase().replace(/\s+/g, '_')
+  const safeName = name.toLowerCase().replace(/\s+/g, '_')
   const ext = file.name.split('.').pop()
-  const fileName = `${safeName}_${motoYear}.${ext}`
+  const fileName = `${safeName}.${ext}`
 
   const baseFolder =
     type === 'image'

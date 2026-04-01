@@ -83,12 +83,6 @@ const handleFilter = async (updateFilter: any) => {
   await getPosts()
 }
 
-const handleSearch = () => {
-  if (filters.value.searchBar.trim().length > 0) {
-    getPosts()
-  }
-}
-
 onMounted(async () => {
   await Promise.all([
     getPosts()
@@ -113,31 +107,67 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <ForumFilters :loading :active-filter="filters" @filters="handleFilter" />
       <div>
+        <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
+      </div>
+      <div class="posts">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <UFormField label="Rechercher un post dans le forum">
-          <UInput v-model="filters.searchBar" placeholder="Rechercher un post" @update:model-value="handleSearch">
-            <template v-if="filters.searchBar?.length" #trailing>
-              <UButton color="neutral" variant="link" size="sm" icon="i-lucide-circle-x" aria-label="Clear input"
-                class="cursor-pointer" @click="filters.searchBar = ''; getPosts()" />
-            </template>
-          </UInput>
-        </UFormField>
-        <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
+        <div v-if="loading === false && posts.length === 0" class="center add-post-empty">
+          <p>Aucun post disponible, ajouter le premier</p>
+          <LazyForumModalAddPost />
+        </div>
         <div v-for="post in posts" :key="post._id">
           <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
         </div>
       </div>
       <div class="panel">
-        <ForumMyFavoritesPost class="my-favorites" />
-        <ForumMyPosts class="my-favorites" />
+        <ForumMyPosts />
+        <ForumMyFavoritesPost />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/** Style version PC */
+@media (max-width: 1024px) {
+  #navbar-pc {
+    display: none;
+  }
+
+  .panel {
+    display: none;
+  }
+}
+
+/** Style version mobile */
+
+@media (min-width: 1024px) {
+  #navbar-mobile {
+    display: none;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 300px;
+    position: sticky;
+    top: 0;
+    right: 0;
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+.add-post-empty {
+  display: flex;
+  gap: 0.5em;
+  margin: auto;
+}
+
 .forum {
   display: flex;
   flex-direction: row;
@@ -160,8 +190,8 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   align-items: start;
-  gap: 2em;
   margin: 2em;
+  gap: 2em;
 }
 
 .forum-filters>div:nth-child(2) {
@@ -169,18 +199,9 @@ onMounted(async () => {
   min-width: 0;
 }
 
-.forum-filters>div>div,
-.my-favorites {
-  margin-top: 2em;
-}
-
-.panel {
+.posts {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  width: 300px;
-  position: sticky;
-  top: 0;
-  right: 0;
+  gap: 1.5em;
 }
 </style>

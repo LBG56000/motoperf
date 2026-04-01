@@ -42,6 +42,7 @@ const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
 const isConnected = ref<boolean>(true) // Simule l'état de connexion de l'utilisateur
+const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
   return [
@@ -54,7 +55,7 @@ const comment = ref<ICommentInput>({
   motorcycleName: '',
   brand: '',
   content: '',
-  user: '69c5b03af6ccda9980998ec6'
+  user: '69cbe6342e0cabab3167824a' // TODO: update quand l'auth sera en place
 })
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -239,7 +240,9 @@ async function postComment() {
         body: {
           title: selectedMotorcycle.name,
           brand: selectedMotorcycle.brand._id,
-          user: comment.value.user
+          category: 'Modèle',
+          user: comment.value.user,
+          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`
         }
       })
 
@@ -268,11 +271,12 @@ async function postComment() {
         referenceModel: 'Post'
       }
     })
+    messagePosted.value = true
   } catch (error) {
     console.error('Error posting comment:', error)
   }
 
-  fetchMessages()
+  await fetchMessages()
 }
 
 onMounted(() => {
@@ -375,6 +379,7 @@ onMounted(() => {
               >
             </div>
             <div
+              v-if="!messagePosted"
               class="input-comment-container"
               :class="{ blurred: !isConnected }"
             >
@@ -402,6 +407,13 @@ onMounted(() => {
                 @click="postComment"
                 >Poster</UButton
               >
+            </div>
+            <div v-else class="input-posted-container">
+              <h4>Merci pour votre contribution !</h4>
+              <p>
+                Votre commentaire a été posté avec succès. Il apparaîtra dans la
+                section des commentaires correspondante.
+              </p>
             </div>
           </div>
         </div>
@@ -521,6 +533,24 @@ onMounted(() => {
 }
 
 .input-comment-container h4 {
+  text-align: center;
+}
+
+.input-posted-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: fit-content;
+  min-height: 25rem;
+  padding: 2rem;
+  gap: 30px;
+}
+
+.input-posted-container h4 {
+  text-align: center;
+}
+
+.input-posted-container p {
   text-align: center;
 }
 
