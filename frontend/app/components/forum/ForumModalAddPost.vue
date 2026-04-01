@@ -10,11 +10,10 @@ const props = defineProps({
 
 const categories = ref<ICategory[]>([])
 const brands = ref<IBrand[]>([])
-
 const toast = useToast()
-const emit = defineEmits<{ close: [boolean] }>()
-
-const { user, isAuthenticated } = useAuth()
+const { user } = useAuth()
+const displayModal = ref(false)
+const emit = defineEmits(['added-post'])
 
 const getCategories = async () => {
   const res = await $fetch<{ categories: ICategory[] }>(
@@ -91,11 +90,16 @@ const onSubmit = async () => {
     if (response.status === 201) {
       toast.add({ title: 'Succès', description: 'Votre post a été ajouté.', color: 'success' })
       resetForm()
-      emit('close', true)
+      displayModal.value = false
+      emit('added-post')
     }
   } catch {
     toast.add({ title: 'Erreur', description: 'Votre post n\' pas pu être ajouté', color: 'error' })
   }
+}
+
+const handleCloseModal = () => {
+  displayModal.value = false
 }
 
 const resetForm = () => {
@@ -115,11 +119,13 @@ onMounted(async () => {
 
 <template>
   <div>
-    <UModal :close="{ onClick: () => emit('close', false) }">
-      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" />
+    <UModal v-model:open="displayModal" :close="true">
+      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" class="cursor-pointer" />
       <template #header>
-        <div>
+        <div class="modal-header">
           <h3>Ajouter un post</h3>
+          <UButton color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
+            @click="handleCloseModal" />
         </div>
       </template>
       <template #body>
@@ -162,11 +168,11 @@ onMounted(async () => {
               <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG" />
             </UFormField>
             <div class="flex gap-2 mt-8">
-              <UButton type="submit" @click="emit('close', true)">
+              <UButton class="cursor-pointer" type="submit">
                 Valider
               </UButton>
 
-              <UButton variant="outline" @click="resetForm">
+              <UButton class="cursor-pointer" variant="outline" @click="resetForm">
                 Réinitialiser
               </UButton>
             </div>
@@ -182,6 +188,16 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
+}
 
+.modal-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

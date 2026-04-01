@@ -114,14 +114,14 @@ onMounted(async () => {
         <USkeleton v-if="loading" class="size-12 rounded-full" />
         <div v-if="loading === false && posts.length === 0" class="center add-post-empty">
           <p>Aucun post disponible, ajouter le premier</p>
-          <LazyForumModalAddPost />
+          <LazyForumModalAddPost @added-post="console.log('ADDED')" />
         </div>
         <div v-for="post in posts" :key="post._id">
           <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
         </div>
       </div>
       <div class="panel">
-        <ForumMyPosts />
+        <ForumMyPosts @new-post="getPosts" />
         <ForumMyFavoritesPost />
       </div>
     </div>
