@@ -1,20 +1,42 @@
 <script setup lang="ts">
 import * as v from 'valibot'
-import type { IBrand } from '~/types/brand'
-import type { ICategory } from '~/types/category'
+import type { IBrand } from '~/types/brand';
+import type { ICategory } from '~/types/category';
 
 const props = defineProps({
   isNewPost: Boolean,
-  categories: Array<ICategory>,
-  brands: Array<IBrand>
 })
+
+const categories = ref<ICategory[]>([])
+const brands = ref<IBrand[]>([])
+const openConnexion = ref(false)
 
 const toast = useToast()
 const emit = defineEmits<{ close: [boolean] }>()
 
-const labelOfModal = computed(() => {
-  return props.isNewPost ? "Créer un nouveau post" : "Modifier un post"
-})
+const { user } = useAuth()
+
+const getCategories = async () => {
+  const res = await $fetch<{ categories: ICategory[] }>(
+    `${useRuntimeConfig().public.apiBase}categories`, {
+    params: {
+      project: 'name,id'
+    }
+  }
+  )
+  categories.value = res.categories
+}
+
+const getBrands = async () => {
+  const res = await $fetch<{ brands: IBrand[] }>(
+    `${useRuntimeConfig().public.apiBase}brand`, {
+    params: {
+      project: 'name,_id'
+    }
+  }
+  )
+  brands.value = res.brands
+}
 
 const schema = v.object({
   title: v.pipe(v.string(), v.minLength(1, 'Le titre est requis')),
@@ -32,20 +54,55 @@ const state = reactive({
   file: undefined as File | undefined
 })
 
+const uploadImage = async (file: File, name: string): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('type', 'image')
+  formData.append('directory', 'posts')
+  formData.append('name', name)
+
+  const res = await $fetch<{ url: string }>('/api/uploadFile', {
+    method: 'POST',
+    body: formData
+  })
+  return res.url
+}
+
 const onSubmit = async () => {
   try {
+    let url = ''
+    if (state.file) {
+      url = await uploadImage(state.file, Date.now().toString())
+    }
+
     // Constrcution et envoi de la requête
+    const payload = {
+      brand: state.brand,
+      title: state.title,
+      category: state.category,
+      content: state.description,
+      url: url,
+      user: user.value?._id
+    }
+
     const response = await $fetch.raw(`${useRuntimeConfig().public.apiBase}posts`, {
       method: 'POST',
-      body: state
+      body: payload
     })
 
     if (response.status === 201) {
       toast.add({ title: 'Succès', description: 'Votre post a été ajouté.', color: 'success' })
       resetForm()
+      emit('close', true)
     }
   } catch {
     toast.add({ title: 'Erreur', description: 'Votre post n\' pas pu être ajouté', color: 'error' })
+  }
+}
+
+const handleAddPost = () => {
+  if (!user) {
+    openConnexion.value = true
   }
 }
 
@@ -54,14 +111,21 @@ const resetForm = () => {
   state.title = ''
   state.category = ''
   state.description = ''
-  state.file = undefined
+  state.file = undefined as File | undefined
 }
+
+onMounted(async () => {
+  await Promise.all([
+    getCategories(), getBrands()
+  ])
+})
 </script>
 
 <template>
   <div>
-    <UModal :transition="true" :close="{ onClick: () => emit('close', false) }">
-      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" />
+    <ConnexionForm v-model="openConnexion" />
+    <UModal v-if="openConnexion === false" :transition="true" :close="{ onClick: () => emit('close', false) }">
+      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" @click="handleAddPost" />
       <template #header>
         <h3>Ajouter un post</h3>
       </template>
@@ -72,7 +136,7 @@ const resetForm = () => {
           </UFormField>
           <UFormField label="Catégorie" required name="category">
             <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
-              value-key="_id" label-key="name" :search-input="{
+              value-key="name" label-key="name" :search-input="{
                 placeholder: 'Rechercher',
                 icon: 'i-lucide-search'
               }">
@@ -104,7 +168,7 @@ const resetForm = () => {
             <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG" />
           </UFormField>
           <div class="flex gap-2 mt-8">
-            <UButton type="submit" @click="resetForm, emit('close', true)">
+            <UButton type="submit" @click="emit('close', true)">
               Valider
             </UButton>
 
