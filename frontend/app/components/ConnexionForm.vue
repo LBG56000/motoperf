@@ -5,8 +5,8 @@ import { useConnexionModal } from '~/composable/useConnexionModal'
 import { useAuth } from '~/composable/useAuth'
 
 const { login, isAuthenticated } = useAuth()
+const { isOpen, close } = useConnexionModal()
 
-const connexionModal = useConnexionModal()
 const form = useTemplateRef('form')
 
 const state = ref({
@@ -14,26 +14,45 @@ const state = ref({
   password: ''
 })
 
-const error = ref<string>('')
+const schema = {
+  email: 'Invalid email',
+  password: () => 'Must be at least 8 characters'
+}
+
+type Schema = typeof state
+
+function validate(state: Partial<Schema>): FormError[] {
+  const errors = []
+  if (!state.email)
+    errors.push({ name: 'email', message: 'Le champ est requis' })
+  if (!state.password)
+    errors.push({ name: 'password', message: 'Le champ est requis' })
+  return errors
+}
 
 const connexion = async () => {
-  await login(state.value.email, state.value.password)
-  if (isAuthenticated) {
-    connexionModal.isOpen.value = false
-    state.value.email = ''
-    state.value.password = ''
+  try {
+    await login(state.value.email, state.value.password)
+    if (isAuthenticated) {
+      close()
+      state.value.email = ''
+      state.value.password = ''
+    }
+  } catch (err: any) {
+    form.value?.setErrors([{ name: 'email', message: err.message }])
   }
 }
 </script>
 
 <template>
-  <UModal v-model:open="connexionModal.isOpen.value">
+  <UModal v-model:open="isOpen">
     <template #content>
       <div class="content">
         <h3>Se connecter</h3>
         <UForm
           ref="form"
           :state="state"
+          :validate="validate"
           class="space-y-4"
           @submit.prevent="connexion"
         >
