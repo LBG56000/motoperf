@@ -64,12 +64,10 @@ router.get(
 router.post('/add-view', async (req, res) => {
   const { filter } = prepareQuery(req.query)
   try {
-    const post = await Post.findOne({ _id: filter.id })
-    if (!post) {
-      throw new Error('Internal server error')
-    }
-    const views = post.views
-    await Post.updateOne({ views: views }, { $inc: { views: 1 } })
+    await Post.updateOne(
+      { _id: filter.id },
+      { $inc: { views: 1 } }
+    );
     res.status(204).json()
   } catch (error) {
     console.error('Error accessing message route:', error)
