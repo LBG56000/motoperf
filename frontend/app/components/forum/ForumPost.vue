@@ -29,10 +29,7 @@ const handleOpenAPost = async (id: string) => {
 }
 
 const isSameUserConnected = (userPost: IUser): boolean => {
-  const { user, isAuthenticated } = useAuth()
-  if (isAuthenticated) {
-    return false
-  }
+  const { user } = useAuth()
   return user.value?._id === userPost._id
 
 }
