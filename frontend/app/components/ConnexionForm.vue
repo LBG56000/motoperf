@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FormError, FormSubmitEvent } from '@nuxt/ui'
+import type { FormError } from '@nuxt/ui'
 
 import { useConnexionModal } from '~/composable/useConnexionModal'
 import { useAuth } from '~/composable/useAuth'
@@ -13,13 +13,9 @@ const state = ref({
   email: '',
   password: ''
 })
+const error = ref('')
 
-const schema = {
-  email: 'Invalid email',
-  password: () => 'Must be at least 8 characters'
-}
-
-type Schema = typeof state
+type Schema = typeof state.value
 
 function validate(state: Partial<Schema>): FormError[] {
   const errors = []
@@ -33,13 +29,13 @@ function validate(state: Partial<Schema>): FormError[] {
 const connexion = async () => {
   try {
     await login(state.value.email, state.value.password)
-    if (isAuthenticated) {
+    if (isAuthenticated.value) {
       close()
       state.value.email = ''
       state.value.password = ''
     }
   } catch (err: any) {
-    form.value?.setErrors([{ name: 'email', message: err.message }])
+    error.value = err.data?.message || 'Erreur de connexion'
   }
 }
 </script>
