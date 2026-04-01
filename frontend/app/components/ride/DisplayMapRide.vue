@@ -48,6 +48,7 @@ const listRideTypes = ref<string[]>([]) // Liste de tous les types de balade pr�
 const listStartTown = ref<string[]>([]) // Liste de toutes les villes de début des balades présent
 const listEndTown = ref<string[]>([]) // Liste de toutes les villes de fin des balaades présent
 const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
+const drawInstruction = ref<string | null>(null) // Permet de mettre les instructions pour expliquer comment le dessin d'une ligne fonctionne
 
 const geom = defineModel('geom', {
   type: Object as () => IGeoJSON | null,
@@ -274,7 +275,12 @@ onMounted(async () => {
   await import('leaflet-draw')
   L_instance.value = L
 
-  map.value = L.map('map', { zoomControl: false }).setView([48.26, -3], 9)
+  map.value = L.map('map', {
+    zoomControl: false,
+    preferCanvas: false,
+    zoomAnimation: true,
+    markerZoomAnimation: true
+  }).setView([48.26, -3], 9)
   L.control.zoom({ position: 'bottomleft' }).addTo(map.value)
   L.control.scale({ imperial: false }).addTo(map.value)
 
@@ -297,7 +303,27 @@ onMounted(async () => {
         rectangle: false
       }
     })
+
     map.value.addControl(drawControl)
+
+    // Supprime les tooltips natifs des boutons de la toolbar
+    const drawContainer = document.querySelector('.leaflet-draw')
+    if (drawContainer) {
+      drawContainer
+        .querySelectorAll('a')
+        .forEach((el) => el.removeAttribute('title'))
+
+      const observer = new MutationObserver(() => {
+        drawContainer
+          .querySelectorAll('a[title]')
+          .forEach((el) => el.removeAttribute('title'))
+      })
+      observer.observe(drawContainer, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['title']
+      })
+    }
 
     // Ferme le mode édition si on commence à dessiner
     map.value.on(LDraw.Draw.Event.DRAWSTART, () => {
@@ -312,18 +338,73 @@ onMounted(async () => {
         drawControl._toolbars.draw._activeMode.handler.disable()
       }
     })
+
+    // Permet l'affichage des instructions en haut
+    map.value.on(LDraw.Draw.Event.DRAWSTART, () => {
+      drawInstruction.value = 'Cliquez sur la carte pour commencer votre tracé'
+      document
+        .querySelectorAll('.leaflet-draw-toolbar a')
+        .forEach((el) => el.removeAttribute('title'))
+    })
+    map.value.on(LDraw.Draw.Event.DRAWSTOP, () => {
+      drawInstruction.value = null
+    })
+    map.value.on(LDraw.Draw.Event.EDITSTART, () => {
+      drawInstruction.value = 'Déplacez les points pour modifier le tracé'
+      document
+        .querySelectorAll('.leaflet-draw-toolbar a')
+        .forEach((el) => el.removeAttribute('title'))
+    })
+    map.value.on(LDraw.Draw.Event.EDITSTOP, () => {
+      drawInstruction.value = null
+    })
+    map.value.on(LDraw.Draw.Event.DELETESTART, () => {
+      drawInstruction.value = 'Cliquez sur un tracé pour le supprimer'
+      document
+        .querySelectorAll('.leaflet-draw-toolbar a')
+        .forEach((el) => el.removeAttribute('title'))
+    })
+    map.value.on(LDraw.Draw.Event.DELETESTOP, () => {
+      drawInstruction.value = null
+    })
+
+    // Quand une ligne est créée
+    map.value.on(LDraw.Draw.Event.CREATED, (e: any) => {
+      const layer = e.layer
+      drawnItems.addLayer(layer)
+      updateGeomModel(drawnItems)
+
+      // Désactive complètement le bouton de dessin
+      const polylineBtn =
+        drawControl._toolbars.draw._toolbarContainer.querySelector(
+          '.leaflet-draw-draw-polyline'
+        )
+      if (polylineBtn) {
+        polylineBtn.classList.add('leaflet-disabled')
+        polylineBtn.style.pointerEvents = 'none'
+        polylineBtn.style.opacity = '0.4'
+        polylineBtn.style.cursor = 'not-allowed'
+      }
+    })
+    // Quand une ligne est modifiée ou supprimée
+    map.value.on(LDraw.Draw.Event.EDITED, () => updateGeomModel(drawnItems))
+    map.value.on(LDraw.Draw.Event.DELETED, () => {
+      updateGeomModel(drawnItems)
+
+      if (drawnItems.getLayers().length === 0) {
+        const polylineBtn =
+          drawControl._toolbars.draw._toolbarContainer.querySelector(
+            '.leaflet-draw-draw-polyline'
+          )
+        if (polylineBtn) {
+          polylineBtn.classList.remove('leaflet-disabled')
+          polylineBtn.style.pointerEvents = ''
+          polylineBtn.style.opacity = ''
+          polylineBtn.style.cursor = ''
+        }
+      }
+    })
   }
-
-  // Quand une ligne est créée
-  map.value.on(LDraw.Draw.Event.CREATED, (e: any) => {
-    const layer = e.layer
-    drawnItems.addLayer(layer)
-    updateGeomModel(drawnItems)
-  })
-
-  // Quand une ligne est modifiée ou supprimée
-  map.value.on(LDraw.Draw.Event.EDITED, () => updateGeomModel(drawnItems))
-  map.value.on(LDraw.Draw.Event.DELETED, () => updateGeomModel(drawnItems))
 
   // Fonction pour transformer la couche en GeoJSON pour le modelValue
   const updateGeomModel = (group: any) => {
@@ -406,6 +487,13 @@ watch(filteredRides, () => renderRides())
     tabindex="0"
     @keydown.esc="toggleFullScreen"
   >
+    <Transition name="slide-fade">
+      <div v-if="drawInstruction" class="draw-instruction-banner">
+        <UIcon name="i-lucide-info" class="w-5 h-5 mr-2" />
+        {{ drawInstruction }}
+      </div>
+    </Transition>
+
     <div id="map"></div>
     <div v-if="isLoading && props.displayMapLoader" class="loader-overlay">
       <div class="loader-content">
@@ -486,6 +574,7 @@ watch(filteredRides, () => renderRides())
 </template>
 
 <style scoped>
+/* --- BOUTONS ET ÉLÉMENTS FIXES --- */
 .button-add-line {
   position: absolute;
   top: 25px;
@@ -502,7 +591,7 @@ watch(filteredRides, () => renderRides())
   pointer-events: auto;
 }
 
-/* Loader de la carte */
+/* --- LOADER --- */
 .loader-overlay {
   position: absolute;
   top: 0;
@@ -546,7 +635,7 @@ watch(filteredRides, () => renderRides())
   }
 }
 
-/* Carte et ce qu'il y a au dessus */
+/* --- CONTENEUR CARTE --- */
 .map-container {
   position: relative !important;
   width: 100%;
@@ -570,11 +659,6 @@ watch(filteredRides, () => renderRides())
   border-radius: 0 !important;
 }
 
-.is-fullscreen .button-enlarge {
-  bottom: 20px;
-  right: 20px;
-}
-
 #map {
   position: absolute;
   top: 0;
@@ -584,6 +668,7 @@ watch(filteredRides, () => renderRides())
   z-index: 1;
 }
 
+/* --- FILTRES --- */
 .filters {
   position: absolute;
   top: 15px;
@@ -601,6 +686,7 @@ watch(filteredRides, () => renderRides())
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* --- LEAFLET UI CUSTOM --- */
 :deep(.custom-dynamic-pin) {
   background: transparent !important;
   border: none !important;
@@ -614,7 +700,6 @@ watch(filteredRides, () => renderRides())
   backdrop-filter: blur(4px);
 }
 
-/* Passer au dessus du CSS de leaflet draw pour que sa soit plus moderne (pas très propre mais aucun autre moyen je pense) */
 :deep(.leaflet-draw-toolbar),
 :deep(.leaflet-draw-actions),
 :deep(.leaflet-draw-tooltip),
@@ -622,16 +707,56 @@ watch(filteredRides, () => renderRides())
   font-family: 'Poppins', sans-serif !important;
 }
 
-:deep(.leaflet-draw-section) {
-  margin-top: 15px !important;
+:deep(.leaflet-control) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-left: 15px !important;
+  margin-bottom: 15px !important;
+  border: none !important;
+  overflow: visible !important;
+}
+
+/* Bandeau en haut pour les instructions */
+.draw-instruction-banner {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background-color: var(--background);
+  color: var(--text-color);
+  padding: 10px 20px;
+  border-radius: 99px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid var(--ui-primary);
+  backdrop-filter: blur(8px);
+}
+
+/* Animation d'apparition du bandeau */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: all 0.3s ease-out;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translate(-50%, 20px);
+  opacity: 0;
+}
+
+/* --- TOOLBAR DRAW --- */
+/* --- TOOLBAR DRAW --- */
+:deep(.leaflet-draw-section) {
+  margin: 0 !important;
 }
 
 :deep(.leaflet-draw-toolbar) {
   margin-top: 0 !important;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border-radius: 8px !important;
   overflow: hidden;
   background: rgba(0, 0, 0, 0.25) !important;
@@ -658,7 +783,7 @@ watch(filteredRides, () => renderRides())
   color: white !important;
 }
 
-/* Les différentes icons dans les menus */
+/* Icons */
 :deep(.leaflet-draw-draw-polyline)::before {
   content: '';
   width: 16px;
@@ -689,6 +814,7 @@ watch(filteredRides, () => renderRides())
     no-repeat center / contain;
 }
 
+/* Actions (Cancel, Save, etc) */
 :deep(.leaflet-draw-actions) {
   left: 36px !important;
   top: 0 !important;
@@ -707,14 +833,12 @@ watch(filteredRides, () => renderRides())
   color: var(--text-color) !important;
   padding: 0 12px !important;
   display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  align-items: center;
+  justify-content: center;
   height: 32px !important;
   font-size: 11px !important;
   font-weight: 500 !important;
-  text-decoration: none !important;
   border-left: 1px solid var(--border-gray) !important;
-  border-bottom: none !important;
 }
 
 :deep(.leaflet-draw-actions a:hover) {
@@ -722,34 +846,36 @@ watch(filteredRides, () => renderRides())
   color: white !important;
 }
 
-:deep(.leaflet-draw-actions li:first-child a) {
-  border-radius: 8px 0 0 8px !important;
-  border-left: none !important;
-}
-:deep(.leaflet-draw-actions li:last-child a) {
-  border-radius: 0 8px 8px 0 !important;
-}
+/* --- TOOLTIPS (BULLES D'AIDE) --- */
 
+/* Bulle qui suit la souris pendant le dessin */
 :deep(.leaflet-draw-tooltip) {
   background: var(--background) !important;
-  backdrop-filter: blur(4px);
   border: 1px solid var(--border-gray) !important;
   color: var(--text-color) !important;
-  border-radius: 8px !important;
-  padding: 8px 12px !important;
-  font-weight: 400 !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 5px 10px !important;
+  font-size: 11px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  margin-left: 20px !important;
+  margin-top: 20px !important;
+  white-space: nowrap !important;
 }
 
+/* On masque le triangle */
+:deep(.leaflet-draw-tooltip::before) {
+  display: none !important;
+}
+
+/* On masque le sous-texte superflu */
 :deep(.leaflet-draw-tooltip-subtext) {
   color: var(--text-color) !important;
   opacity: 0.7;
+  font-size: 10px !important;
+  display: block !important;
 }
 
-:deep(.leaflet-draw-tooltip::before) {
-  border-right-color: var(--background) !important;
-}
-
+/* --- ÉLÉMENTS DE DESSIN --- */
 :deep(.leaflet-editing-icon) {
   background: var(--circle-draw-line) !important;
   border: 2px solid var(--circle-draw-line-outline) !important;
@@ -758,7 +884,6 @@ watch(filteredRides, () => renderRides())
   height: 12px !important;
   margin-left: -6px !important;
   margin-top: -6px !important;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
 
 :deep(.leaflet-draw-guide-dash) {
@@ -775,24 +900,19 @@ watch(filteredRides, () => renderRides())
   cursor: crosshair;
 }
 
-:deep(.leaflet-control) {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-left: 15px !important;
-  margin-bottom: 15px !important;
-  border: none !important;
-}
-
-/* Attribution du fond de plan en bas à droite, remettre comme avant */
+/* --- AUTRES CONTRÔLES --- */
 :deep(.leaflet-control-attribution) {
   display: block !important;
   margin: 0 !important;
-  background: rgba(255, 255, 255, 0.7) !important;
   padding: 0 5px;
+  background: rgba(255, 255, 255, 0.7) !important;
 }
 
-:deep(.leaflet-draw-section) {
+:deep(.leaflet-control-zoom) {
+  display: block !important;
   margin: 0 !important;
+  padding: 0 5px;
+  margin-bottom: 10px !important;
+  margin-left: 10px !important;
 }
 </style>

@@ -145,12 +145,12 @@ export function convertToFrench(LDraw: any) {
       handlers: {
         edit: {
           tooltip: {
-            text: 'Déplacez les points pour modifier le tracé.',
-            subtext: 'Cliquez sur annuler pour rejeter les changements.'
+            text: '',
+            subtext: ''
           }
         },
         remove: {
-          tooltip: { text: 'Cliquez sur un tracé pour le supprimer' }
+          tooltip: { text: '' }
         }
       }
     }
