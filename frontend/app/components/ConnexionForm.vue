@@ -1,26 +1,59 @@
 <script setup lang="ts">
-import type { FormError, FormSubmitEvent } from '@nuxt/ui'
+import type { FormError } from '@nuxt/ui'
+
+import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composable/useAuth'
 
 const { login, isAuthenticated } = useAuth()
+const { isOpen, close } = useConnexionModal()
 
-const isOpen = defineModel({ type: Boolean, default: false })
 const form = useTemplateRef('form')
 
 const state = ref({
   email: '',
   password: ''
 })
+const error = ref('')
 
-const error = ref<string>('')
+type Schema = typeof state.value
+
+function validate(state: Partial<Schema>): FormError[] {
+  const errors = []
+  if (!state.email)
+    errors.push({ name: 'email', message: 'Le champ est requis' })
+  if (!state.password)
+    errors.push({ name: 'password', message: 'Le champ est requis' })
+  return errors
+}
 
 const connexion = async () => {
-  await login(state.value.email, state.value.password)
-  if (isAuthenticated) {
-    isOpen.value = false
-    state.value.email = ''
-    state.value.password = ''
+  try {
+    await login(state.value.email, state.value.password)
+    if (isAuthenticated.value) {
+      close()
+      state.value.email = ''
+      state.value.password = ''
+    }
+  } catch (err: any) {
+    error.value = err.data?.message || 'Erreur de connexion'
   }
 }
+
+const resetForm = () => {
+  form.value?.clear()
+  state.value.email = ''
+  state.value.password = ''
+  error.value = ''
+}
+
+watch(
+  () => isOpen.value,
+  (newVal) => {
+    if (!newVal) {
+      resetForm()
+    }
+  }
+)
 </script>
 
 <template>
@@ -31,6 +64,7 @@ const connexion = async () => {
         <UForm
           ref="form"
           :state="state"
+          :validate="validate"
           class="space-y-4"
           @submit.prevent="connexion"
         >

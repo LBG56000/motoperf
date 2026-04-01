@@ -8,7 +8,6 @@ const rideSchema = new Schema({
   },
   description: {
     type: String,
-    required: true,
   },
   color: {
     type: String,
