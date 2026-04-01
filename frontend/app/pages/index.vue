@@ -3,10 +3,17 @@ import Sponsor from '@/components/Sponsor.vue'
 import type { IMotorcycle } from '@/types/motorcycles'
 import StatsHome from '~/components/card/StatsHome.vue'
 
+import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composable/useAuth'
+
+const { isAuthenticated } = useAuth()
+
 interface IItemTab {
   content: string
   urlImg: string
 }
+
+const connexionModal = useConnexionModal()
 
 const itemsCaroussel = ref<IMotorcycle[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
@@ -92,18 +99,18 @@ onMounted(async () => {
           >Essayer</UButton
         >
         <UButton
+          v-if="!isAuthenticated"
           size="xl"
           color="neutral"
           class="rounded-full button"
           trailing-icon="i-lucide-arrow-right"
           variant="outline"
+          @click="connexionModal.open()"
           >Se connecter</UButton
         >
       </div>
 
       <div class="hero-images">
-        <img src="/images/accueil/R1_fond.png" alt="Moto" class="img-cover" />
-        <img src="/images/accueil/BMW_fond.png" alt="Moto" class="img-cover" />
         <img
           src="/images/accueil/R1_fond.png"
           alt="Moto"
@@ -316,7 +323,7 @@ section {
   gap: 3rem;
 }
 
-.button {
+:deep(.button) {
   font-size: small;
   padding: 10px 40px;
 }
