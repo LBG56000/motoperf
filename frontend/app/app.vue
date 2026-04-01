@@ -1,4 +1,7 @@
-<script setup></script>
+<script setup>
+const { fetchUser } = useAuth()
+onMounted(fetchUser)
+</script>
 
 <template>
   <NuxtLayout>

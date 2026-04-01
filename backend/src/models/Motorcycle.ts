@@ -74,7 +74,7 @@ const motorcycleSchema = new Schema({
     type: Number,
     default: 0,
   },
-  withAllFiled: {
+  withAllField: {
     type: Boolean,
     default: false,
   },
@@ -86,6 +86,10 @@ const motorcycleSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  post: {
+    type: Types.ObjectId,
+    ref: 'Post',
+  }
 })
 
 export default model<IMotorcycle>('Motorcycle', motorcycleSchema)

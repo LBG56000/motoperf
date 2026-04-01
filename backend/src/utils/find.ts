@@ -1,13 +1,15 @@
 export interface ReqQuery {
   project?: string
-  sort?: number
+  sort?: string
   limit?: string
   filter?: string
   deep?: string
 }
 
 const defaultLimit = 10
-const defaultSort = 'asc'
+const defaultSort = {
+  createdAt: -1,
+}
 const defaultProject = 'id'
 const defaultFilter = {}
 
@@ -32,8 +34,7 @@ export function prepareQuery(query: ReqQuery) {
 
   const limit = query.limit ? Number(query.limit) : defaultLimit
   const filter = query.filter ? JSON.parse(query.filter) : defaultFilter
-  let sort = defaultSort
-  if (query.sort && query.sort === -1) sort = 'desc'
+  const sort = query.sort ? JSON.parse(query.sort) : defaultSort
 
   const deep = query.deep ? true : false
 

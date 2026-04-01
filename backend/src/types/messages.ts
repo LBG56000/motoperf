@@ -9,7 +9,6 @@ export interface IMessage {
   isRep: boolean
   reference?: Types.ObjectId;
   referenceModel?: 'Post' | 'Message';
-  motorcycleId: boolean | null
   user: IUser
   createAt: string
 }

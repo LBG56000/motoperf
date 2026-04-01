@@ -4,7 +4,7 @@
 
 <template>
   <div>
-    <UCard variant="outline">
+    <UCard variant="outline" class="my-favourites-posts custom-border">
       <template #header>
         <h3>Mes favoris</h3>
       </template>
@@ -15,4 +15,12 @@
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.my-favourites-posts {
+  width: 100%;
+}
+
+.custom-border {
+  border: 0.5px solid var(--border-gray);
+}
+</style>

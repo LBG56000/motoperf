@@ -16,8 +16,8 @@ defineProps<{
     :ui="{
       container: 'flex items-stretch h-full',
       item: 'basis-1/5 ps-0 self-stretch',
-      prev: 'sm:start-15',
-      next: 'sm:end-15'
+      prev: 'sm:start-0',
+      next: 'sm:end-0'
     }"
   >
     <article>

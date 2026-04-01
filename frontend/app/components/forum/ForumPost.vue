@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { IPost } from '~/types/post';
+import type { IPost } from '~/types/post'
 
 const props = defineProps<{
-  post: IPost,
-  isUser: boolean,
+  post: IPost
+  isUser: boolean
   loading: boolean
 }>()
 
@@ -11,31 +11,46 @@ const handleEditAPost = () => {
   console.log('Edit post')
 }
 
-const handleOpenAPost = (id: string) => {
+const apiBase = useRuntimeConfig().public.apiBase
+
+const addViewInAPost = async (id: string) => {
+  await $fetch(`${apiBase}posts/add-view`, {
+    method: 'POST',
+    params: {
+      filter: JSON.stringify({ id: id }),
+    }
+  })
+}
+
+const handleOpenAPost = async (id: string) => {
+  await addViewInAPost(id)
   navigateTo(`/forum/${id}`)
 }
 </script>
 <template>
-  <UCard class="card-forum" @click="handleOpenAPost(post._id)">
+  <UCard class="card-forum custom-border" @click="handleOpenAPost(post._id)">
     <div class="postCard">
       <USkeleton v-if="props.loading" class="size-12 rounded-full" />
-      <UAvatar v-else :src="`/_nuxt/assets/images/users/${props.post.user.image}`" size="3xl" loading="lazy"
-        class="margin-2" />
+      <UAvatar v-else :src="`/images/users/${props.post.user.image}`" size="3xl" loading="lazy" class="margin-2" />
       <div class="main">
         <div class="top">
-          <h3>{{ props.post.question }}</h3>
+          <h4>{{ props.post.title }}</h4>
           <!--TODO: à compléter pour la gestion utilisateur-->
           <UIcon v-if="props.isUser" class="size-6" name="i-lucide-square-pen" @click.stop="handleEditAPost" />
         </div>
         <div class="grid">
           <div>
             <div class="badges">
-              <UBadge size="lg" class="margin-2">{{ props.post.brand.name }}</UBadge>
+              <UBadge size="lg" class="margin-2">{{
+                props.post.brand.name
+              }}</UBadge>
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
 
-            <p>Par {{ props.post.user.firstname }}, {{ formatTimeAgo(props.post.createdAt)
-              }}</p>
+            <p>
+              Par {{ props.post.user.firstname }},
+              {{ formatTimeAgo(props.post.createdAt) }}
+            </p>
           </div>
           <div class="statsContainer">
             <div class="stats">
@@ -53,25 +68,31 @@ const handleOpenAPost = (id: string) => {
   </UCard>
 </template>
 <style scoped>
+.card-forum {
+  width: 100%;
+  max-width: 1100px;
+  /* margin: 0.5rem auto; */
+}
+
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .statsContainer {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: flex-end;
 }
 
 .postCard {
-  width: 55vw;
-  margin: 1em auto;
-  padding: 1em;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
   display: flex;
-  gap: 1em;
+  gap: 1.5em;
   align-items: flex-start;
 }
 
@@ -83,9 +104,15 @@ const handleOpenAPost = (id: string) => {
   width: 100%;
 }
 
+.top h3 {
+  margin: 0;
+}
+
 .badges {
   display: flex;
-  gap: 0.5em;
+  flex-direction: row;
+  gap: 1.5rem;
+  align-items: center;
   margin-bottom: 1em;
   margin-top: 1em;
 }
@@ -96,15 +123,21 @@ const handleOpenAPost = (id: string) => {
 
 .stats {
   display: flex;
-  gap: 0.5em;
+  gap: 0.3em;
   margin-top: 1em;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .grid {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-top: 0.5em;
   width: 100%;
+}
+
+.custom-border {
+  border: 0.5px solid var(--border-gray);
 }
 </style>

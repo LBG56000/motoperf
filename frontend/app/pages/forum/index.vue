@@ -4,13 +4,52 @@ import HeaderInfo from '~/components/global/HeaderInfo.vue';
 import type { IPost } from '~/types/post';
 
 const posts = ref<IPost[]>([])
-
 const loading = ref(true)
+const filters = ref({
+  brandIds: [] as string[],
+  categoryIds: [] as string[],
+  onlyMyPost: true,
+  searchBar: ''
+})
+
+const filter = computed(() => {
+  const conditions = []
+
+  if (filters.value.brandIds.length) {
+    conditions.push({
+      brand: { $in: filters.value.brandIds }
+    })
+  }
+
+  if (filters.value.categoryIds.length) {
+    conditions.push({
+      category: { $in: filters.value.categoryIds }
+    })
+  }
+
+  if (filters.value.searchBar && filters.value.searchBar.trim().length !== 0) {
+    conditions.push({
+      title: { $regex: filters.value.searchBar, $options: 'i' }
+    })
+  }
+
+  if (!conditions.length) return undefined
+
+  return JSON.stringify({
+    $or: conditions
+  })
+})
+
 const getPosts = async () => {
-  const res = await fetch(`${useRuntimeConfig().public.apiBase}posts?deep=true&project=content,question,id,createdAt,views`)
-  const data = await res.json()
+  const res = await $fetch<{ posts: IPost[] }>(`${useRuntimeConfig().public.apiBase}posts`, {
+    params: {
+      deep: true,
+      project: 'content,title,id,createdAt,views',
+      filter: filter.value
+    }
+  })
   posts.value = await Promise.all(
-    data.posts.map(async (post: IPost) => {
+    res.posts.map(async (post: IPost) => {
       post.responses = await getResponseOfPost(post._id)
       // await getResponsesOfResponses()
       return post
@@ -36,6 +75,14 @@ const isUserOfPost = computed(() => {
   return true
 })
 
+const handleFilter = async (updateFilter: any) => {
+  filters.value = {
+    ...filters.value,
+    ...updateFilter
+  }
+  await getPosts()
+}
+
 onMounted(async () => {
   await Promise.all([
     getPosts()
@@ -60,23 +107,73 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <ForumFilters :loading />
       <div>
+        <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
+      </div>
+      <div class="posts">
         <USkeleton v-if="loading" class="size-12 rounded-full" />
-        <p v-if="loading === false && posts.length === 0">Aucun post disponible</p>
+        <div v-if="loading === false && posts.length === 0" class="center add-post-empty">
+          <p>Aucun post disponible, ajouter le premier</p>
+          <LazyForumModalAddPost />
+        </div>
         <div v-for="post in posts" :key="post._id">
           <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
         </div>
       </div>
       <div class="panel">
-        <ForumMyFavoritesPost class="my-favorites" />
-        <ForumMyPosts class="my-favorites" />
+        <ForumMyPosts />
+        <ForumMyFavoritesPost />
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/** Style version PC */
+@media (max-width: 1024px) {
+  #navbar-pc {
+    display: none;
+  }
+
+  .panel {
+    display: none;
+  }
+}
+
+/** Style version mobile */
+
+@media (min-width: 1024px) {
+  #navbar-mobile {
+    display: none;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 300px;
+    position: sticky;
+    top: 0;
+    right: 0;
+  }
+}
+
+.center {
+  text-align: center;
+}
+
+.add-post-empty {
+  display: flex;
+  gap: 0.5em;
+  margin: auto;
+}
+
+.forum {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .loading {
   display: flex;
   justify-content: center;
@@ -93,21 +190,18 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   align-items: start;
-  justify-content: space-between;
-  margin: 5em;
+  margin: 2em;
+  gap: 2em;
 }
 
-.forum-filters>div>div,
-.my-favorites {
-  margin-top: 2em;
+.forum-filters>div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
 }
 
-.panel {
+.posts {
   display: flex;
   flex-direction: column;
-  margin-left: 2em;
-  position: sticky;
-  top: 0;
-  right: 0;
+  gap: 1.5em;
 }
 </style>

@@ -8,7 +8,8 @@ router.get(
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {
     const { project, sort, limit, filter } = prepareQuery(req.query)
     try {
-      const motorcycles = await Motorcycle.find(filter)
+      const motorcycles = await Motorcycle.find()
+        .where(filter)
         .select(project)
         .sort(sort)
         .limit(limit)
@@ -38,6 +39,52 @@ router.get('/count', async (req: Request, res: Response) => {
     res.status(200).json(totalMotorcycles)
   } catch (error) {
     console.error('Error accessing motorcycle route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/stats', async (req: Request, res: Response) => {
+  try {
+    const totalHorsePower = await Motorcycle.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalHorsePower: { $sum: '$horsePower' },
+        },
+      },
+    ])
+    res.status(200).json(totalHorsePower[0].totalHorsePower)
+  } catch (error) {
+    console.error('Error accessing motorcycle route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.put('/:id', async (req: Request, res: Response) => {
+  try {
+    const updatedMotorcycle = await Motorcycle.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+    ).populate('brand')
+    if (!updatedMotorcycle) {
+      return res.status(404).json({ error: 'Motorcycle not found' })
+    }
+    res.status(200).json({ motorcycle: updatedMotorcycle })
+  } catch (error) {
+    console.error('Error updating motorcycle:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.delete('/:id', async (req: Request, res: Response) => {
+  try {
+    const deletedMotorcycle = await Motorcycle.findByIdAndDelete(req.params.id)
+    if (!deletedMotorcycle) {
+      return res.status(404).json({ error: 'Motorcycle not found' })
+    }
+    res.status(200).json({ message: 'Motorcycle deleted successfully' })
+  } catch (error) {
+    console.error('Error deleting motorcycle:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
 })

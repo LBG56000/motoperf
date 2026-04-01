@@ -3,39 +3,60 @@ import Sponsor from '@/components/Sponsor.vue'
 import type { IMotorcycle } from '@/types/motorcycles'
 import StatsHome from '~/components/card/StatsHome.vue'
 
+interface IItemTab {
+  content: string
+  urlImg: string
+}
+
 const itemsCaroussel = ref<IMotorcycle[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
+const dynamicStats = ref<IItemTab[]>([])
+const itemsTab = reactive<IItemTab[]>([
+  {
+    content: 'Base de données complètes',
+    urlImg: '/images/accueil/icon_checked_classic.png'
+  },
+  {
+    content: 'Communautée active',
+    urlImg: '/images/accueil/icon_clock.png'
+  },
+  {
+    content: 'Equipe passionée',
+    urlImg: '/images/accueil/icon_idea.png'
+  }
+])
 
-const itemsTab = [
-  [
-    {
-      content: '80 Marques',
-      urlImg: '/images/accueil/icon_Binocle.png'
-    },
-    {
-      content: '10 000 ch',
+async function fetchStats() {
+  // Get total brands
+  const totalBrands = await $fetch<{ totalBrands: number }>(
+    `${apiBase}brands/count`
+  )
+
+  // Get total horsPower
+  const totalHorsePower = await $fetch<{ totalHorsePower: number }>(
+    `${apiBase}motorcycles/stats`
+  )
+
+  // Get total motorcycles
+  const totalMotorcycles = await $fetch<{ totalMotorcycles: number }>(
+    `${apiBase}motorcycles/count`
+  )
+
+  dynamicStats.value.push({
+    content: `${totalBrands} Marques`,
+    urlImg: '/images/accueil/icon_Binocle.png'
+  })
+  if (totalHorsePower)
+    dynamicStats.value.push({
+      content: `${totalHorsePower} Chevaux`,
       urlImg: '/images/accueil/icon_Settings.png'
-    },
-    {
-      content: '3560 modèles',
+    })
+  if (totalMotorcycles)
+    dynamicStats.value.push({
+      content: `${totalMotorcycles} Motos`,
       urlImg: '/images/accueil/icon_moto.png'
-    }
-  ],
-  [
-    {
-      content: 'Base de données complètes',
-      urlImg: '/images/accueil/icon_checked_classic.png'
-    },
-    {
-      content: 'Communautée active',
-      urlImg: '/images/accueil/icon_clock.png'
-    },
-    {
-      content: 'Equipe passionée',
-      urlImg: '/images/accueil/icon_idea.png'
-    }
-  ]
-]
+    })
+}
 async function fetchMotocycles() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
     `${apiBase}motorcycles`,
@@ -50,6 +71,7 @@ async function fetchMotocycles() {
 
 onMounted(async () => {
   await fetchMotocycles()
+  await fetchStats()
 })
 </script>
 <template>
@@ -82,6 +104,16 @@ onMounted(async () => {
       <div class="hero-images">
         <img src="/images/accueil/R1_fond.png" alt="Moto" class="img-cover" />
         <img src="/images/accueil/BMW_fond.png" alt="Moto" class="img-cover" />
+        <img
+          src="/images/accueil/R1_fond.png"
+          alt="Moto"
+          class="img-cover moto-left"
+        />
+        <img
+          src="/images/accueil/BMW_fond.png"
+          alt="Moto"
+          class="img-cover moto-right"
+        />
       </div>
     </section>
     <section>
@@ -108,13 +140,17 @@ onMounted(async () => {
         en quelques chiffres
       </h2>
       <article class="column">
-        <div
-          v-for="line in itemsTab"
-          :key="line[0]?.content"
-          class="row justify-content-center"
-        >
+        <div class="row justify-content-center">
           <StatsHome
-            v-for="item in line"
+            v-for="item in dynamicStats"
+            :key="item.content"
+            :content="item.content"
+            :url-img="item.urlImg"
+          />
+        </div>
+        <div class="row justify-content-center">
+          <StatsHome
+            v-for="item in itemsTab"
             :key="item.content"
             :content="item.content"
             :url-img="item.urlImg"
@@ -214,6 +250,14 @@ section {
   object-position: center;
 }
 
+.moto-left {
+  animation: slide-left-to-right 2s ease-in-out;
+}
+
+.moto-right {
+  animation: slide-right-to-left 2s ease-in-out;
+}
+
 .row {
   display: flex;
   flex-direction: row;
@@ -275,5 +319,27 @@ section {
 .button {
   font-size: small;
   padding: 10px 40px;
+}
+
+@keyframes slide-left-to-right {
+  from {
+    transform: translateX(-100vw);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-right-to-left {
+  from {
+    transform: translateX(100vw);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 </style>
