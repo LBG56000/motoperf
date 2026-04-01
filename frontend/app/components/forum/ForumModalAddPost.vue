@@ -124,16 +124,16 @@ onMounted(async () => {
       </template>
       <template #body>
         <div>
-          <UForm :schema :state="state" @submit="onSubmit">
+          <UForm :schema :state="state" @submit="onSubmit" class="form">
             <UFormField label="Titre du post" required name="title">
-              <UInput v-model="state.title" placeholder="Titre du post" />
+              <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
             </UFormField>
             <UFormField label="Catégorie" required name="category">
               <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
                 value-key="name" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
-                }">
+                }" size="md" class="w-full">
                 <template #empty>
                   <span class="text-gray-500 text-sm p-2">
                     Aucune catégorie trouvée
@@ -146,7 +146,7 @@ onMounted(async () => {
                 value-key="_id" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
-                }">
+                }" size="md" class="w-full">
                 <template #empty>
                   <span class="text-gray-500 text-sm p-2">
                     Aucune marque trouvée
@@ -155,7 +155,7 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Description" required name="description">
-              <UTextarea v-model="state.description" placeholder="Ecrivez votre description" />
+              <UTextarea size="md" v-model="state.description" placeholder="Ecrivez votre description" class="w-full" />
             </UFormField>
             <UFormField required label="Image associé à mon post" name="file">
               <!-- TODO: a faire avec une vraie image -->
@@ -166,7 +166,7 @@ onMounted(async () => {
                 Valider
               </UButton>
 
-              <UButton variant="outline">
+              <UButton variant="outline" @click="resetForm">
                 Réinitialiser
               </UButton>
             </div>
@@ -176,4 +176,12 @@ onMounted(async () => {
     </UModal>
   </div>
 </template>
-<style scoped></style>
+<style scoped>
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+
+}
+</style>
