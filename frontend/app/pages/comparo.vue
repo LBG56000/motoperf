@@ -191,34 +191,43 @@ async function fetchCarrouselMotorcycles() {
 async function fetchMessages() {
   const post1 = motorcycle1.value?.post
   const post2 = motorcycle2.value?.post
-  
+
   if (post1) {
-    const data = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${post1}/responses`, {
-      params: {
-        project: 'content, user, createdAt',
-        deep: true,
-        limit: 5,
+    const data = await $fetch<{ messages: IMessage[] }>(
+      `${apiBase}posts/${post1}/responses`,
+      {
+        params: {
+          project: 'content, user, createdAt',
+          deep: true,
+          limit: 5
+        }
       }
-    })
+    )
     commentsMotorcycle1.value = data.messages
   }
 
   if (post2) {
-    const data = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${post2}/responses`, {
-      params: {
-        project: 'content, user, createdAt',
-        deep: true,
-        limit: 5,
+    const data = await $fetch<{ messages: IMessage[] }>(
+      `${apiBase}posts/${post2}/responses`,
+      {
+        params: {
+          project: 'content, user, createdAt',
+          deep: true,
+          limit: 5
+        }
       }
-    })
+    )
     commentsMotorcycle2.value = data.messages
   }
 }
 
 async function postComment() {
   if (!comment.value.content || !comment.value.motorcycleId) return
-   
-  const selectedMotorcycle = motorcycle1.value?._id === comment.value.motorcycleId ? motorcycle1.value : motorcycle2.value
+
+  const selectedMotorcycle =
+    motorcycle1.value?._id === comment.value.motorcycleId
+      ? motorcycle1.value
+      : motorcycle2.value
   if (!selectedMotorcycle) return
 
   let postId = selectedMotorcycle.post
@@ -303,7 +312,7 @@ onMounted(() => {
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="resultat-section">
-          <div v-if="resultatNumber.length > 0" class="info-container">
+          <div v-if="resultatNumber.length > 0">
             <h3>Résultats</h3>
             <div v-for="field in resultatNumber" :key="field.fieldName">
               <ResultatFieldNumber
@@ -337,12 +346,18 @@ onMounted(() => {
           <div class="display-comment-container">
             <div class="left-display-comment">
               <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
-              <Comment v-if="commentsMotorcycle1.length > 0" :responses="commentsMotorcycle1" />
+              <Comment
+                v-if="commentsMotorcycle1.length > 0"
+                :responses="commentsMotorcycle1"
+              />
               <p v-else>Postez le premier commentaire !</p>
             </div>
             <div class="right-display-comment">
               <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
-              <Comment v-if="commentsMotorcycle2.length > 0" :responses="commentsMotorcycle2" />
+              <Comment
+                v-if="commentsMotorcycle2.length > 0"
+                :responses="commentsMotorcycle2"
+              />
               <p v-else>Postez le premier commentaire !</p>
             </div>
           </div>
@@ -485,8 +500,6 @@ onMounted(() => {
 .right-display-comment p {
   text-align: center;
 }
-
-
 
 /* Commentaires Input */
 .input-comment-box {
