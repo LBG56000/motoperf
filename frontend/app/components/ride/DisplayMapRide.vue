@@ -34,6 +34,7 @@ const map = ref<any>(null) // Instance de la carte Leaflet
 const currentTileLayer = ref<any>(null) // Couche de tuiles courante affichée sur la carte (permet de gérer notamment le zoom sur les balades trouvées)
 const ridesLayerGroup = ref<any>(null) // Layer group pour les balades affichées sur la carte
 const L_instance = ref<any>(null) // Layer instances courant de leaflet
+const LDraw_instance = ref<any>(null) // window.L, instance globale de leaflet avec les lib qui s'attache à celui-ci
 
 const dataRides = ref<IRide[]>([]) // Données des balades récupérées depuis l'API
 const searchValue = ref<string>('') // Valeur de recherche pour filtrer les balades
@@ -189,7 +190,8 @@ const updateMapBackground = (id: string, L: any) => {
 // Créer la couhe des balades
 const renderRides = () => {
   const L = L_instance.value
-  if (!map.value || !L) return
+  const LDraw = LDraw_instance.value
+  if (!map.value || !L || !LDraw) return
 
   // On supprime la couche existante
   if (ridesLayerGroup.value) map.value.removeLayer(ridesLayerGroup.value)
@@ -200,25 +202,16 @@ const renderRides = () => {
 
   // Bounds sert à ajuster le zoom en fonction de l'emplacement des balades trouvées
   const bounds = L.latLngBounds([])
-
   const currentZoom = map.value.getZoom()
 
   // Pour chaque balade correspondant à la recherche
+  const markersCluster = LDraw.markerClusterGroup()
   filteredRides.value.forEach((ride: IRide) => {
-    // On créé une couche GeoJSON pour afficher les balades
-    const geojsonLayer = L.geoJSON(ride.geom as any, {
-      style: {
-        color: ride.color || '#3B82F6',
-        weight: getWeightByZoom(currentZoom),
-        opacity: 1
-      }
-    })
-
     // On créer l'icon dynamiquement en fonction de la couleur de la balade
     const dynamicIcon = L.divIcon({
       html: getMapPinSvg(ride.color || '#3b82f6'),
       iconSize: [26, 26],
-      iconAnchor: [13, 26],
+      iconAnchor: [13, 10],
       className: 'custom-dynamic-pin'
     })
 
@@ -226,14 +219,39 @@ const renderRides = () => {
     const start = ride.geom.features[0].geometry.coordinates[0]
     const hour = Math.floor(ride.duration)
     const minutes = Math.round((ride.duration - hour) * 60)
-    const marker = L.marker([start[1], start[0]], {
-      icon: dynamicIcon
-    }).bindPopup(
-      `<b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min`
+
+    let geojsonLayer: any = null
+    const marker = markersCluster.addLayer(
+      L.marker([start[1], start[0]], {
+        icon: dynamicIcon
+      })
+        .bindPopup(
+          `<div class="ride-detail-container">
+          <b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min
+        </div>`
+        )
+        .on('popupopen', () => {
+          // On créé une couche GeoJSON pour afficher les balades
+          geojsonLayer = L.geoJSON(ride.geom as any, {
+            style: {
+              color: ride.color || '#3B82F6',
+              weight: getWeightByZoom(currentZoom),
+              opacity: 1
+            }
+          })
+          geojsonLayer.addTo(ridesLayerGroup.value)
+        })
+        .on('popupclose', () => {
+          // On supprimer la couche
+          if (geojsonLayer) {
+            geojsonLayer.remove(ridesLayerGroup.value)
+          }
+        })
     )
 
     // Ajouter la couche et le point de départ à la couche
-    geojsonLayer.addTo(ridesLayerGroup.value)
+    // geojsonLayer.addTo(ridesLayerGroup.value)
+    markersCluster.addLayer(marker)
     marker.addTo(ridesLayerGroup.value)
 
     // On étend les bounds pour inclure le point de départ de la balade
@@ -241,6 +259,7 @@ const renderRides = () => {
   })
 
   // On ajoute la couche à la carte
+  ridesLayerGroup.value.addLayer(markersCluster)
   ridesLayerGroup.value.addTo(map.value)
 
   // Si des balades correspondent à la recherche, on ajuste le zoom pour les afficher dans la view box
@@ -254,25 +273,17 @@ const handleFilters = () => {
   searchValue.value = ''
 }
 
-const startDrawingLine = () => {
-  const L = L_instance.value
-  if (!map.value || !L) return
-
-  // On lance l'outil de dessin de ligne manuellement
-  const polylineDrawer = new L.Draw.Polyline(map.value, {
-    shapeOptions: { color: '#3B82F6', weight: 4 }
-  })
-
-  polylineDrawer.enable()
-}
-
 onMounted(async () => {
   isLoading.value = true
 
   const L = await import('leaflet')
+  await import('leaflet.markercluster')
+  await import('leaflet-draw')
+
   await import('leaflet/dist/leaflet.css')
   await import('leaflet-draw/dist/leaflet.draw.css')
-  await import('leaflet-draw')
+  await import('leaflet.markercluster/dist/MarkerCluster.css')
+  await import('leaflet.markercluster/dist/MarkerCluster.Default.css')
   L_instance.value = L
 
   map.value = L.map('map', {
@@ -285,6 +296,7 @@ onMounted(async () => {
   L.control.scale({ imperial: false }).addTo(map.value)
 
   const LDraw = (window as any).L
+  LDraw_instance.value = LDraw
   convertToFrench(LDraw)
 
   // On crée une couche pour stocker les éléments dessinés
@@ -591,6 +603,10 @@ watch(filteredRides, () => renderRides())
   pointer-events: auto;
 }
 
+.ride-detail-container {
+  margin-bottom: 20em;
+}
+
 /* --- LOADER --- */
 .loader-overlay {
   position: absolute;
@@ -748,7 +764,6 @@ watch(filteredRides, () => renderRides())
   opacity: 0;
 }
 
-/* --- TOOLBAR DRAW --- */
 /* --- TOOLBAR DRAW --- */
 :deep(.leaflet-draw-section) {
   margin: 0 !important;
