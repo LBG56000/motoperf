@@ -38,6 +38,22 @@ const connexion = async () => {
     error.value = err.data?.message || 'Erreur de connexion'
   }
 }
+
+const resetForm = () => {
+  form.value?.clear()
+  state.value.email = ''
+  state.value.password = ''
+  error.value = ''
+}
+
+watch(
+  () => isOpen.value,
+  (newVal) => {
+    if (!newVal) {
+      resetForm()
+    }
+  }
+)
 </script>
 
 <template>
