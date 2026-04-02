@@ -78,7 +78,7 @@ router.post('/add-view', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const body = req.body
-    const brand = await Brand.findOne({ _id: body.brand })
+    const brand = await Brand.findOne({ name: body.brand })
     const category = await Category.findOne({ name: body.category })
     const user = await User.findOne({ _id: body.user })
     // TODO: a modifier dans le front et le back avec des vrai user et des vrai images
@@ -101,6 +101,37 @@ router.post('/', async (req, res) => {
   }
 })
 
-//Renvoyer lors de la création l'id du post =
+router.put('/', async (req, res) => {
+  const { filter } = prepareQuery(req.query)
+  try {
+    const body = req.body
+    const brand = await Brand.findOne({ name: body.brand })
+    const category = await Category.findOne({ name: body.category })
+    const user = await User.findOne({ _id: body.user })
+
+    if (!brand || !category || !user) {
+      return res.status(500).json({ error: 'Internal server error' })
+    }
+
+    const updatePost = await Post.findByIdAndUpdate(
+      filter.id,
+      {
+        title: body.title,
+        content: body.content,
+        category: category._id,
+        user: user._id,
+        brand: brand._id,
+        url: body.url,
+      },
+    )
+    if (!updatePost) {
+      return res.status(500).json()
+    }
+    res.status(204).json({ error: 'Internal server error' })
+  } catch (error) {
+    console.error('Error updating motorcycle:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 
 export default router
