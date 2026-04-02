@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import ForumMyFavoritesPost from '~/components/forum/ForumMyFavoritesPost.vue';
 import HeaderInfo from '~/components/global/HeaderInfo.vue';
-import { useAuth } from '~/composable/useAuth';
-import { useConnexionModal } from '~/composable/useConnexionModal';
 import type { IPost } from '~/types/post';
 
 const posts = ref<IPost[]>([])
@@ -13,11 +11,6 @@ const filters = ref({
   onlyMyPost: true,
   searchBar: ''
 })
-
-const { isAuthenticated } = useAuth()
-const { open } = useConnexionModal()
-const modalIsOpen = ref(false)
-
 
 const filter = computed(() => {
   const conditions = []
@@ -51,7 +44,7 @@ const getPosts = async () => {
   const res = await $fetch<{ posts: IPost[] }>(`${useRuntimeConfig().public.apiBase}posts`, {
     params: {
       deep: true,
-      project: 'content,title,id,createdAt,views',
+      project: 'content,title,id,createdAt,views,image',
       filter: filter.value
     }
   })
@@ -123,7 +116,7 @@ onMounted(async () => {
         </div>
       </div>
       <div class="panel">
-        <ForumMyPosts @new-post="getPosts" />
+        <ForumMyPosts @new-post="getPosts; console.log('test  ')" />
         <ForumMyFavoritesPost />
       </div>
     </div>
