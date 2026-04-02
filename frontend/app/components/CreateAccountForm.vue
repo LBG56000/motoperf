@@ -6,10 +6,10 @@ import { useAuth } from '~/composable/useAuth'
 
 const { login, isAuthenticated } = useAuth()
 const { isOpen, close } = useConnexionModal()
-
 const form = useTemplateRef('form')
 const error = ref('')
 const success = ref('')
+const currentStep = ref(1)
 
 const state = reactive({
   prenom: '',
@@ -33,7 +33,6 @@ const isValidEmail = (email: string) => {
 
 const validate = (state: Partial<Schema>): FormError[] => {
   const errors = []
-
   if (!state.prenom)
     errors.push({ path: 'prenom', message: 'Le prénom est requis' })
   if (!state.nom) errors.push({ path: 'nom', message: 'Le nom est requis' })
@@ -52,50 +51,37 @@ const validate = (state: Partial<Schema>): FormError[] => {
       path: 'confirmPassword',
       message: 'Les mots de passe ne correspondent pas'
     })
-
   return errors
+}
+
+const nextStep = () => {
+  error.value = ''
+  currentStep.value++
+}
+
+const prevStep = () => {
+  error.value = ''
+  currentStep.value--
 }
 
 const handleSubmit = async () => {
   error.value = ''
   success.value = ''
-
   try {
-    // Validation manuelle avant l'API call
     const errors = validate(state)
     if (errors.length > 0) {
       error.value = 'Veuillez corriger les erreurs du formulaire'
       return
     }
-
-    // Ici vous ferez l'appel API pour mettre à jour le profil
     console.log('Profil mis à jour:', state)
     success.value = 'Profil mis à jour avec succès !'
-
-    // Fermer la modal après succès
     setTimeout(() => {
       close()
+      currentStep.value = 1
     }, 2000)
   } catch (err) {
     error.value = 'Une erreur est survenue lors de la mise à jour du profil'
     console.error(err)
-  }
-}
-
-const handleDelete = () => {
-  if (
-    confirm(
-      'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.'
-    )
-  ) {
-    try {
-      // Ici vous ferez l'appel API pour supprimer le compte
-      console.log('Compte supprimé')
-      close()
-    } catch (err) {
-      error.value = 'Une erreur est survenue lors de la suppression du compte'
-      console.error(err)
-    }
   }
 }
 </script>
@@ -103,297 +89,294 @@ const handleDelete = () => {
 <template>
   <UModal v-model:open="isOpen">
     <template #content>
-      <div class="modal-wrapper">
-        <div class="content">
-          <h1 class="title">S'inscrire</h1>
+      <div class="content">
+        <h3>S'inscrire</h3>
 
-          <!-- Avatar Section -->
-          <div class="avatar-section">
-            <div class="avatar-placeholder">
-              <UIcon name="i-lucide-user" />
+        <!-- Indicateur de progression -->
+        <div class="progress-indicator">
+          <div class="progress-dot" :class="{ active: currentStep >= 1 }" />
+          <div class="progress-dot" :class="{ active: currentStep >= 2 }" />
+          <div class="progress-dot" :class="{ active: currentStep >= 3 }" />
+        </div>
+
+        <UForm
+          ref="form"
+          :state="state"
+          :validate="validate"
+          class="form-container"
+          @submit.prevent="handleSubmit"
+        >
+          <!-- ÉTAPE 1 -->
+          <div v-show="currentStep === 1" class="form-step">
+            <div class="step-content">
+              <button type="button" class="avatar-button">
+                <div class="avatar-circle">
+                  <UIcon name="i-lucide-user" />
+                </div>
+                Insérer +
+              </button>
+              <UFormField label="Prénom" name="prenom" required>
+                <UInput
+                  v-model="state.prenom"
+                  placeholder="Jean"
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField label="Nom" name="nom" required>
+                <UInput
+                  v-model="state.nom"
+                  placeholder="Bihan"
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
             </div>
-            <button class="insert-btn">Inséré +</button>
           </div>
 
-          <UForm
-            ref="form"
-            :state="state"
-            :validate="validate"
-            class="form-container"
-            @submit.prevent="handleSubmit"
-          >
-            <!-- Prénom -->
-            <UFormField label="Prénom" name="prenom" required>
-              <UInput
-                v-model="state.prenom"
-                placeholder="John"
-                variant="none"
-              />
-            </UFormField>
-
-            <!-- Nom -->
-            <UFormField label="Nom" name="nom" required>
-              <UInput v-model="state.nom" placeholder="Doe" variant="none" />
-            </UFormField>
-
-            <!-- Moto -->
-            <UFormField label="Moto" name="moto" required>
-              <UInput v-model="state.moto" placeholder="GSX-R" variant="none" />
-            </UFormField>
-
-            <!-- Niveau d'expérience -->
-            <div class="experience-section">
-              <label class="label">Je suis :</label>
-              <div class="experience-buttons">
-                <button
-                  v-for="level in experienceLevels"
-                  :key="level"
-                  type="button"
-                  :class="[
-                    'experience-btn',
-                    { active: state.experience === level }
-                  ]"
-                  @click="state.experience = level"
-                >
-                  {{ level }}
-                </button>
+          <!-- ÉTAPE 2 -->
+          <div v-show="currentStep === 2" class="form-step">
+            <div class="step-content">
+              <div class="experience-section">
+                <label class="experience-label">Je suis :</label>
+                <div class="experience-buttons">
+                  <button
+                    v-for="level in experienceLevels"
+                    :key="level"
+                    type="button"
+                    class="experience-button"
+                    :class="{ active: state.experience === level }"
+                    @click="state.experience = level"
+                  >
+                    {{ level }}
+                  </button>
+                </div>
               </div>
+              <UFormField label="Moto" name="moto" required>
+                <UInput
+                  v-model="state.moto"
+                  placeholder="GSX-R"
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField
+                label="Motard depuis (années)"
+                name="yearsExperience"
+                required
+              >
+                <UInput
+                  v-model="state.yearsExperience"
+                  type="number"
+                  placeholder="12"
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
             </div>
+          </div>
 
-            <!-- Motard depuis -->
-            <UFormField
-              label="Motard depuis (nombre d'années)"
-              name="yearsExperience"
-              required
-            >
-              <UInput
-                v-model="state.yearsExperience"
-                type="number"
-                placeholder="12"
-                variant="none"
-              />
-            </UFormField>
-
-            <!-- E-Mail -->
-            <UFormField label="E-Mail" name="email" required>
-              <UInput
-                v-model="state.email"
-                type="email"
-                placeholder="john.doe@gmail.com"
-                variant="none"
-              />
-            </UFormField>
-
-            <!-- Nouveau mot de passe -->
-            <UFormField label="Nouveau mot de passe" name="password">
-              <UInput
-                v-model="state.password"
-                type="password"
-                placeholder="MonMotDePassword1234..."
-                variant="none"
-              />
-            </UFormField>
-
-            <!-- Confirmer mot de passe -->
-            <UFormField
-              label="Confirmer le nouveau mot de passe"
-              name="confirmPassword"
-            >
-              <UInput
-                v-model="state.confirmPassword"
-                type="password"
-                placeholder="MonMotDePassword1234..."
-                variant="none"
-              />
-            </UFormField>
-
-            <!-- Messages d'erreur/succès -->
-            <p v-if="error" class="error-message">{{ error }}</p>
-            <p v-if="success" class="success-message">{{ success }}</p>
-
-            <!-- Boutons d'action -->
-            <div class="button-group">
-              <UButton
-                label="Supprimer mon compte"
-                color="gray"
-                variant="solid"
-                class="delete-btn"
-                type="button"
-                @click="handleDelete"
-              />
-              <UButton
-                type="submit"
-                label="Confirmer"
-                color="red"
-                variant="solid"
-                class="confirm-btn"
-              />
+          <!-- ÉTAPE 3 -->
+          <div v-show="currentStep === 3" class="form-step">
+            <div class="step-content">
+              <UFormField label="E-Mail" name="email" required>
+                <UInput
+                  v-model="state.email"
+                  type="email"
+                  placeholder="john.doe@gmail.com"
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField label="Mot de passe" name="password">
+                <UInput
+                  v-model="state.password"
+                  type="password"
+                  placeholder="Mot de passe ..."
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
+              <UFormField
+                label="Confirmer le mot de passe"
+                name="confirmPassword"
+              >
+                <UInput
+                  v-model="state.confirmPassword"
+                  type="password"
+                  placeholder="Confirmation mot de passe ..."
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
             </div>
-          </UForm>
-        </div>
+          </div>
+
+          <!-- Messages -->
+          <p v-if="error" class="error-message">{{ error }}</p>
+          <p v-if="success" class="success-message">{{ success }}</p>
+
+          <!-- Boutons de navigation -->
+          <div class="button-group">
+            <UButton
+              v-if="currentStep > 1"
+              type="button"
+              label="Retour"
+              variant="soft"
+              color="neutral"
+              class="w-1/2"
+              @click="prevStep"
+            />
+            <UButton
+              v-if="currentStep < 3"
+              type="button"
+              label="Suivant"
+              color="neutral"
+              class="w-1/2 ml-auto"
+              @click="nextStep"
+            />
+            <UButton
+              v-if="currentStep === 3"
+              type="submit"
+              label="Confirmer"
+              color="neutral"
+              class="font-bold w-1/2 ml-auto"
+            />
+          </div>
+        </UForm>
       </div>
     </template>
   </UModal>
 </template>
 
 <style scoped>
-.modal-wrapper {
-  width: 100%;
-  max-height: 80vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
-
 .content {
+  height: 60vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   padding: 2rem;
-  width: 100%;
 }
 
-.title {
-  font-size: 2rem;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.avatar-section {
+.progress-indicator {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.avatar-placeholder {
-  width: 80px;
-  height: 80px;
-  border: 3px solid #ef4444;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
-  font-size: 3rem;
-  color: #ef4444;
+  gap: 8px;
+  margin-bottom: 32px;
 }
 
-.insert-btn {
-  background: none;
-  border: none;
-  color: #6b7280;
-  cursor: pointer;
-  font-size: 0.875rem;
-  text-decoration: underline;
-  padding: 0;
+.progress-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #d1d5db;
+  transition: background-color 0.2s ease;
+}
 
-  &:hover {
-    color: #374151;
-  }
+.progress-dot.active {
+  background-color: #ef4444;
 }
 
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 24px;
+  flex: 1;
+}
+
+.form-step {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.avatar-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4b5563;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.avatar-button:hover {
+  color: #1f2937;
+}
+
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  color: #ef4444;
 }
 
 .experience-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 12px;
 }
 
-.label {
+.experience-label {
   font-size: 0.875rem;
-  color: #6b7280;
   font-weight: 500;
+  display: block;
 }
 
 .experience-buttons {
   display: flex;
-  gap: 1rem;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
-.experience-btn {
-  padding: 0.5rem 1.5rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 2rem;
-  background: white;
-  cursor: pointer;
+.experience-button {
+  padding: 8px 16px;
+  border-radius: 9999px;
   font-size: 0.875rem;
-  transition: all 0.2s;
-
-  &:hover {
-    border-color: #9ca3af;
-  }
-
-  &.active {
-    border-color: #ef4444;
-    color: #ef4444;
-    background: white;
-  }
+  border: 2px solid #d1d5db;
+  background-color: transparent;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.button-group {
-  display: flex;
-  gap: 1rem;
-  margin-top: 2rem;
+.experience-button:hover {
+  border-color: #9ca3af;
+}
 
-  :deep(.delete-btn) {
-    flex: 1;
-    background-color: #000 !important;
-    border-radius: 2rem;
-  }
-
-  :deep(.confirm-btn) {
-    flex: 1;
-    background-color: #ef4444 !important;
-    border-radius: 2rem;
-  }
+.experience-button.active {
+  border-color: #ef4444;
+  color: #ef4444;
 }
 
 .error-message {
   color: #dc2626;
   font-size: 0.875rem;
-  margin-top: 1rem;
 }
 
 .success-message {
   color: #16a34a;
   font-size: 0.875rem;
-  margin-top: 1rem;
 }
 
-:deep(.u-form-group) {
+.button-group {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-:deep(.u-form-label) {
-  font-size: 0.875rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-:deep(.u-input) {
-  border: none;
-  border-bottom: 1px solid #575757;
-  padding: 0.75rem 0;
-  border-radius: 0;
-
-  &:focus {
-    border-bottom-color: #ef4444;
-    outline: none;
-  }
-
-  &::placeholder {
-    color: #d1d5db;
-  }
+  gap: 12px;
+  padding-top: 16px;
+  margin-top: auto;
 }
 </style>
