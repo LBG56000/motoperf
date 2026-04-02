@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watch, nextTick } from 'vue'
+import { onMounted, ref, computed, watch, nextTick, reactive } from 'vue'
 import type { IMotorcycle } from '~/types/motorcycles'
 import CountUp from 'vue-countup-v3'
 import type { IMessage } from '~/types/messages'
@@ -11,6 +11,18 @@ interface ICommentInput {
   brand: string
   content: string
   user: string // TODO: update quand l'auth sera en place
+}
+
+interface IMaxStats {
+  maxYear: number
+  maxEngineSize: number
+  maxHorsePower: number
+  maxTorque: number
+  maxWeight: number
+  maxConsumption: number
+  maxAcceleration: number
+  maxSpeedMax: number
+  maxPrice: number
 }
 
 const route = useRoute()
@@ -47,6 +59,18 @@ const fieldCategories = {
   image: 'imageUrl'
 }
 
+const fieldMaxRef = reactive<Record<string, number>>({
+  year: 2030,
+  engine_size: 2000,
+  horsePower: 200,
+  torque: 200,
+  weight: 300,
+  consumption: 15,
+  acceleration: 15,
+  speedMax: 320,
+  price: 30000
+})
+
 const fieldLabels: Record<string, string> = {
   year: 'Année',
   engine_size: 'Cylindrée (cc)',
@@ -63,11 +87,26 @@ const statsNumbers = computed(() => {
   if (!m.value) return []
   return fieldCategories.numbers
     .filter((key) => m.value![key as keyof IMotorcycle] !== undefined)
-    .map((key) => ({
-      label: fieldLabels[key] ?? key,
-      value: m.value![key as keyof IMotorcycle]
-    }))
+    .map((key) => {
+      const raw = Number(m.value![key as keyof IMotorcycle])
+      const ref = fieldMaxRef[key] ?? raw
+      const normalized = key === 'year' ? raw - 1950 : raw
+      const refNorm = key === 'year' ? ref - 1950 : ref
+      return {
+        key,
+        label: fieldLabels[key] ?? key,
+        value: raw,
+        percent: Math.min((normalized / refNorm) * 100, 100)
+      }
+    })
 })
+
+function getCountUpOptions(key: string) {
+  return {
+    useEasing: true,
+    separator: key === 'year' ? '' : ' '
+  }
+}
 
 async function fetchData() {
   const data = await $fetch<{ motorcycles: IMotorcycle[] }>(
@@ -80,7 +119,19 @@ async function fetchData() {
     }
   )
   m.value = data.motorcycles?.[0] ?? null
-  console.log('Motorcycle data:', m)
+}
+
+async function fetchMax() {
+  const data = await $fetch<IMaxStats>(`${apiBase}motorcycles/max-stats`)
+  fieldMaxRef.year = data.maxYear
+  fieldMaxRef.engine_size = data.maxEngineSize
+  fieldMaxRef.horsePower = data.maxHorsePower
+  fieldMaxRef.torque = data.maxTorque
+  fieldMaxRef.weight = data.maxWeight
+  fieldMaxRef.consumption = data.maxConsumption
+  fieldMaxRef.acceleration = data.maxAcceleration
+  fieldMaxRef.speedMax = data.maxSpeedMax
+  fieldMaxRef.price = data.maxPrice
 }
 
 async function fetchMessages() {
@@ -151,6 +202,7 @@ async function postComment() {
 
 onMounted(async () => {
   await fetchData()
+  await fetchMax()
   await fetchMessages()
 })
 
@@ -200,9 +252,12 @@ watch(
             class="stat-value"
             :end-val="Number(stat.value)"
             :duration="2"
-            :options="{ useEasing: true, separator: ' ' }"
+            :options="getCountUpOptions(stat.key)"
             :autoplay="true"
           />
+          <div class="bar-outer">
+            <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -318,5 +373,26 @@ span {
   padding: 2rem;
   max-width: 50%;
   height: fit-content;
+}
+
+.bar-outer {
+  width: 100%;
+  height: 10px;
+  background-color: #d7d7d7;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff0000, #990000);
+  border-radius: 5px;
+  animation: slide-in 2s ease-in-out;
+}
+
+@keyframes slide-in {
+  from {
+    width: 0;
+  }
 }
 </style>

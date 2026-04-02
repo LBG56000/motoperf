@@ -89,4 +89,29 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 })
 
+router.get('/max-stats', async (req: Request, res: Response) => {
+  try {
+    const maxStats = await Motorcycle.aggregate([
+      {
+        $group: {
+          _id: null,
+          maxYear: { $max: '$year' },
+          maxEngineSize: { $max: '$engine_size' },
+          maxHorsePower: { $max: '$horsePower' },
+          maxTorque: { $max: '$torque' },
+          maxWeight: { $max: '$weight' },
+          maxConsumption: { $max: '$consumption' },
+          maxAcceleration: { $max: '$acceleration' },
+          maxSpeedMax: { $max: '$speedMax' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+    ])
+    res.status(200).json(maxStats[0])
+  } catch (error) {
+    console.error('Error accessing motorcycle route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 export default router
