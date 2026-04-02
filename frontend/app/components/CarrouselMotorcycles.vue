@@ -4,6 +4,10 @@ import type { IMotorcycle } from '@/types/motorcycles'
 defineProps<{
   items: IMotorcycle[]
 }>()
+
+const emit = defineEmits<{
+  (e: 'selected', _id: string, imgUrl: string): void
+}>()
 </script>
 
 <template>
@@ -43,6 +47,7 @@ defineProps<{
           class="rounded-full"
           style="color: white"
           icon="i-lucide-arrow-left-right"
+          @click="emit('selected', item._id, item.imageUrl ? item.imageUrl : '')"
           >Comparer</UButton
         >
       </div>
