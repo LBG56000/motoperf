@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ForumMyFavoritesPost from '~/components/forum/ForumMyFavoritesPost.vue';
 import HeaderInfo from '~/components/global/HeaderInfo.vue';
+import { useAuth } from '~/composable/useAuth';
+import { useConnexionModal } from '~/composable/useConnexionModal';
 import type { IPost } from '~/types/post';
 
 const posts = ref<IPost[]>([])
@@ -11,6 +13,11 @@ const filters = ref({
   onlyMyPost: true,
   searchBar: ''
 })
+
+const { isAuthenticated } = useAuth()
+const { open } = useConnexionModal()
+const modalIsOpen = ref(false)
+
 
 const filter = computed(() => {
   const conditions = []
@@ -71,10 +78,6 @@ const getResponseOfPost = async (postId: string) => {
 //   })
 // }
 
-const isUserOfPost = computed(() => {
-  return true
-})
-
 const handleFilter = async (updateFilter: any) => {
   filters.value = {
     ...filters.value,
@@ -114,10 +117,9 @@ onMounted(async () => {
         <USkeleton v-if="loading" class="size-12 rounded-full" />
         <div v-if="loading === false && posts.length === 0" class="center add-post-empty">
           <p>Aucun post disponible, ajouter le premier</p>
-          <LazyForumModalAddPost @added-post="console.log('ADDED')" />
         </div>
         <div v-for="post in posts" :key="post._id">
-          <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
+          <ForumPost :post="post" class="cursor-pointer" :loading />
         </div>
       </div>
       <div class="panel">

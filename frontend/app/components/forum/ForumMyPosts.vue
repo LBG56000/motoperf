@@ -6,9 +6,13 @@ import { useConnexionModal } from '~/composable/useConnexionModal';
 const { isAuthenticated } = useAuth()
 const { open } = useConnexionModal()
 const emits = defineEmits(['new-post'])
+const openAddPost = ref(false)
 
 const handleAddPost = () => {
   open()
+  if (isAuthenticated) {
+    openAddPost.value = true
+  }
 }
 
 const handleHaveANewPost = () => {
@@ -24,7 +28,7 @@ const handleHaveANewPost = () => {
           <h3>Mes posts</h3>
           <UButton v-if="!isAuthenticated" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
             @click="handleAddPost" />
-          <LazyForumModalAddPost v-else @added-post="handleHaveANewPost" />
+          <LazyForumModalAddPost v-else v-model:open="openAddPost" @added-post="handleHaveANewPost" />
         </div>
       </template>
       <template #default>

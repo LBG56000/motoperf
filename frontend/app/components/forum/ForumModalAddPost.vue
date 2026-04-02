@@ -11,9 +11,9 @@ const props = defineProps({
 const categories = ref<ICategory[]>([])
 const brands = ref<IBrand[]>([])
 const toast = useToast()
-const { user } = useAuth()
-const displayModal = ref(false)
+const { user, isAuthenticated } = useAuth()
 const emit = defineEmits(['added-post'])
+const displayModal = defineModel<boolean>('open', { default: false })
 
 const getCategories = async () => {
   const res = await $fetch<{ categories: ICategory[] }>(
