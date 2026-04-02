@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useConnexionModal } from '~/composable/useConnexionModal'
 import { useAuth } from '~/composable/useAuth'
 
 const { login, isAuthenticated } = useAuth()
 const { isOpen, close } = useConnexionModal()
 const form = useTemplateRef('form')
-const error = ref('')
-const success = ref('')
 const currentStep = ref(1)
+const formErrors = ref<FormError[]>([])
 
 const state = reactive({
-  prenom: '',
-  nom: '',
+  firstname: '',
+  lastname: '',
   moto: '',
   experience: 'Confirmé',
   yearsExperience: '',
@@ -31,56 +30,77 @@ const isValidEmail = (email: string) => {
   return re.test(email)
 }
 
-const validate = (state: Partial<Schema>): FormError[] => {
-  const errors = []
-  if (!state.prenom)
-    errors.push({ path: 'prenom', message: 'Le prénom est requis' })
-  if (!state.nom) errors.push({ path: 'nom', message: 'Le nom est requis' })
-  if (!state.moto)
-    errors.push({ path: 'moto', message: 'Le modèle de moto est requis' })
-  if (!state.email)
-    errors.push({ path: 'email', message: "L'email est requis" })
-  if (state.email && !isValidEmail(state.email))
-    errors.push({ path: 'email', message: "L'email n'est pas valide" })
-  if (
-    state.password &&
-    state.confirmPassword &&
-    state.password !== state.confirmPassword
-  )
-    errors.push({
-      path: 'confirmPassword',
-      message: 'Les mots de passe ne correspondent pas'
-    })
+// Validation par étape
+const validateStep = (step: number): FormError[] => {
+  console.log('Validation par étape')
+  const errors: FormError[] = []
+
+  if (step === 1 || step === 3) {
+    if (!state.firstname)
+      errors.push({ name: 'firstname', message: 'Le prénom est requis' })
+    if (!state.lastname)
+      errors.push({ name: 'lastname', message: 'Le nom est requis' })
+  }
+
+  if (step === 2 || step === 3) {
+    if (!state.yearsExperience)
+      errors.push({ name: 'yearsExperience', message: 'Années requises' })
+  }
+
+  if (step === 3) {
+    if (!state.email)
+      errors.push({ name: 'email', message: "L'email est requis" })
+    if (state.email && !isValidEmail(state.email))
+      errors.push({ name: 'email', message: "L'email n'est pas valide" })
+
+    if (!state.password)
+      errors.push({
+        name: 'password',
+        message: 'Le mot de passe est requis'
+      })
+    if (state.password && state.password.length < 8)
+      errors.push({
+        name: 'password',
+        message: 'Le mot de passe doit contenir au moins 8 caractères'
+      })
+    if (state.password !== state.confirmPassword)
+      errors.push({
+        name: 'confirmPassword',
+        message: 'Les mots de passe ne correspondent pas'
+      })
+  }
+  formErrors.value = errors
   return errors
 }
 
-const nextStep = () => {
-  error.value = ''
-  currentStep.value++
+const getError = (path: string) => {
+  return formErrors.value.find((e) => e.name === path)?.message
+}
+
+const nextStep = async () => {
+  validateStep(currentStep.value)
+
+  if (formErrors.value.length === 0) {
+    currentStep.value++
+  }
 }
 
 const prevStep = () => {
-  error.value = ''
+  formErrors.value = []
   currentStep.value--
 }
 
 const handleSubmit = async () => {
-  error.value = ''
-  success.value = ''
+  console.log('Soumission du formulaire avec les données:', state)
   try {
-    const errors = validate(state)
-    if (errors.length > 0) {
-      error.value = 'Veuillez corriger les erreurs du formulaire'
+    validateStep(currentStep.value)
+    if (formErrors.value.length > 0) {
       return
     }
+
+    formErrors.value = []
     console.log('Profil mis à jour:', state)
-    success.value = 'Profil mis à jour avec succès !'
-    setTimeout(() => {
-      close()
-      currentStep.value = 1
-    }, 2000)
   } catch (err) {
-    error.value = 'Une erreur est survenue lors de la mise à jour du profil'
     console.error(err)
   }
 }
@@ -102,12 +122,12 @@ const handleSubmit = async () => {
         <UForm
           ref="form"
           :state="state"
-          :validate="validate"
+          :errors="formErrors"
           class="form-container"
-          @submit.prevent="handleSubmit"
+          @submit="handleSubmit"
         >
           <!-- ÉTAPE 1 -->
-          <div v-show="currentStep === 1" class="form-step">
+          <div v-if="currentStep === 1" class="form-step">
             <div class="step-content">
               <button type="button" class="avatar-button">
                 <div class="avatar-circle">
@@ -115,27 +135,41 @@ const handleSubmit = async () => {
                 </div>
                 Insérer +
               </button>
-              <UFormField label="Prénom" name="prenom" required>
-                <UInput
-                  v-model="state.prenom"
-                  placeholder="Jean"
-                  variant="soft"
-                  class="w-full"
-                />
-              </UFormField>
-              <UFormField label="Nom" name="nom" required>
-                <UInput
-                  v-model="state.nom"
-                  placeholder="Bihan"
-                  variant="soft"
-                  class="w-full"
-                />
-              </UFormField>
+              <div class="form-field">
+                <UFormField
+                  label="Prénom"
+                  name="firstname"
+                  :error="getError('firstname')"
+                  required
+                >
+                  <UInput
+                    v-model="state.firstname"
+                    placeholder="Jean"
+                    variant="soft"
+                    class="w-full"
+                  />
+                </UFormField>
+              </div>
+              <div class="form-field">
+                <UFormField
+                  label="Nom"
+                  name="lastname"
+                  :error="getError('lastname')"
+                  required
+                >
+                  <UInput
+                    v-model="state.lastname"
+                    placeholder="Bihan"
+                    variant="soft"
+                    class="w-full"
+                  />
+                </UFormField>
+              </div>
             </div>
           </div>
 
           <!-- ÉTAPE 2 -->
-          <div v-show="currentStep === 2" class="form-step">
+          <div v-if="currentStep === 2" class="form-step">
             <div class="step-content">
               <div class="experience-section">
                 <label class="experience-label">Je suis :</label>
@@ -152,8 +186,9 @@ const handleSubmit = async () => {
                   </button>
                 </div>
               </div>
-              <UFormField label="Moto" name="moto" required>
+              <UFormField label="Moto" name="moto">
                 <UInput
+                  id="moto"
                   v-model="state.moto"
                   placeholder="GSX-R"
                   variant="soft"
@@ -161,8 +196,9 @@ const handleSubmit = async () => {
                 />
               </UFormField>
               <UFormField
-                label="Motard depuis (années)"
+                label="Motard depuis (nombre d'années)"
                 name="yearsExperience"
+                :error="getError('yearsExperience')"
                 required
               >
                 <UInput
@@ -177,10 +213,16 @@ const handleSubmit = async () => {
           </div>
 
           <!-- ÉTAPE 3 -->
-          <div v-show="currentStep === 3" class="form-step">
+          <div v-if="currentStep === 3" class="form-step">
             <div class="step-content">
-              <UFormField label="E-Mail" name="email" required>
+              <UFormField
+                label="E-mail"
+                name="email"
+                :error="getError('email')"
+                required
+              >
                 <UInput
+                  id="email"
                   v-model="state.email"
                   type="email"
                   placeholder="john.doe@gmail.com"
@@ -188,7 +230,12 @@ const handleSubmit = async () => {
                   class="w-full"
                 />
               </UFormField>
-              <UFormField label="Mot de passe" name="password">
+              <UFormField
+                label="Mot de passe"
+                name="password"
+                :error="getError('password')"
+                required
+              >
                 <UInput
                   v-model="state.password"
                   type="password"
@@ -200,6 +247,8 @@ const handleSubmit = async () => {
               <UFormField
                 label="Confirmer le mot de passe"
                 name="confirmPassword"
+                :error="getError('confirmPassword')"
+                required
               >
                 <UInput
                   v-model="state.confirmPassword"
@@ -211,10 +260,6 @@ const handleSubmit = async () => {
               </UFormField>
             </div>
           </div>
-
-          <!-- Messages -->
-          <p v-if="error" class="error-message">{{ error }}</p>
-          <p v-if="success" class="success-message">{{ success }}</p>
 
           <!-- Boutons de navigation -->
           <div class="button-group">
@@ -255,6 +300,7 @@ const handleSubmit = async () => {
   display: flex;
   flex-direction: column;
   padding: 2rem;
+  overflow-y: auto;
 }
 
 .progress-indicator {
@@ -293,6 +339,32 @@ const handleSubmit = async () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.required {
+  color: #ef4444;
+}
+
+.input-error {
+  border-color: #dc2626 !important;
+}
+
+.field-error {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 2px;
 }
 
 .avatar-button {
@@ -341,6 +413,7 @@ const handleSubmit = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  justify-content: space-between;
 }
 
 .experience-button {
@@ -366,11 +439,17 @@ const handleSubmit = async () => {
 .error-message {
   color: #dc2626;
   font-size: 0.875rem;
+  padding: 8px;
+  background-color: #fee2e2;
+  border-radius: 6px;
 }
 
 .success-message {
   color: #16a34a;
   font-size: 0.875rem;
+  padding: 8px;
+  background-color: #f0fdf4;
+  border-radius: 6px;
 }
 
 .button-group {
