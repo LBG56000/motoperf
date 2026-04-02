@@ -7,8 +7,11 @@ import {
 } from '~/types/ride'
 import DisplayMapRide from './DisplayMapRide.vue'
 import * as turf from '@turf/turf'
+import { useAuth } from '~/composable/useAuth.js'
+import type { un } from 'vue-router/dist/router-CWoNjPRp.mjs'
 
 const isLoading = ref<boolean>(false)
+const { user } = useAuth()
 
 // Termes de recherche séparés pour chaque select
 const startTownSearch = ref<string>('')
@@ -147,8 +150,36 @@ async function uploadFile(
   return res.url
 }
 
+// Fonction pour trouver une commune à partir de coordonnées [long, lat]
+const getCommuneFromCoords = async (
+  coords: number[] | undefined
+): Promise<IValueCommuneSelect | undefined> => {
+  try {
+    let data
+    if (coords) {
+      const res = await fetch(
+        `https://api-adresse.data.gouv.fr/reverse/?lon=${coords[0]}&lat=${coords[1]}`
+      )
+      data = await res.json()
+    }
+
+    // On vérifie qu'on a au moins un résultat
+    if (data.features && data.features.length > 0) {
+      // On prend le premier résultat (le plus proche)
+      const properties = data.features[0].properties
+
+      return {
+        label: `${properties.city} (${properties.postcode})`,
+        value: properties.city
+      }
+    }
+  } catch (e) {
+    console.error('Erreur lors du reverse geocoding:', e)
+  }
+  return undefined
+}
+
 async function onSubmit() {
-  console.log('stateForm : ', stateForm)
   const runtimeConfig = useRuntimeConfig()
   try {
     let directoryImageRide
@@ -159,7 +190,8 @@ async function onSubmit() {
     const payload = {
       ...stateForm,
       imageLink: directoryImageRide,
-      distance: parseFloat(rideDistance.value.toString())
+      distance: parseFloat(rideDistance.value.toString()),
+      userId: user.value?._id
     }
 
     await $fetch(`${runtimeConfig.public.apiBase}rides`, {
@@ -195,6 +227,65 @@ async function validate(data: Partial<typeof stateForm>) {
     return [{ name: 'geom', message: 'Le tracé de la balade est requis' }]
   return []
 }
+
+const getEstimatedDuration = async (geom: any): Promise<number | undefined> => {
+  try {
+    const feature = geom.features[0]
+    const coords = feature.geometry.coordinates
+
+    // OSRM demande les coordonnées sous forme long,lat;long,lat...
+    // On peut échantillonner les points si le tracé est trop long (limite d'URL)
+    const polyline = coords.map((c: any) => `${c[0]},${c[1]}`).join(';')
+
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${polyline}?overview=false`
+    )
+    const data = await res.json()
+
+    if (data.routes && data.routes.length > 0) {
+      // La durée est en secondes, on la convertit en heures pour ton champ duration
+      const durationSeconds = data.routes[0].duration
+      const durationHours = durationSeconds / 3600
+      return parseFloat(durationHours.toFixed(2))
+    }
+  } catch (e) {
+    console.error('Erreur calcul durée OSRM:', e)
+  }
+  return undefined
+}
+
+watch(
+  () => stateForm.geom,
+  async (newGeom) => {
+    if (!newGeom || !newGeom.features || newGeom.features.length === 0) return
+
+    const feature = newGeom.features[0]
+    if (feature?.geometry.type !== 'LineString') return
+
+    const coords = feature.geometry.coordinates
+    if (coords.length < 2) return
+
+    isLoading.value = true
+
+    // On ajoute le calcul de durée aux requêtes parallèles
+    const [startCity, endCity, estimatedTime] = await Promise.all([
+      getCommuneFromCoords(coords[0]),
+      getCommuneFromCoords(coords[coords.length - 1]),
+      getEstimatedDuration(newGeom)
+    ])
+
+    stateForm.startTown = startCity
+    stateForm.endTown = endCity
+
+    // On met à jour la durée automatiquement
+    if (estimatedTime) {
+      stateForm.duration = estimatedTime
+    }
+
+    isLoading.value = false
+  },
+  { deep: true }
+)
 </script>
 <template>
   <div id="container-form" class="container-form">
@@ -225,7 +316,22 @@ async function validate(data: Partial<typeof stateForm>) {
         />
       </UFormField>
 
-      <div class="row-towns">
+      <UFormField label="Tracé de la balade" name="geom" required>
+        <DisplayMapRide
+          v-model:geom="stateForm.geom"
+          display-enlarge-button
+          display-editor-container
+        />
+
+        <div v-if="rideDistance > 0" class="distance-info">
+          <UIcon name="i-lucide-map-pinned" class="w-4 h-4" />
+          <span
+            >Distance estimée : <strong>{{ rideDistance }} km</strong></span
+          >
+        </div>
+      </UFormField>
+
+      <div class="row-container">
         <UFormField label="Ville de départ" name="startTown" required>
           <USelectMenu
             v-model="stateForm.startTown"
@@ -266,26 +372,27 @@ async function validate(data: Partial<typeof stateForm>) {
           />
         </UFormField>
       </div>
+      <div class="row-container">
+        <UFormField label="Type de la balade" name="rideType" required>
+          <USelect
+            v-model="stateForm.rideType"
+            :items="rideTypeOptions"
+            class="w-full"
+            placeholder="Sélectionnez le type..."
+            style="cursor: pointer"
+            size="xl"
+          />
+        </UFormField>
 
-      <UFormField label="Durée de la balade (h)" name="duration" required>
-        <UInputNumber
-          v-model="stateForm.duration"
-          class="w-full"
-          placeholder="Entrez une durée..."
-          size="xl"
-        />
-      </UFormField>
-
-      <UFormField label="Type de la balade" name="rideType" required>
-        <USelect
-          v-model="stateForm.rideType"
-          :items="rideTypeOptions"
-          class="w-full"
-          placeholder="Sélectionnez le type..."
-          style="cursor: pointer"
-          size="xl"
-        />
-      </UFormField>
+        <UFormField label="Durée de la balade (h)" name="duration" required>
+          <UInputNumber
+            v-model="stateForm.duration"
+            class="w-full"
+            placeholder="Entrez une durée..."
+            size="xl"
+          />
+        </UFormField>
+      </div>
 
       <UFormField label="Image de la balade" name="picture" required>
         <div class="card-image" style="cursor: pointer">
@@ -298,14 +405,6 @@ async function validate(data: Partial<typeof stateForm>) {
             }"
           />
         </div>
-      </UFormField>
-
-      <UFormField label="Tracé de la balade" name="geom" required>
-        <DisplayMapRide
-          v-model:geom="stateForm.geom"
-          display-enlarge-button
-          display-editor-container
-        />
       </UFormField>
 
       <UButton
@@ -323,8 +422,21 @@ async function validate(data: Partial<typeof stateForm>) {
 </template>
 
 <style scoped>
+.distance-info {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.distance-info strong {
+  color: var(--ui-primary);
+}
+
 .container-form {
-  width: 60%;
+  width: 100%;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -358,14 +470,14 @@ h3 {
   gap: 1.5rem;
 }
 
-.row-towns {
+.row-container {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
 }
 
 @media (min-width: 768px) {
-  .row-towns {
+  .row-container {
     grid-template-columns: 1fr 1fr;
   }
 }

@@ -42,6 +42,7 @@ export interface ICreateRideBody {
   startTown: { value: string }
   endTown: { value: string }
   rideType: string
-  imageLink?: string
+  imageLink: string
+  userId: string
   geom: IGeoJSON
 }

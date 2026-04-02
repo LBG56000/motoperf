@@ -80,7 +80,6 @@ const fetchCreatorInfos = async () => {
     )
 
     creator.value = data.users[0] || data
-    console.log(creator.value)
   } catch (e) {
     console.error("Erreur lors de la récupération de l'auteur", e)
   }

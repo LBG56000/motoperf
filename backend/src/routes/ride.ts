@@ -67,6 +67,7 @@ router.post(
         endTown,
         rideType,
         imageLink,
+        userId,
         geom,
       } = req.body
 
@@ -83,6 +84,7 @@ router.post(
         start_town: startTown?.value,
         end_town: endTown?.value,
         ride_type: rideType,
+        user_id: userId,
         image_link: imageLink,
       })
 

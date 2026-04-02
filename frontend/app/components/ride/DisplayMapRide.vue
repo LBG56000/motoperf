@@ -154,7 +154,7 @@ const filteredRides = computed<IRide[]>(() => {
 
     // Filtres rapides (Boutons du haut de la carte)
     const matchesQuickTime = !filterTime.value || ride.duration <= 1.5
-    const matchesQuickDistance = !filterDistance.value || ride.distance <= 20
+    const matchesQuickDistance = !filterDistance.value || ride.distance <= 50
 
     // On retourne VRAI seulement si TOUTES les conditions sont vrai
     return (
@@ -583,7 +583,7 @@ watch(filteredRides, () => {
         style="cursor: pointer"
         @click="filterDistance = !filterDistance"
       >
-        -20km
+        -50km
       </UButton>
     </div>
     <UButton
