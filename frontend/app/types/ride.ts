@@ -11,6 +11,8 @@ export interface IRide {
   ride_type: string
   image_link: string
   like: number
+  liked_id: string[]
+  user_id: string
   create_date: string
 }
 

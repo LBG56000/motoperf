@@ -69,11 +69,15 @@ const rideSchema = new Schema({
     type: Number,
     default: 0,
   },
-  liked_by: {
+  liked_id: {
     type: [String],
     default: [],
   },
   image_link: {
+    type: String,
+    required: true,
+  },
+  user_id: {
     type: String,
     required: true,
   },

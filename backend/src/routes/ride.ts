@@ -20,42 +20,34 @@ router.get(
 
 router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
   const { userId } = req.body
+  const rideId = req.params.id
 
-  if (!userId) {
-    return res.status(400).json({ error: "L'ID de l'utilisateur est requis" })
-  }
+  if (!userId) return res.status(400).json({ error: 'ID requis' })
 
   try {
-    const ride = await Ride.findById(req.params.id)
+    const ride = await Ride.findById(rideId)
+    if (!ride) return res.status(404).json({ error: 'Balade introuvable' })
 
-    if (!ride) {
-      return res.status(404).json({ error: 'Balade introuvable' })
-    }
+    const hasLiked = ride.liked_id.includes(userId.toString())
 
-    const hasLiked = ride.liked_id.includes(userId)
-    let update
-    if (hasLiked) {
-      update = {
-        $pull: { liked_id: userId },
-        $inc: { like: -1 },
-      }
-    } else {
-      update = {
-        $addToSet: { liked_id: userId },
-        $inc: { like: 1 },
-      }
-    }
+    const update = hasLiked
+      ? { $pull: { liked_id: userId }, $inc: { like: -1 } }
+      : { $addToSet: { liked_id: userId }, $inc: { like: 1 } }
 
-    const updatedRide = await Ride.findByIdAndUpdate(req.params.id, update, {
+    const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
       new: true,
     })
 
+    if (!updatedRide)
+      return res.status(404).json({ error: 'Erreur mise à jour' })
+
     res.status(200).json({
-      like: updatedRide?.like,
+      like: updatedRide.like,
       isLiked: !hasLiked,
     })
-  } catch (error) {
-    res.status(500).json({ error: 'Erreur pendant l’opération de like' })
+  } catch (error: any) {
+    console.error('ERREUR MONGODB:', error.message)
+    res.status(500).json({ error: 'Erreur serveur', details: error.message })
   }
 })
 

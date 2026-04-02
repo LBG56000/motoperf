@@ -1,14 +1,19 @@
 import Ride from '../models/Ride'
 import { connectToMongo } from '.'
+import User from '../models/User'
 
 const seedRide = async () => {
   await connectToMongo()
   await Ride.deleteMany({})
 
+  const user = await User.findOne({ email: 'bob.martin@motocenter.com' })
+  const userId = user ? user._id : '1'
+
   await Ride.insertMany([
     {
-      title: 'Balade à côté de la mer',
-      description: 'Une superbe balade à travers la côte bretonne.',
+      title: 'La Côte de Granit Rose',
+      description:
+        'Un itinéraire spectaculaire longeant le littoral entre falaises de granit et plages de sable fin. Idéal pour une sortie photo.',
       color: '#7EDE6B',
       geom: {
         type: 'FeatureCollection',
@@ -59,19 +64,20 @@ const seedRide = async () => {
           },
         ],
       },
-      duration: 0.5,
-      distance: 15.5,
+      duration: 0.25,
+      distance: 14.5,
       start_town: 'Trébeurden',
       end_town: 'Perros-Guirec',
       ride_type: 'Sinueuse',
       like: 24,
       create_date: '2024-03-20T10:00:00Z',
-      user_id: 101,
-      image_link: './admin/rides/images/images.jpg',
+      user_id: userId,
+      image_link: './images/rides/image.jpg',
     },
     {
-      title: 'Courte balade pour tester sa moto',
-      description: 'Idéal pour tester sa vitesse de croisière.',
+      title: 'Boucle de Trélévern',
+      description:
+        'Petite virée locale parfaite pour une mise en jambe ou tester de nouveaux réglages sur sa machine.',
       color: '#E69F00',
       geom: {
         type: 'FeatureCollection',
@@ -125,19 +131,20 @@ const seedRide = async () => {
           },
         ],
       },
-      duration: 0.5,
-      distance: 10.0,
+      duration: 0.17,
+      distance: 6.2,
       start_town: 'Trélévern',
       end_town: 'Trélévern',
       ride_type: 'Sinueuse',
       like: 12,
       create_date: '2024-03-21T14:30:00Z',
-      user_id: 102,
-      image_link: './admin/rides/images/images2.jpeg',
+      user_id: userId,
+      image_link: './images/rides/image2.jpg',
     },
     {
-      title: 'Balade centre Bretagne avec beaucoup de virages',
-      description: "Des virages à n'en plus finir et une vue imprenable.",
+      title: 'Coeur de Bretagne : Vallées et Virages',
+      description:
+        'Un parcours exigeant à travers le centre-Bretagne, offrant des successions de virages serrés dans un cadre verdoyant.',
       color: '#CC79A7',
       geom: {
         type: 'FeatureCollection',
@@ -246,19 +253,20 @@ const seedRide = async () => {
           },
         ],
       },
-      duration: 1.75,
-      distance: 20.2,
+      duration: 0.55,
+      distance: 35.2,
       start_town: 'Trédaniel',
       end_town: 'Jugon-les-Lacs',
       ride_type: 'Sinueuse',
       like: 56,
       create_date: '2024-03-22T09:15:00Z',
-      user_id: 101,
-      image_link: './admin/rides/images/images3.jpg',
+      user_id: userId,
+      image_link: './images/rides/image3.jpg',
     },
     {
-      title: 'Balade à Guingamp',
-      description: 'Assez longue balade sur des grads axes.',
+      title: 'Descente du Trieux',
+      description:
+        'Liaison rapide et efficace traversant le pays de Guingamp sur des routes larges et dégagées.',
       color: '#222222',
       geom: {
         type: 'FeatureCollection',
@@ -359,19 +367,20 @@ const seedRide = async () => {
           },
         ],
       },
-      duration: 2,
-      distance: 61.4,
+      duration: 0.33,
+      distance: 18.5,
       start_town: 'Guingamp',
       end_town: 'Plouëc-du-Trieux',
       ride_type: 'Grands axes',
       like: 15,
       create_date: '2024-03-22T09:15:00Z',
-      user_id: 101,
-      image_link: './admin/rides/images/images4.jpg',
+      user_id: userId,
+      image_link: './images/rides/image4.jpg',
     },
     {
-      title: 'Longue balade',
-      description: 'Longue balade avec des routes sinueuse, grands axes',
+      title: 'De Loudéac aux Montagnes Noires',
+      description:
+        'Une aventure de longue haleine traversant la Bretagne sauvage. Des paysages variés, du bitume parfait et quelques passages plus techniques.',
       color: '#0072B2',
       geom: {
         type: 'FeatureCollection',
@@ -480,15 +489,15 @@ const seedRide = async () => {
           },
         ],
       },
-      duration: 3,
+      duration: 1.17,
       distance: 108.4,
       start_town: 'Loudéac',
-      end_town: 'Kernaskelneg',
-      ride_type: 'Sinueuse',
+      end_town: 'Plonévez-du-Faou',
+      ride_type: 'Mixte',
       like: 48,
       create_date: '2024-03-22T09:15:00Z',
-      user_id: 101,
-      image_link: './admin/rides/images/images5.jpg',
+      user_id: userId,
+      image_link: './images/rides/image5.jpg',
     },
   ])
 

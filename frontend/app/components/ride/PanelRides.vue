@@ -33,7 +33,10 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
           :key="ride._id"
           class="ride-item"
         >
-          <CardRide :ride="ride" />
+          <CardRide
+            :ride="ride"
+            @update:like="(newCount) => (ride.like = newCount)"
+          />
         </div>
       </div>
     </div>
@@ -44,12 +47,14 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 .ride-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  padding-bottom: 20px;
 }
 
 .ride-item {
   border-radius: 12px;
-  height: 25dvh;
+  height: auto;
+  width: 100%;
 }
 
 .sidebar {

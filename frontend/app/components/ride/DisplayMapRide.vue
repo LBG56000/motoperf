@@ -50,6 +50,7 @@ const listStartTown = ref<string[]>([]) // Liste de toutes les villes de début 
 const listEndTown = ref<string[]>([]) // Liste de toutes les villes de fin des balaades présent
 const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
 const drawInstruction = ref<string | null>(null) // Permet de mettre les instructions pour expliquer comment le dessin d'une ligne fonctionne
+const visibleRides = ref<IRide[]>([]) // Ride visible dans la view box de la carte
 
 const geom = defineModel('geom', {
   type: Object as () => IGeoJSON | null,
@@ -187,6 +188,23 @@ const updateMapBackground = (id: string, L: any) => {
   }).addTo(map.value)
 }
 
+// Modifie la variable réactive pour mettre que les balades visibles sur la carte de l'utilisateur
+const updateVisibleRides = () => {
+  if (!map.value || !filteredRides.value.length) {
+    visibleRides.value = []
+    return
+  }
+
+  const bounds = map.value.getBounds()
+
+  // On filtre les balades déjà filtrées pour ne garder que celles dans la view box
+  visibleRides.value = filteredRides.value.filter((ride) => {
+    const startPoint = ride.geom.features[0].geometry.coordinates[0]
+    const latLng = L_instance.value.latLng(startPoint[1], startPoint[0])
+    return bounds.contains(latLng)
+  })
+}
+
 // Créer la couhe des balades
 const renderRides = () => {
   const L = L_instance.value
@@ -318,7 +336,7 @@ onMounted(async () => {
 
     map.value.addControl(drawControl)
 
-    // Supprime les tooltips natifs des boutons de la toolbar
+    // Supprime les tooltips natifs des boutons de la toolbar (de leaflet-draw)
     const drawContainer = document.querySelector('.leaflet-draw')
     if (drawContainer) {
       drawContainer
@@ -351,7 +369,7 @@ onMounted(async () => {
       }
     })
 
-    // Permet l'affichage des instructions en haut
+    // Permet l'affichage des instructions personnalisé en bas
     map.value.on(LDraw.Draw.Event.DRAWSTART, () => {
       drawInstruction.value = 'Cliquez sur la carte pour commencer votre tracé'
       document
@@ -431,7 +449,7 @@ onMounted(async () => {
     const runtimeConfig = useRuntimeConfig()
     try {
       const res = await fetch(
-        `${runtimeConfig.public.apiBase}rides?project=title,description,color,geom,duration,distance,start_town,end_town,ride_type,like,image_link`
+        `${runtimeConfig.public.apiBase}rides?project=all`
       )
       const data: RideResponse = await res.json()
       if (data.rides && data.rides.length > 0) {
@@ -451,7 +469,7 @@ onMounted(async () => {
       isLoading.value = false
     }
 
-    // Permet d'épaissir le trait des balades en fonction du zoom
+    // Permet d'épaissir le trait des balades en fonction du zoom et de mettre à jour les balades visibles
     map.value.on('zoomend', () => {
       const newZoom = map.value.getZoom()
       const newWeight = getWeightByZoom(newZoom)
@@ -463,7 +481,11 @@ onMounted(async () => {
           }
         })
       }
+
+      updateVisibleRides()
     })
+    map.value.on('moveend', updateVisibleRides)
+
     isLoading.value = false
   }
 
@@ -489,7 +511,10 @@ onMounted(async () => {
 watch(selectedId, (newId: string) =>
   updateMapBackground(newId, L_instance.value)
 )
-watch(filteredRides, () => renderRides())
+watch(filteredRides, () => {
+  renderRides()
+  updateVisibleRides()
+})
 </script>
 
 <template>
@@ -581,7 +606,7 @@ watch(filteredRides, () => renderRides())
       @apply="onApplyFilters"
     />
 
-    <PanelRides v-if="props.displayRideList" :filtered-rides="filteredRides" />
+    <PanelRides v-if="props.displayRideList" :filtered-rides="visibleRides" />
   </div>
 </template>
 
