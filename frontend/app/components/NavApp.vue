@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import ConnexionForm from './ConnexionForm.vue'
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
-import { useAuth } from '@/utils/useAuth'
+import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composable/useConnexionModal'
 
 const { isAuthenticated, logout, user } = useAuth()
 
@@ -10,7 +10,7 @@ const isOpen = ref(false)
 const mode = ref(false)
 const colorMode = useColorMode()
 
-const isModalOpen = ref(false)
+const connexionModal = useConnexionModal()
 
 function toggle_open() {
   isOpen.value = !isOpen.value
@@ -31,7 +31,6 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
 
 <template>
   <div id="navbar-pc">
-    <ConnexionForm v-model="isModalOpen" />
     <div class="navbar">
       <div class="list-left">
         <LogoApp />
@@ -56,13 +55,13 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
           size="xl"
           color="neutral"
           class="rounded-full button"
-          @click="() => (isModalOpen = true)"
+          @click="connexionModal.open()"
           >Connexion
         </UButton>
         <UAvatar
           v-else
           icon="i-lucide-user"
-          :src="user?.image"
+          :src="'/images/users/' + user?.image"
           size="xl"
           loading="lazy"
           @click="logout"
@@ -204,7 +203,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
   background-color: var(--background);
 }
 
-.button {
+:deep(.button) {
   font-size: small;
   padding: 10px 40px;
 }

@@ -7,6 +7,7 @@ import MotocyclesForm from '~/components/form/MotocyclesForm.vue'
 import CarrouselMotorcycles from '~/components/CarrouselMotorcycles.vue'
 import Comment from '~/components/forum/Comment.vue'
 import type { IMessage } from '~/types/messages'
+import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
 
 interface ICommentInput {
   motorcycleId: string
@@ -41,7 +42,7 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
-const isConnected = ref<boolean>(true) // Simule l'état de connexion de l'utilisateur
+const isConnected = ref<boolean>(false) // Simule l'état de connexion de l'utilisateur
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
@@ -79,6 +80,8 @@ const resultatImg = reactive<
     secondValue: string
   }[]
 >([])
+const motorcycle1PreviewUrl = ref<string>('')
+const motorcycle2PreviewUrl = ref<string>('')
 const commentsMotorcycle1 = ref<IMessage[]>([])
 const commentsMotorcycle2 = ref<IMessage[]>([])
 
@@ -143,7 +146,7 @@ async function fetchMotocycles() {
 }
 
 async function fetchCarrouselMotorcycles() {
-  const project = 'name,horsePower,torque,price'
+  const project = 'name,horsePower,torque,price, imageUrl'
   const limit = 10
   // SportsBikes for Carrousel
   const sportBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
@@ -279,6 +282,26 @@ async function postComment() {
   await fetchMessages()
 }
 
+function handleCaroussel(_id: string, imgUrl: string) {
+  if (!motorcycle1Id.value) {
+    motorcycle1Id.value = _id
+    motorcycle1PreviewUrl.value = imgUrl
+  } else if (!motorcycle2Id.value) {
+    motorcycle2Id.value = _id
+    motorcycle2PreviewUrl.value = imgUrl
+  }
+}
+
+function handleDelete() {
+  motorcycle1Id.value = ''
+  motorcycle2Id.value = ''
+  motorcycle1.value = undefined
+  motorcycle2.value = undefined
+  motorcycle1PreviewUrl.value = ''
+  motorcycle2PreviewUrl.value = ''
+  showResultat.value = false
+}
+
 onMounted(() => {
   fetchCarrouselMotorcycles()
 })
@@ -307,11 +330,11 @@ onMounted(() => {
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
         <UButton
-          icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl"
-          :disabled="!motorcycle1Id || !motorcycle2Id"
-          @click="fetchMotocycles"
-          >Comparo</UButton
+        icon="i-lucide-arrow-left-right"
+        class="w-fit rounded-4xl"
+        :disabled="!motorcycle1Id || !motorcycle2Id"
+        @click="fetchMotocycles"
+        >Comparer</UButton
         >
       </div>
       <Transition>
@@ -320,13 +343,13 @@ onMounted(() => {
             <h3>Résultats</h3>
             <div v-for="field in resultatNumber" :key="field.fieldName">
               <ResultatFieldNumber
-                :field-name="field.fieldName"
+              :field-name="field.fieldName"
                 :first-value="field.firstValue"
                 :second-value="field.secondValue"
-              />
-              <br />
+                />
+                <br />
+              </div>
             </div>
-          </div>
           <div v-if="resultatImg.length > 0">
             <h3>Images</h3>
             <div v-for="field in resultatImg" :key="field.fieldName">
@@ -334,78 +357,78 @@ onMounted(() => {
                 :field-name="field.fieldName"
                 :first-value="field.firstValue"
                 :second-value="field.secondValue"
-              />
+                />
+              </div>
             </div>
-          </div>
-          <div v-if="resultatSound.length > 0">
-            <h3>Sons</h3>
-            <div v-for="field in resultatSound" :key="field.fieldName">
-              <ResultatFieldSound
+            <div v-if="resultatSound.length > 0">
+              <h3>Sons</h3>
+              <div v-for="field in resultatSound" :key="field.fieldName">
+                <ResultatFieldSound
                 :field-name="field.fieldName"
                 :first-value="field.firstValue"
                 :second-value="field.secondValue"
-              />
+                />
+              </div>
             </div>
-          </div>
-          <div class="display-comment-container">
-            <div class="left-display-comment">
-              <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
-              <Comment
+            <div class="display-comment-container">
+              <div class="left-display-comment">
+                <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
+                <Comment
                 v-if="commentsMotorcycle1.length > 0"
                 :responses="commentsMotorcycle1"
-              />
-              <p v-else>Postez le premier commentaire !</p>
-            </div>
-            <div class="right-display-comment">
-              <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
-              <Comment
+                />
+                <p v-else>Postez le premier commentaire !</p>
+              </div>
+              <div class="right-display-comment">
+                <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
+                <Comment
                 v-if="commentsMotorcycle2.length > 0"
                 :responses="commentsMotorcycle2"
-              />
-              <p v-else>Postez le premier commentaire !</p>
+                />
+                <p v-else>Postez le premier commentaire !</p>
+              </div>
             </div>
-          </div>
-          <div class="input-comment-box">
-            <div v-if="!isConnected" class="need-connection">
-              <h3>
-                Rejoignez la communauté pour débattre et partager vos avis sur
-                ces motos !
-              </h3>
-              <UButton
+            <div class="input-comment-box">
+              <div v-if="!isConnected" class="need-connection">
+                <h3>
+                  Rejoignez la communauté pour débattre et partager vos avis sur
+                  ces motos !
+                </h3>
+                <UButton
                 color="neutral"
                 class="rounded-4xl self-end text-xs p-2"
                 size="xl"
                 >Se connecter</UButton
-              >
-            </div>
-            <div
+                >
+              </div>
+              <div
               v-if="!messagePosted"
               class="input-comment-container"
               :class="{ blurred: !isConnected }"
-            >
+              >
               <h4>
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
               <div class="comment-input">
                 <USelect
-                  v-model="comment.motorcycleId"
-                  size="lg"
-                  class="w-50"
-                  :items="optionMotorcycles"
-                  :placeholder="motorcycle1?.name"
+                v-model="comment.motorcycleId"
+                size="lg"
+                class="w-50"
+                :items="optionMotorcycles"
+                :placeholder="motorcycle1?.name"
                 />
                 <UTextarea
-                  v-model="comment.content"
-                  size="xl"
-                  placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
+                v-model="comment.content"
+                size="xl"
+                placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
                 />
               </div>
               <UButton
-                class="rounded-4xl self-end text-xs m-1"
-                size="xl"
-                @click="postComment"
-                >Poster</UButton
+              class="rounded-4xl self-end text-xs m-1"
+              size="xl"
+              @click="postComment"
+              >Poster</UButton
               >
             </div>
             <div v-else class="input-posted-container">
@@ -421,15 +444,25 @@ onMounted(() => {
       <div class="caroussel-container">
         <div>
           <h3>Pour la performance</h3>
-          <CarrouselMotorcycles :items="carousselSportBikes" />
+          <CarrouselMotorcycles :items="carousselSportBikes" @selected="handleCaroussel" />
         </div>
         <div>
           <h3>Pour le A2</h3>
-          <CarrouselMotorcycles :items="carousselBeginnerBikes" />
+          <CarrouselMotorcycles :items="carousselBeginnerBikes" @selected="handleCaroussel" />
         </div>
         <div>
           <h3>Pour l'aventure</h3>
-          <CarrouselMotorcycles :items="carousselAdventureBikes" />
+          <CarrouselMotorcycles :items="carousselAdventureBikes" @selected="handleCaroussel" />
+        </div>
+        <div class="dual-container">
+          <DualMotorcycle 
+          :left-motorcycle-url="motorcycle1PreviewUrl" 
+          :right-motorcycle-url="motorcycle2PreviewUrl" 
+          :left-name="motorcycle1?.name" 
+          :right-name="motorcycle2?.name" 
+          @compare="fetchMotocycles"
+          @delete="handleDelete"
+          />
         </div>
       </div>
       <br />
@@ -577,6 +610,13 @@ onMounted(() => {
   filter: blur(3px);
   pointer-events: none;
   user-select: none;
+}
+
+.dual-container {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* Utilitaires */

@@ -108,6 +108,7 @@ async function fetchBrands() {
 }
 
 async function fetchMotorcyclesByBrand() {
+  if (!motorcycle.value.brand?._id) return
   // If first change on model input, fetch motorcycles list for the selected brand
   if (!isMotorcyclesFetched.value) {
     const data = await $fetch<{ motorcycles: IMotorcycle[] }>(

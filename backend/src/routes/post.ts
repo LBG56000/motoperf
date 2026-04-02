@@ -64,12 +64,10 @@ router.get(
 router.post('/add-view', async (req, res) => {
   const { filter } = prepareQuery(req.query)
   try {
-    const post = await Post.findOne({ _id: filter.id })
-    if (!post) {
-      throw new Error('Internal server error')
-    }
-    const views = post.views
-    await Post.updateOne({ views: views }, { $inc: { views: 1 } })
+    await Post.updateOne(
+      { _id: filter.id },
+      { $inc: { views: 1 } }
+    );
     res.status(204).json()
   } catch (error) {
     console.error('Error accessing message route:', error)
@@ -82,11 +80,10 @@ router.post('/', async (req, res) => {
     const body = req.body
     const brand = await Brand.findOne({ _id: body.brand })
     const category = await Category.findOne({ name: body.category })
+    const user = await User.findOne({ _id: body.user })
     // TODO: a modifier dans le front et le back avec des vrai user et des vrai images
-    const user = await User.findOne({ firstname: 'Alice' })
 
     if (!brand || !category || !user) {
-      console.error('brand:', brand, 'category:', category, 'user:', user)
       return res.status(500).json({ error: 'Internal server error' })
     }
     const postCreated = await Post.insertOne({
@@ -95,7 +92,7 @@ router.post('/', async (req, res) => {
       user: user,
       brand: brand,
       category: category,
-      image: 'test1.png',
+      image: body.url
     })
     res.status(201).json({ _id: postCreated._id })
   } catch (error) {
