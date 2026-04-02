@@ -283,7 +283,6 @@ async function postComment() {
 }
 
 function handleCaroussel(_id: string, imgUrl: string) {
-  console.log('Selected motorcycle ID:', _id, 'Image URL:', imgUrl);
   if (!motorcycle1Id.value) {
     motorcycle1Id.value = _id
     motorcycle1PreviewUrl.value = imgUrl
