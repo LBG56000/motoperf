@@ -163,7 +163,7 @@ async function refreshAll() {
 function onRowClick(row) {
   const rowIndex = row.srcElement.parentElement.rowIndex
 
-  const moto = motos.value[rowIndex - 2]
+  const moto = listMotosearch.value[rowIndex - 2]
 
   if (!moto) return console.error('moto introuvable')
   selectedMoto.value = moto

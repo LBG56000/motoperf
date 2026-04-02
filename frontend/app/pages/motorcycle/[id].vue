@@ -80,7 +80,7 @@ async function fetchData() {
     }
   )
   m.value = data.motorcycles?.[0] ?? null
-  console.log('Motorcycle data:', m.value)
+  console.log('Motorcycle data:', m)
 }
 
 async function fetchMessages() {
