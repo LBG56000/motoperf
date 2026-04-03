@@ -296,7 +296,7 @@ const handleSubmit = async () => {
 
 <style scoped>
 .content {
-  height: 60vh;
+  height: 65vh;
   display: flex;
   flex-direction: column;
   padding: 2rem;
