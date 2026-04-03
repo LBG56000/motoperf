@@ -32,6 +32,7 @@ const getResponsesOfPost = async () => {
 
 onMounted(async () => {
   await Promise.all([getPost(), getResponsesOfPost()])
+  scrollToMap('post')
 })
 </script>
 
