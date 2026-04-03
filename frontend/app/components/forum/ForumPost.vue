@@ -21,7 +21,7 @@ const addViewInAPost = async (id: string) => {
 
 const handleOpenAPost = async (id: string) => {
   await addViewInAPost(id)
-  navigateTo(`/forum/${id}`)
+  navigateTo(`/forum/${id}#post`)
 }
 
 const handlePostChange = () => {
@@ -36,7 +36,6 @@ const handlePostChange = () => {
       <div class="main">
         <div class="top">
           <h4>{{ props.post.title }}</h4>
-          <!--TODO: à compléter pour la gestion utilisateur-->
           <ForumEditAPost :post="post" :is-new-post="false" @edited-post="handlePostChange" />
         </div>
         <div class="grid">
@@ -44,7 +43,7 @@ const handlePostChange = () => {
             <div class="badges">
               <UBadge size="lg" class="margin-2">{{
                 props.post.brand.name
-                }}</UBadge>
+              }}</UBadge>
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
             <p>

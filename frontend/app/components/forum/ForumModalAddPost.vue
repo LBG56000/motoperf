@@ -211,7 +211,7 @@ onMounted(async () => {
                 </template>
               </USelectMenu>
             </UFormField>
-            <UFormField label="Marques" required name="brand">
+            <UFormField label="Marque" required name="brand">
               <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
                 value-key="name" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
@@ -240,7 +240,7 @@ onMounted(async () => {
                         <p class="text-sm">Sélectionner votre fichier</p>
                       </div>
                     </div>
-                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload" @click="open">
+                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload cursor-pointer" @click="open">
                       <h4>Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
@@ -295,6 +295,13 @@ onMounted(async () => {
   font-size: 16px;
 }
 
+.helper-upload h4 {
+  font-size: 14px;
+  background-color: rgba(128, 128, 128, 0.865);
+  padding: 0.5em;
+  color: var(--background);
+}
+
 .blur-4 {
   filter: blur(2px);
 }
@@ -305,5 +312,9 @@ onMounted(async () => {
   text-align: center;
   min-height: 100px;
   max-height: 100px;
+}
+
+img {
+  max-width: 80%;
 }
 </style>
