@@ -71,9 +71,12 @@ router.get(
       Object.entries(project).filter(([key]) => allowedFields.includes(key)),
     )
 
+    const finalProject =
+      Object.keys(safeProject).length > 0 ? safeProject : { _id: 1 }
+
     try {
       const users = await User.find(filter)
-        .select(safeProject)
+        .select(finalProject)
         .sort(sort)
         .limit(limit)
       res.status(200).json({ users })
