@@ -20,24 +20,36 @@ async function fetchStats() {
   try {
     const totalUsers = await $fetch<number>(`${apiBase}users/count`)
     const totalBikes = await $fetch<number>(`${apiBase}motorcycles/count`)
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    const res = await $fetch<{ users: IUser[] }>(
+
+    const resToday = await $fetch<{ users: IUser[] }>(
       `${apiBase}users?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
     )
-    const newUsers = res.users
-    stats.value.push({
-      title: 'Utilisateurs',
-      value: totalUsers ?? 0
-    })
-    stats.value.push({
-      title: 'Motos',
-      value: totalBikes ?? 0
-    })
-    stats.value.push({
-      title: "Nouveaux utilisateurs aujourd'hui",
-      value: newUsers.length ?? 0
-    })
+
+    const resPostsToday = await $fetch<{ posts: any[] }>(
+      `${apiBase}posts?filter=${JSON.stringify({ createdAt: { $gte: today } })}`
+    )
+
+    stats.value = [
+      {
+        title: 'Utilisateurs',
+        value: totalUsers ?? 0
+      },
+      {
+        title: 'Motos',
+        value: totalBikes ?? 0
+      },
+      {
+        title: "Nouveaux utilisateurs aujourd'hui",
+        value: resToday.users.length ?? 0
+      },
+      {
+        title: "Posts créés aujourd'hui",
+        value: resPostsToday.posts.length ?? 0
+      }
+    ]
   } catch (error) {
     console.error('Erreur lors de la récupération des statistiques :', error)
   }
@@ -54,13 +66,10 @@ onMounted(() => {
     <hr />
     <main>
       <h3>Bienvenue {{ userName }}</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CardStats
-          v-for="stat in stats"
-          :key="stat.title"
-          :title="stat.title"
-          :value="stat.value"
-        />
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-40 pr-40">
+        <div v-for="stat in stats" :key="stat.title" class="card">
+          <CardStats :title="stat.title" :value="stat.value" />
+        </div>
       </div>
     </main>
   </div>
@@ -74,5 +83,10 @@ h3 {
 
 main {
   margin: 100px 20px;
+}
+
+.card {
+  border: 3px solid black;
+  border-radius: 8px;
 }
 </style>

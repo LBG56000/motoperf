@@ -6,11 +6,10 @@ const props = defineProps<{
 </script>
 
 <template>
-  <UCard>
+  <UCard :ui="{ header: 'border-0 pb-0', body: 'pt-0' }">
     <template #header>
       <h4>{{ props.value }}</h4>
     </template>
-
     <template #default>
       <h6>{{ props.title }}</h6>
     </template>
