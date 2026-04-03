@@ -13,7 +13,7 @@ export interface IRide {
   like: number
   liked_id: string[]
   user_id: string
-  create_date: string
+  createdAt: string
 }
 
 export interface IGeoJSON {
@@ -67,6 +67,8 @@ export interface IValueForm {
   endTown: IValueCommuneSelect | undefined
   rideType: string
   picture: File | undefined
+  dateEvent: any | undefined
+  hourEvent: any | undefined
   geom: IGeoJSON | null
 }
 

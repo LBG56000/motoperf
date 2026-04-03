@@ -40,6 +40,9 @@ const dataRides = ref<IRide[]>([]) // Données des balades récupérées depuis 
 const searchValue = ref<string>('') // Valeur de recherche pour filtrer les balades
 const filterTime = ref<boolean>(false) // Filtre de durée activé ou non
 const filterDistance = ref<boolean>(false) // Filtre de distance activé ou non
+const filterLike = ref<boolean>(false) // Filtre sur les plus liké
+const filterRecent = ref<boolean>(false) // Filtre sur les plus récentes
+
 const selectedId = ref<string>('default') // Fond de carte sélectionné
 const showFilters = ref<boolean>(false) // Affichage ou non des filtres
 const distanceMax = ref<number>(1) // Distance max d'un tracé pour le slider
@@ -114,52 +117,47 @@ const mapItems = ref<MapItem[]>([
 ])
 
 const filteredRides = computed<IRide[]>(() => {
-  return dataRides.value.filter((ride: IRide) => {
-    // Recherche des champs de texte (filtre et input au dessus de la map)
+  // 1. On commence par filtrer selon les critères classiques
+  let rides = dataRides.value.filter((ride: IRide) => {
     const searchString = (
       searchValue.value ||
       activeFilters.value.title ||
       ''
     ).toLowerCase()
-
     const matchesSearch = ride.title.toLowerCase().includes(searchString)
 
-    // Filtre Ville de départ
-    const filterStart = activeFilters.value.startTown
+    // Filtres géographiques et types
     const matchesStartTown =
-      !filterStart ||
-      filterStart.length === 0 ||
-      filterStart.includes(ride.start_town)
-
-    // Filtre Ville d'arrivée
-    const filterEnd = activeFilters.value.endTown
+      !activeFilters.value.startTown?.length ||
+      activeFilters.value.startTown.includes(ride.start_town)
     const matchesEndTown =
-      !filterEnd || filterEnd.length === 0 || filterEnd.includes(ride.end_town)
-
-    // Filtre Type de balade
-    const filterType = activeFilters.value.type
+      !activeFilters.value.endTown?.length ||
+      activeFilters.value.endTown.includes(ride.end_town)
     const matchesType =
-      !filterType ||
-      filterType.length === 0 ||
-      filterType.includes(ride.ride_type)
+      !activeFilters.value.type?.length ||
+      activeFilters.value.type.includes(ride.ride_type)
 
-    // Filtre Distance
-    const minDist = activeFilters.value.distance?.[0] ?? 0
-    const maxDist = activeFilters.value.distance?.[1] ?? 1000
+    // Filtres Sliders
     const matchesSliderDistance =
-      ride.distance >= minDist && ride.distance <= maxDist
-
-    // Filtre Durée (Tes données sont déjà en heures, ex: 1.5)
-    const minDur = activeFilters.value.duration?.[0] ?? 0
-    const maxDur = activeFilters.value.duration?.[1] ?? 24
+      ride.distance >= (activeFilters.value.distance?.[0] ?? 0) &&
+      ride.distance <= (activeFilters.value.distance?.[1] ?? 9999)
     const matchesSliderDuration =
-      ride.duration >= minDur && ride.duration <= maxDur
+      ride.duration >= (activeFilters.value.duration?.[0] ?? 0) &&
+      ride.duration <= (activeFilters.value.duration?.[1] ?? 99)
 
-    // Filtres rapides (Boutons du haut de la carte)
+    // Filtres rapides (Boutons)
     const matchesQuickTime = !filterTime.value || ride.duration <= 1.5
     const matchesQuickDistance = !filterDistance.value || ride.distance <= 50
 
-    // On retourne VRAI seulement si TOUTES les conditions sont vrai
+    // Filtre "Plus récentes" (Sorties il y a moins de 7 jours)
+    let matchesRecent = true
+    if (filterRecent.value) {
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+      const rideDate = new Date(ride.createdAt)
+      matchesRecent = rideDate >= sevenDaysAgo
+    }
+
     return (
       matchesSearch &&
       matchesSliderDistance &&
@@ -168,9 +166,16 @@ const filteredRides = computed<IRide[]>(() => {
       matchesQuickDistance &&
       matchesStartTown &&
       matchesEndTown &&
-      matchesType
+      matchesType &&
+      matchesRecent
     )
   })
+
+  if (filterLike.value) {
+    rides = [...rides].sort((a, b) => (b.like || 0) - (a.like || 0)).slice(0, 5)
+  }
+
+  return rides
 })
 
 // Fonction appelée quand le formulaire émet 'apply'
@@ -296,7 +301,7 @@ const handleFilters = () => {
 
 onMounted(async () => {
   // Si le paramètre est présent dans l'URL
-  if (route.query.created === 'true') {
+  if (route.query.scroll === 'true') {
     setTimeout(() => {
       scrollToMap('map')
       // Nettoyage de l'URL pour éviter de rescroller au prochain refresh
@@ -596,6 +601,26 @@ watch(filteredRides, () => {
         @click="filterDistance = !filterDistance"
       >
         -50km
+      </UButton>
+
+      <UButton
+        icon="i-lucide-heart"
+        :color="filterLike ? 'primary' : 'neutral'"
+        :variant="filterLike ? 'solid' : 'subtle'"
+        style="cursor: pointer"
+        @click="filterLike = !filterLike"
+      >
+        Coups de coeur
+      </UButton>
+
+      <UButton
+        icon="i-lucide-calendar-days"
+        :color="filterRecent ? 'primary' : 'neutral'"
+        :variant="filterRecent ? 'solid' : 'subtle'"
+        style="cursor: pointer"
+        @click="filterRecent = !filterRecent"
+      >
+        Les plus récentes
       </UButton>
     </div>
     <UButton

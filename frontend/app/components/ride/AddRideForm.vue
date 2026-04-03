@@ -8,7 +8,9 @@ import {
 import DisplayMapRide from './DisplayMapRide.vue'
 import * as turf from '@turf/turf'
 import { useAuth } from '~/composable/useAuth.js'
-import type { un } from 'vue-router/dist/router-CWoNjPRp.mjs'
+import { Time, CalendarDate } from '@internationalized/date'
+import InputDate from '~/components/global/InputDate.vue'
+import InputTime from '~/components/global/InputTime.vue'
 
 const isLoading = ref<boolean>(false)
 const { user } = useAuth()
@@ -16,6 +18,10 @@ const { user } = useAuth()
 // Termes de recherche séparés pour chaque select
 const startTownSearch = ref<string>('')
 const endTownSearch = ref<string>('')
+
+const now = new Date()
+
+const switchEvent = ref<boolean>(false)
 
 const rideTypeOptions = Object.values(RideType).map((type: string) => ({
   label: type,
@@ -126,6 +132,12 @@ const stateForm = reactive<IValueForm>({
   endTown: undefined,
   rideType: '',
   picture: undefined,
+  dateEvent: new CalendarDate(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    now.getDate()
+  ),
+  hourEvent: new Time(now.getHours(), now.getMinutes()),
   geom: null
 })
 
@@ -198,6 +210,16 @@ async function onSubmit() {
       userId: user.value?._id
     }
 
+    // Conversion en chaînes de caractères ISO/Lisibles
+    if (switchEvent.value) {
+      payload.dateEvent = stateForm.dateEvent.toString()
+      payload.hourEvent = stateForm.hourEvent.toString()
+    } else {
+      // Si ce n'est pas une balade groupée, on nettoie les valeurs
+      payload.dateEvent = undefined
+      payload.hourEvent = undefined
+    }
+
     await $fetch(`${runtimeConfig.public.apiBase}rides`, {
       method: 'POST',
       body: payload
@@ -205,7 +227,7 @@ async function onSubmit() {
 
     await navigateTo({
       path: '/ride',
-      query: { created: 'true' }
+      query: { scroll: 'true' }
     })
 
     const toast = useToast()
@@ -345,7 +367,7 @@ watch(
       <UContainer class="flex flex-col space-y-6">
         <header class="form-header">
           <UButton
-            to="/ride"
+            to="/ride?scroll=true"
             icon="i-lucide-chevron-left"
             variant="ghost"
             color="neutral"
@@ -416,20 +438,38 @@ watch(
           </UFormField>
         </div>
 
-        <div class="row-container">
-          <UFormField
-            label="Type de la balade"
-            name="rideType"
-            required
-            class="full-width"
-          >
-            <USelect
-              v-model="stateForm.rideType"
-              class="w-full"
-              :items="rideTypeOptions"
-              placeholder="Sélectionnez le type..."
-              size="xl"
-            />
+        <UFormField
+          label="Type de la balade"
+          name="rideType"
+          required
+          class="w-full"
+        >
+          <USelect
+            v-model="stateForm.rideType"
+            class="w-full"
+            :items="rideTypeOptions"
+            placeholder="Sélectionnez le type..."
+            size="xl"
+          />
+        </UFormField>
+
+        <UFormField name="groupRide" required class="w-full">
+          <div class="switch-container">
+            <USwitch v-model="switchEvent" />
+            <p>Créer une balade groupée</p>
+          </div>
+        </UFormField>
+
+        <div
+          v-if="switchEvent"
+          class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
+        >
+          <UFormField label="Date de la balade" required class="w-full">
+            <InputDate v-model="stateForm.dateEvent" />
+          </UFormField>
+
+          <UFormField label="Heure de la balade" required class="w-full">
+            <InputTime v-model="stateForm.hourEvent" />
           </UFormField>
         </div>
 
@@ -454,8 +494,16 @@ watch(
 </template>
 
 <style scoped>
-.full-width {
-  grid-column: span 2;
+.switch-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch-container p {
+  font-size: medium;
 }
 
 .container-info-under-map {
