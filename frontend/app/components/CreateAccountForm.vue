@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
-import { ref, reactive, computed } from 'vue'
-import { useConnexionModal } from '~/composable/useConnexionModal'
+import { ref, reactive } from 'vue'
+import { useCreateAccountModal } from '~/composable/useCreateAccountModal'
 import { useAuth } from '~/composable/useAuth'
 
 const { register } = useAuth()
-const { isOpen, close } = useConnexionModal()
+const { isOpen } = useCreateAccountModal()
 const form = useTemplateRef('form')
 const currentStep = ref(1)
 const formErrors = ref<FormError[]>([])

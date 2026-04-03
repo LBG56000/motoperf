@@ -1,3 +1,5 @@
+import { useCreateAccountModal } from './useCreateAccountModal'
+
 export const useConnexionModal = () => {
   const isOpen = useState('connexionModal.isOpen', () => false)
 
@@ -8,5 +10,10 @@ export const useConnexionModal = () => {
     isOpen.value = false
   }
 
-  return { isOpen, open, close }
+  const openCreateAccountModal = () => {
+    close()
+    useCreateAccountModal().open()
+  }
+
+  return { isOpen, open, close, openCreateAccountModal }
 }

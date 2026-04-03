@@ -5,7 +5,7 @@ import { useConnexionModal } from '~/composable/useConnexionModal'
 import { useAuth } from '~/composable/useAuth'
 
 const { login, isAuthenticated } = useAuth()
-const { isOpen, close } = useConnexionModal()
+const { isOpen, close, openCreateAccountModal } = useConnexionModal()
 
 const form = useTemplateRef('form')
 
@@ -61,6 +61,15 @@ watch(
     <template #content>
       <div class="content">
         <h3>Se connecter</h3>
+
+        <p>
+          Déjà inscrit ?
+          <span
+            style="text-decoration: underline; cursor: pointer"
+            @click="openCreateAccountModal"
+            >Se connecter</span
+          >
+        </p>
         <UForm
           ref="form"
           :state="state"
