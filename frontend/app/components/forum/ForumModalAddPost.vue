@@ -230,9 +230,8 @@ onMounted(async () => {
             <UFormField required :label="onImageTitle()" name="file">
               <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
                 <template #default="{ open }">
-                  <div @click="open">
-                    <div class="cursor-pointer" :class="isHover ? 'blur-4' : ''" @mouseover="isHover = true"
-                      @mouseleave="isHover = false">
+                  <div @click="open" @mouseover="isHover = true" @mouseleave="isHover = false">
+                    <div class="cursor-pointer" :class="isHover ? 'blur-4' : ''">
                       <img :src="getPreviewUrl()" />
                     </div>
                     <div v-if="props.isNewPost && getPreviewUrl() === ''" class="border cursor-pointer">
@@ -241,8 +240,7 @@ onMounted(async () => {
                         <p class="text-sm">Sélectionner votre fichier</p>
                       </div>
                     </div>
-                    <div v-if="isHover" class="helper-upload" @mouseover="isHover = true" @mouseleave="isHover = false"
-                      @click="open">
+                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload" @click="open">
                       <h4>Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
