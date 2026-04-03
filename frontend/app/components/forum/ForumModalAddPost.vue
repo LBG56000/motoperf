@@ -108,7 +108,7 @@ const onSubmit = async () => {
         ...(!props.isNewPost && { params: { filter: JSON.stringify({ id: props.post?._id }) } })
       })
 
-      if (response.status === 201 || response.status === 204) {
+      if (response.ok) {
         toast.add({ title: 'Succès', description: `Votre post a été ${props.isNewPost ? 'ajouté' : 'modifié'}.`, color: 'success' })
         resetForm()
         displayModal.value = false

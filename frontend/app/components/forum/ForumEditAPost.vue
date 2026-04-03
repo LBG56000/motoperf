@@ -7,6 +7,8 @@ const props = defineProps<{
   post: IPost
 }>()
 
+const emit = defineEmits(['edited-post'])
+
 const { user, isAuthenticated } = useAuth()
 
 const isOwner = computed(() => {
@@ -15,11 +17,15 @@ const isOwner = computed(() => {
   }
   return props.post.user._id === user.value._id
 })
+
+const handleEditPost = () => {
+  emit('edited-post')
+}
 </script>
 
 <template>
   <div>
-    <LazyForumModalAddPost :is-new-post :post :is-same-user="isOwner" />
+    <LazyForumModalAddPost :is-new-post :post :is-same-user="isOwner" @added-post="handleEditPost" />
   </div>
 </template>
 <style scoped></style>

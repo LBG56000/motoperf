@@ -6,6 +6,8 @@ const props = defineProps<{
   loading: boolean
 }>()
 
+const emit = defineEmits(['post-change'])
+
 const apiBase = useRuntimeConfig().public.apiBase
 
 const addViewInAPost = async (id: string) => {
@@ -21,6 +23,10 @@ const handleOpenAPost = async (id: string) => {
   await addViewInAPost(id)
   navigateTo(`/forum/${id}`)
 }
+
+const handlePostChange = () => {
+  emit('post-change')
+}
 </script>
 <template>
   <UCard class="card-forum custom-border" @click="handleOpenAPost(post._id)">
@@ -31,7 +37,7 @@ const handleOpenAPost = async (id: string) => {
         <div class="top">
           <h4>{{ props.post.title }}</h4>
           <!--TODO: à compléter pour la gestion utilisateur-->
-          <ForumEditAPost :post="post" :is-new-post="false" />
+          <ForumEditAPost :post="post" :is-new-post="false" @edited-post="handlePostChange" />
         </div>
         <div class="grid">
           <div>

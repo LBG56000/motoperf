@@ -112,11 +112,11 @@ onMounted(async () => {
           <p>Aucun post disponible, ajouter le premier</p>
         </div>
         <div v-for="post in posts" :key="post._id">
-          <ForumPost :post="post" class="cursor-pointer" :loading />
+          <ForumPost :post="post" class="cursor-pointer" :loading @post-change="getPosts()" />
         </div>
       </div>
       <div class="panel">
-        <ForumMyPosts @new-post="getPosts; console.log('test  ')" />
+        <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>
     </div>
