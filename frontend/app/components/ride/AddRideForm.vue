@@ -112,6 +112,10 @@ const handleMenuClose = (isOpen: boolean) => {
 
 onMounted(async () => {
   loadInitialCommunes()
+
+  setTimeout(() => {
+    scrollToMap('map')
+  }, 350)
 })
 
 const stateForm = reactive<IValueForm>({
@@ -199,7 +203,10 @@ async function onSubmit() {
       body: payload
     })
 
-    await navigateTo('/ride')
+    await navigateTo({
+      path: '/ride',
+      query: { created: 'true' }
+    })
 
     const toast = useToast()
     toast.add({
@@ -289,196 +296,226 @@ watch(
 </script>
 <template>
   <div id="container-form" class="container-form">
-    <h3>Ajouter votre balade</h3>
-
     <UForm
       class="form-wrapper"
       :state="stateForm"
       :validate="validate"
       @submit="onSubmit"
     >
-      <UFormField label="Titre de la balade" name="title" required>
-        <UInput
-          v-model="stateForm.title"
-          class="w-full"
-          placeholder="Entrez un titre..."
-          size="xl"
-        />
-      </UFormField>
+      <UContainer class="flex flex-col h-full">
+        <UFormField
+          label="Tracé de la balade"
+          name="geom"
+          required
+          class="flex flex-col grow"
+          :ui="{ container: 'flex-grow' }"
+        >
+          <DisplayMapRide
+            v-model:geom="stateForm.geom"
+            display-enlarge-button
+            display-editor-container
+            class="grow min-h-100 lg:min-h-0"
+          />
 
-      <UFormField label="Description de la balade" name="description">
-        <UTextarea
-          v-model="stateForm.description"
-          class="w-full"
-          placeholder="Entrez une description..."
-          size="xl"
-          :rows="5"
-        />
-      </UFormField>
+          <div class="container-info-under-map">
+            <div v-if="rideDistance > 0" class="ride-line-info">
+              <UIcon name="i-lucide-map-pinned" class="w-4 h-4" />
+              <span
+                >Distance estimée :
+                <strong style="color: var(--ui-primary)"
+                  >{{ rideDistance }} km</strong
+                ></span
+              >
+            </div>
+            <div class="ride-line-info">
+              <UIcon name="i-lucide-timer" class="w-4 h-4" />
+              <span>Durée estimée :</span>
+              <UInputNumber
+                v-model="stateForm.duration"
+                class="w-40"
+                placeholder="Ex: 2"
+                size="xl"
+              />
+              h
+            </div>
+          </div>
+        </UFormField>
+      </UContainer>
 
-      <UFormField label="Tracé de la balade" name="geom" required>
-        <DisplayMapRide
-          v-model:geom="stateForm.geom"
-          display-enlarge-button
-          display-editor-container
-        />
+      <UContainer class="flex flex-col space-y-6">
+        <header class="form-header">
+          <UButton
+            to="/ride"
+            icon="i-lucide-chevron-left"
+            variant="ghost"
+            color="neutral"
+            label="Retour"
+          />
+          <h3>Nouvelle balade</h3>
+          <p class="text-gray-500 text-sm mt-1">
+            Configurez les détails de votre itinéraire
+          </p>
+        </header>
 
-        <div v-if="rideDistance > 0" class="distance-info">
-          <UIcon name="i-lucide-map-pinned" class="w-4 h-4" />
-          <span
-            >Distance estimée : <strong>{{ rideDistance }} km</strong></span
+        <UFormField label="Titre de la balade" name="title" required>
+          <UInput
+            v-model="stateForm.title"
+            class="w-full"
+            placeholder="Entrez un titre..."
+            size="xl"
+          />
+        </UFormField>
+
+        <UFormField label="Description de la balade" name="description">
+          <UTextarea
+            v-model="stateForm.description"
+            class="w-full"
+            placeholder="Entrez une description..."
+            size="xl"
+            :rows="4"
+          />
+        </UFormField>
+
+        <div class="row-container">
+          <UFormField label="Ville de départ" name="startTown" required>
+            <USelectMenu
+              v-model="stateForm.startTown"
+              class="w-full"
+              :items="listCommunes"
+              placeholder="Chercher une ville..."
+              :search-input="{
+                placeholder: 'Rechercher...',
+                modelValue: startTownSearch,
+                'onUpdate:modelValue': (val: string) => (startTownSearch = val)
+              }"
+              size="xl"
+              option-attribute="label"
+              value-attribute="value"
+              :loading="isLoading"
+              @update:open="handleMenuClose"
+            />
+          </UFormField>
+
+          <UFormField label="Ville d'arrivée" name="endTown" required>
+            <USelectMenu
+              v-model="stateForm.endTown"
+              class="w-full"
+              :items="listCommunes"
+              placeholder="Chercher une ville..."
+              :search-input="{
+                placeholder: 'Rechercher...',
+                modelValue: endTownSearch,
+                'onUpdate:modelValue': (val: string) => (endTownSearch = val)
+              }"
+              size="xl"
+              option-attribute="label"
+              value-attribute="value"
+              :loading="isLoading"
+              @update:open="handleMenuClose"
+            />
+          </UFormField>
+        </div>
+
+        <div class="row-container">
+          <UFormField
+            label="Type de la balade"
+            name="rideType"
+            required
+            class="full-width"
           >
+            <USelect
+              v-model="stateForm.rideType"
+              class="w-full"
+              :items="rideTypeOptions"
+              placeholder="Sélectionnez le type..."
+              size="xl"
+            />
+          </UFormField>
         </div>
-      </UFormField>
 
-      <div class="row-container">
-        <UFormField label="Ville de départ" name="startTown" required>
-          <USelectMenu
-            v-model="stateForm.startTown"
-            :items="listCommunes"
-            class="w-full"
-            placeholder="Chercher une ville..."
-            style="cursor: pointer"
-            :search-input="{
-              placeholder: 'Rechercher...',
-              modelValue: startTownSearch,
-              'onUpdate:modelValue': (val: string) => (startTownSearch = val)
-            }"
-            size="xl"
-            option-attribute="label"
-            value-attribute="value"
-            :loading="isLoading"
-            @update:open="handleMenuClose"
-          />
+        <UFormField label="Image de la balade" name="picture" required>
+          <div class="card-image">
+            <UFileUpload v-model="stateForm.picture" class="w-full h-full" />
+          </div>
         </UFormField>
 
-        <UFormField label="Ville d'arrivée" name="endTown" required>
-          <USelectMenu
-            v-model="stateForm.endTown"
-            :items="listCommunes"
-            class="w-full"
-            placeholder="Chercher une ville..."
-            style="cursor: pointer"
-            :search-input="{
-              placeholder: 'Rechercher...',
-              modelValue: endTownSearch,
-              'onUpdate:modelValue': (val: string) => (endTownSearch = val)
-            }"
-            size="xl"
-            option-attribute="label"
-            value-attribute="value"
-            :loading="isLoading"
-            @update:open="handleMenuClose"
-          />
-        </UFormField>
-      </div>
-      <div class="row-container">
-        <UFormField label="Type de la balade" name="rideType" required>
-          <USelect
-            v-model="stateForm.rideType"
-            :items="rideTypeOptions"
-            class="w-full"
-            placeholder="Sélectionnez le type..."
-            style="cursor: pointer"
-            size="xl"
-          />
-        </UFormField>
-
-        <UFormField label="Durée de la balade (h)" name="duration" required>
-          <UInputNumber
-            v-model="stateForm.duration"
-            class="w-full"
-            placeholder="Entrez une durée..."
-            size="xl"
-          />
-        </UFormField>
-      </div>
-
-      <UFormField label="Image de la balade" name="picture" required>
-        <div class="card-image" style="cursor: pointer">
-          <UFileUpload
-            v-model="stateForm.picture"
-            class="w-full h-full"
-            :ui="{
-              base: 'h-full w-full',
-              container: 'h-full w-full flex items-center justify-center'
-            }"
-          />
-        </div>
-      </UFormField>
-
-      <UButton
-        type="submit"
-        label="Ajouter la balade"
-        color="primary"
-        size="xl"
-        class="self-end"
-        icon="i-lucide-check"
-        style="cursor: pointer"
-        loading-auto
-      />
+        <UButton
+          type="submit"
+          label="Ajouter la balade"
+          color="primary"
+          size="xl"
+          class="justify-center"
+          icon="i-lucide-check"
+          loading-auto
+        />
+      </UContainer>
     </UForm>
   </div>
 </template>
 
 <style scoped>
-.distance-info {
-  margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
+.full-width {
+  grid-column: span 2;
 }
 
-.distance-info strong {
-  color: var(--ui-primary);
+.container-info-under-map {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+}
+
+.ride-line-info {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: start;
+  align-items: center;
 }
 
 .container-form {
   width: 100%;
   padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-}
-
-h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1.5rem;
-  color: var(--text-color);
-}
-
-.card-image {
-  width: 40dvw;
-  height: 25dvh;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .form-wrapper {
-  width: 100%;
-  max-width: 70rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  flex-direction: row;
+  gap: 2.5rem;
+  width: 100%;
+  /* Aligne les hauteurs des deux colonnes */
+  align-items: stretch;
+}
+
+.form-wrapper > * {
+  flex: 1;
+  width: 50%;
+}
+
+:deep(.u-container) {
+  max-width: none !important;
+  margin: 0 !important;
+  width: 100%;
+}
+
+.card-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
 }
 
 .row-container {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-@media (min-width: 768px) {
-  .row-container {
-    grid-template-columns: 1fr 1fr;
+@media (max-width: 1024px) {
+  .form-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .form-wrapper > * {
+    width: 100%;
   }
 }
 </style>

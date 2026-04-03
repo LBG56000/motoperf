@@ -4,7 +4,7 @@ import HeaderInfo from '../../components/global/HeaderInfo.vue'
 </script>
 <template>
   <div>
-    <HeaderInfo :scroll-to-element-id="'container-form'">
+    <HeaderInfo :scroll-to-element-id="'map'">
       <template #title>
         <h1>
           Créer de nouveaux <br />

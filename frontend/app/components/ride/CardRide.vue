@@ -3,6 +3,7 @@ import type { IRide } from '~/types/ride'
 import { computed } from 'vue'
 import { useAuth } from '~/composable/useAuth'
 import type { IUser } from '~/types/users.js'
+import { useConnexionModal } from '~/composable/useConnexionModal.js'
 
 interface IProps {
   ride: IRide
@@ -10,6 +11,7 @@ interface IProps {
 
 const isLikedCurrent = ref(false)
 const { user } = useAuth()
+const { open } = useConnexionModal()
 const creator = ref<any>(null)
 
 const props = defineProps<IProps>()
@@ -44,6 +46,7 @@ const likeGestion = async () => {
 
     // Si pas d'ID, on arrête
     if (!userId) {
+      open()
       return
     }
 

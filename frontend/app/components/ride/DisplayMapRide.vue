@@ -52,6 +52,9 @@ const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
 const drawInstruction = ref<string | null>(null) // Permet de mettre les instructions pour expliquer comment le dessin d'une ligne fonctionne
 const visibleRides = ref<IRide[]>([]) // Ride visible dans la view box de la carte
 
+const route = useRoute() // Paramètre dans l'url
+const router = useRouter()
+
 const geom = defineModel('geom', {
   type: Object as () => IGeoJSON | null,
   default: null
@@ -292,6 +295,15 @@ const handleFilters = () => {
 }
 
 onMounted(async () => {
+  // Si le paramètre est présent dans l'URL
+  if (route.query.created === 'true') {
+    setTimeout(() => {
+      scrollToMap('map')
+      // Nettoyage de l'URL pour éviter de rescroller au prochain refresh
+      router.replace({ query: {} })
+    }, 400)
+  }
+
   isLoading.value = true
 
   const L = await import('leaflet')
