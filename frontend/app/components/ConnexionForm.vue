@@ -62,14 +62,6 @@ watch(
       <div class="content">
         <h3>Se connecter</h3>
 
-        <p>
-          Déjà inscrit ?
-          <span
-            style="text-decoration: underline; cursor: pointer"
-            @click="openCreateAccountModal"
-            >Se connecter</span
-          >
-        </p>
         <UForm
           ref="form"
           :state="state"
@@ -91,6 +83,12 @@ watch(
             style="width: 100%; justify-content: center; color: white"
           />
         </UForm>
+        <p style="font-size: small">
+          Nouveau sur ce site ?
+          <span class="new-account" @click="openCreateAccountModal"
+            >S'inscrire</span
+          >
+        </p>
         <p class="error-message">{{ error }}</p>
       </div>
     </template>
@@ -111,5 +109,10 @@ watch(
   color: red;
   font-size: 0.8em;
   margin: 1rem;
+}
+
+.new-account {
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>
