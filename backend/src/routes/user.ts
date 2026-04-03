@@ -29,13 +29,12 @@ router.post('/account', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Email and password are required' })
   }
 
-  const existingUser = await User.findOne({ email })
-  if (existingUser) {
+  if (await User.findOne({ email })) {
     return res.status(409).json({ error: 'User already exists' })
   }
 
   try {
-    const newUser = await User.create({
+    const newUser: any = {
       email,
       password,
       firstname,
@@ -44,7 +43,7 @@ router.post('/account', async (req: Request, res: Response) => {
       userType,
       image,
       createdAt: new Date(),
-    })
+    }
 
     const users = await User.insertOne(newUser)
 
