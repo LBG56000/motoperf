@@ -6,7 +6,9 @@ const isAuthenticated = computed(() => !!user.value)
 export function useAuth() {
   const apiBase = useRuntimeConfig().public.apiBase
 
-  async function fetchUser(projects: string = '') {
+  async function fetchUser(
+    projects: string = 'email, pseudo, userType, image, firstname, lastname, ridingStartYear, moto, CreatedAt, UpdatedAt'
+  ) {
     try {
       const data = await $fetch<{ users: IUser }>(`${apiBase}users/account`, {
         credentials: 'include',
@@ -16,6 +18,22 @@ export function useAuth() {
     } catch {
       user.value = null
     }
+  }
+
+  async function register(
+    email: string,
+    password: string,
+    firstname: string,
+    lastname: string,
+    pseudo: string,
+    userType: string,
+    image?: string
+  ) {
+    await $fetch(`${apiBase}users/account`, {
+      method: 'POST',
+      body: { email, password, firstname, lastname, pseudo, userType, image }
+    })
+    await login(email, password)
   }
 
   async function login(email: string, password: string) {
@@ -39,6 +57,7 @@ export function useAuth() {
     user: readonly(user),
     isAuthenticated,
     fetchUser,
+    register,
     login,
     logout
   }

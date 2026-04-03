@@ -4,7 +4,7 @@ import { ref, reactive, computed } from 'vue'
 import { useConnexionModal } from '~/composable/useConnexionModal'
 import { useAuth } from '~/composable/useAuth'
 
-const { login, isAuthenticated } = useAuth()
+const { register } = useAuth()
 const { isOpen, close } = useConnexionModal()
 const form = useTemplateRef('form')
 const currentStep = ref(1)
@@ -97,6 +97,15 @@ const handleSubmit = async () => {
     if (formErrors.value.length > 0) {
       return
     }
+
+    register(
+      state.email,
+      state.password,
+      state.firstname,
+      state.lastname,
+      `${state.firstname} ${state.lastname}`,
+      'other'
+    )
 
     formErrors.value = []
     console.log('Profil mis à jour:', state)
