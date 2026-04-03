@@ -3,11 +3,12 @@ import Header from '~/components/admin/Header.vue'
 import { h, resolveComponent } from 'vue'
 import CardMoto from '../../components/admin/CardMoto.vue'
 import type { IMotorcycle } from '~/types/motorcycles'
+import { getPaginationRowModel } from '@tanstack/vue-table'
 
 definePageMeta({
   layout: 'admin'
 })
-
+const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase
 const motos = ref<IMotorcycle[]>([])
@@ -182,9 +183,23 @@ const listMotosearch = computed(() => {
   }
 })
 
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 10
+})
+
+const items = ref([10, 20, 50, 100])
+
 onMounted(() => {
   fetchData()
 })
+
+watch(
+  () => pagination.value.pageSize,
+  (newSize) => {
+    table.value?.tableApi?.setPageSize(newSize)
+  }
+)
 </script>
 
 <template>
@@ -210,14 +225,34 @@ onMounted(() => {
       <div class="main-content">
         <div class="table-moto">
           <UTable
+            ref="table"
+            v-model:pagination="pagination"
             sticky
             :data="listMotosearch"
             :columns="columns"
+            :pagination-options="{
+              getPaginationRowModel: getPaginationRowModel()
+            }"
             :ui="{
               tr: 'cursor-pointer hover:bg-gray-50'
             }"
             @select="onRowClick"
           />
+
+          <div class="flex justify-end p-4 px-4">
+            <USelect v-model="pagination.pageSize" :items="items" />
+          </div>
+
+          <div class="flex justify-end border-t border-default pt-4 px-4">
+            <UPagination
+              :page="
+                (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+              "
+              :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+              :total="table?.tableApi?.getFilteredRowModel().rows.length"
+              @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+            />
+          </div>
         </div>
         <div v-if="panelOpen" class="panel-moto">
           <CardMoto

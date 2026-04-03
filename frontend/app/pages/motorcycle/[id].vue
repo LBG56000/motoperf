@@ -38,7 +38,7 @@ const comment = ref<ICommentInput>({
   user: '69cbe6342e0cabab3167824a' // TODO: update quand l'auth sera en place
 })
 const messagePosted = ref<boolean>(false)
-const isConnected = ref<boolean>(true) // Simule l'état de connexion de l'utilisateur
+const isConnected = ref<boolean>(false) // Simule l'état de connexion de l'utilisateur
 
 const statsRef = ref<HTMLElement | null>(null)
 const countStarted = ref(false)
@@ -233,7 +233,7 @@ watch(
     <img
       :src="m.imageUrl"
       :alt="`Image de la moto ${m.name}`"
-      class="motorcycle-image"
+      class="img-cover moto-left"
     />
 
     <div class="detail">
@@ -267,31 +267,53 @@ watch(
       <p v-else>Pas d'audio</p>
     </div>
 
-    <div
-      v-if="!messagePosted"
-      class="input-comment-container"
-      :class="{ blurred: !isConnected }"
-    >
-      <h4>
-        Déjà roulé sur cette moto ?<br />
-        Faite le savoir à la communauté !
-      </h4>
-      <div class="comment-input">
-        <UTextarea
-          v-model="comment.content"
-          size="xl"
-          placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
-        />
-      </div>
-      <UButton
-        class="rounded-4xl self-end text-xs m-1"
-        size="xl"
-        @click="postComment"
-        >Poster</UButton
-      >
-    </div>
     <div v-if="commentsMotorcycle.length > 0" class="display-comment">
       <Comment :responses="commentsMotorcycle" />
+    </div>
+
+    <div class="input-comment-box">
+      <div v-if="!isConnected" class="need-connection">
+        <h3>
+          Rejoignez la communauté pour débattre et partager vos avis sur ces
+          motos !
+        </h3>
+        <UButton
+          color="neutral"
+          class="rounded-4xl self-end text-xs p-2"
+          size="xl"
+          >Se connecter</UButton
+        >
+      </div>
+      <div
+        v-if="!messagePosted"
+        class="input-comment-container"
+        :class="{ blurred: !isConnected }"
+      >
+        <h4>
+          Déjà roulé sur cette moto ?<br />
+          Faite le savoir à la communauté !
+        </h4>
+        <div class="comment-input">
+          <UTextarea
+            v-model="comment.content"
+            size="xl"
+            placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
+          />
+        </div>
+        <UButton
+          class="rounded-4xl self-end text-xs m-1"
+          size="xl"
+          @click="postComment"
+          >Poster</UButton
+        >
+      </div>
+      <div v-else class="input-posted-container">
+        <h4>Merci pour votre contribution !</h4>
+        <p>
+          Votre commentaire a été posté avec succès. Il apparaîtra dans la
+          section des commentaires correspondante.
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -301,7 +323,7 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 2em;
+  margin-top: 1em;
 }
 .main-content {
   display: flex;
@@ -394,5 +416,82 @@ span {
   from {
     width: 0;
   }
+}
+
+.input-comment-box {
+  position: relative;
+  margin: 3rem 25%;
+  width: 50%;
+  min-height: 25rem;
+  border: 1px solid #757575;
+  border-radius: 1.25rem;
+}
+
+.need-connection {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+}
+
+.need-connection h3 {
+  width: 400px;
+}
+
+.input-comment-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  min-height: 25rem;
+  padding: 2rem;
+}
+
+.input-comment-container h4 {
+  text-align: center;
+}
+
+.comment-input {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.input-posted-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: fit-content;
+  min-height: 25rem;
+  padding: 2rem;
+  gap: 30px;
+}
+
+.input-posted-container h4 {
+  text-align: center;
+}
+
+.input-posted-container p {
+  text-align: center;
+}
+
+.blurred {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.img-cover {
+  flex: 1; /* = flex-grow: 1; flex-shrink: 1; flex-basis: 0%; */
+
+  width: 50%;
+  min-width: 38%;
+  height: 100%;
+
+  object-fit: cover;
+
+  object-position: center;
 }
 </style>
