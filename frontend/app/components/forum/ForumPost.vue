@@ -21,7 +21,7 @@ const addViewInAPost = async (id: string) => {
 
 const handleOpenAPost = async (id: string) => {
   await addViewInAPost(id)
-  navigateTo(`/forum/${id}#post`)
+  navigateTo(`/forum/${id}`)
 }
 
 const handlePostChange = () => {
