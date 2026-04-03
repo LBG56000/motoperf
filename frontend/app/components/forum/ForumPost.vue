@@ -1,16 +1,12 @@
 <script setup lang="ts">
-import { useAuth } from '~/composable/useAuth';
 import type { IPost } from '~/types/post'
-import type { IUser } from '~/types/users';
 
 const props = defineProps<{
   post: IPost
   loading: boolean
 }>()
 
-const handleEditAPost = () => {
-  console.log('Edit post')
-}
+const emit = defineEmits(['post-change'])
 
 const apiBase = useRuntimeConfig().public.apiBase
 
@@ -25,13 +21,11 @@ const addViewInAPost = async (id: string) => {
 
 const handleOpenAPost = async (id: string) => {
   await addViewInAPost(id)
-  navigateTo(`/forum/${id}`)
+  navigateTo(`/forum/${id}#post`)
 }
 
-const isSameUserConnected = (userPost: IUser): boolean => {
-  const { user } = useAuth()
-  return user.value?._id === userPost._id
-
+const handlePostChange = () => {
+  emit('post-change')
 }
 </script>
 <template>
@@ -42,19 +36,16 @@ const isSameUserConnected = (userPost: IUser): boolean => {
       <div class="main">
         <div class="top">
           <h4>{{ props.post.title }}</h4>
-          <!--TODO: à compléter pour la gestion utilisateur-->
-          <UIcon v-if="isSameUserConnected(props.post.user)" class="size-6" name="i-lucide-square-pen"
-            @click.stop="handleEditAPost" />
+          <ForumEditAPost :post="post" :is-new-post="false" @edited-post="handlePostChange" />
         </div>
         <div class="grid">
           <div>
             <div class="badges">
               <UBadge size="lg" class="margin-2">{{
                 props.post.brand.name
-                }}</UBadge>
+              }}</UBadge>
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
-
             <p>
               Par {{ props.post.user.firstname }},
               {{ formatTimeAgo(props.post.createdAt) }}
