@@ -104,7 +104,12 @@ const handleSubmit = async () => {
       state.firstname,
       state.lastname,
       `${state.firstname} ${state.lastname}`,
-      'other'
+      {
+        Débutant: 'beginner',
+        Confirmé: 'confirmed',
+        Expert: 'expert',
+        Autre: 'other'
+      }[state.experience] as 'beginner' | 'confirmed' | 'expert' | 'other'
     )
 
     formErrors.value = []
