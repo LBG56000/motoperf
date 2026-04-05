@@ -18,6 +18,7 @@ interface IProps {
   displayMapLoader?: boolean
   displayRide?: boolean
   displayEditorContainer?: boolean
+  disableEditing?: boolean
 }
 
 // Correction de la définition des props
@@ -27,47 +28,54 @@ const props = withDefaults(defineProps<IProps>(), {
   displayRideList: false,
   displayMapLoader: true,
   displayRide: false,
-  displayEditorContainer: false
+  displayEditorContainer: false,
+  disableEditing: false
 })
 
-const map = ref<any>(null) // Instance de la carte Leaflet
-const currentTileLayer = ref<any>(null) // Couche de tuiles courante affichée sur la carte (permet de gérer notamment le zoom sur les balades trouvées)
-const ridesLayerGroup = ref<any>(null) // Layer group pour les balades affichées sur la carte
-const L_instance = ref<any>(null) // Layer instances courant de leaflet
-const LDraw_instance = ref<any>(null) // window.L, instance globale de leaflet avec les lib qui s'attache à celui-ci
+const map = ref<any>(null) // Instance principale de la carte Leaflet
+const currentTileLayer = ref<any>(null) // Couche de tuiles active (OSM, Google, etc.) affichée sur la carte
+const ridesLayerGroup = ref<any>(null) // Groupe de couches contenant les tracés et marqueurs des balades depuis le backend
+const L_instance = ref<any>(null) // Instance locale de la bibliothèque Leaflet importée dynamiquement
+const LDraw_instance = ref<any>(null) // Instance globale Leaflet enrichie des fonctionnalités de dessin (Leaflet-Draw)
+const drawnItems = ref<any>(null) // Groupe de couches Leaflet contenant les éléments tracés manuellement par l'utilisateur
+let drawControl: any = null // Configuration des interactions de dessin de lignes
 
-const dataRides = ref<IRide[]>([]) // Données des balades récupérées depuis l'API
-const searchValue = ref<string>('') // Valeur de recherche pour filtrer les balades
-const filterTime = ref<boolean>(false) // Filtre de durée activé ou non
-const filterDistance = ref<boolean>(false) // Filtre de distance activé ou non
-const filterLike = ref<boolean>(false) // Filtre sur les plus liké
-const filterRecent = ref<boolean>(false) // Filtre sur les plus récentes
+const dataRides = ref<IRide[]>([]) // Liste brute de toutes les balades récupérées via l'API
+const searchValue = ref<string>('') // Texte saisi par l'utilisateur dans la barre de recherche rapide
+const filterTime = ref<boolean>(false) // État du filtre rapide pour les balades de moins d'une heure trente
+const filterDistance = ref<boolean>(false) // État du filtre rapide pour les balades de moins de 50 kilomètres
+const filterLike = ref<boolean>(false) // État du filtre pour afficher uniquement les balades les plus populaires
+const filterRecent = ref<boolean>(false) // État du filtre pour afficher les balades créées durant les 7 derniers jours
 
-const selectedId = ref<string>('default') // Fond de carte sélectionné
-const showFilters = ref<boolean>(false) // Affichage ou non des filtres
-const distanceMax = ref<number>(1) // Distance max d'un tracé pour le slider
-const durationMax = ref<number>(1) // Durée max d'un tracé pour le slider
-const isLoading = ref<boolean>(true) // Valeur si la carte est entrain de charger
-const listRideTypes = ref<string[]>([]) // Liste de tous les types de balade présent
-const listStartTown = ref<string[]>([]) // Liste de toutes les villes de début des balades présent
-const listEndTown = ref<string[]>([]) // Liste de toutes les villes de fin des balaades présent
-const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
-const drawInstruction = ref<string | null>(null) // Permet de mettre les instructions pour expliquer comment le dessin d'une ligne fonctionne
-const visibleRides = ref<IRide[]>([]) // Ride visible dans la view box de la carte
+const selectedId = ref<string>('default') // Identifiant du fond de carte sélectionné (ex: 'osm', 'satellite')
+const showFilters = ref<boolean>(false) // Contrôle l'affichage du panneau latéral des filtres avancés
+const distanceMax = ref<number>(1) // Valeur maximale de distance trouvée en base pour borner le slider
+const durationMax = ref<number>(1) // Valeur maximale de durée trouvée en base pour borner le slider
+const listRideTypes = ref<string[]>([]) // Liste unique des catégories de balades disponibles pour le filtre
+const listStartTown = ref<string[]>([]) // Liste unique des villes de départ présentes en base pour le filtre
+const listEndTown = ref<string[]>([]) // Liste unique des villes d'arrivée présentes en base pour le filtre
+const { isFullScreen, toggleFullScreen } = useFullScreenMap(map) // Utilitaire gérant l'état et le basculement du mode plein écran
+const drawInstruction = ref<string | null>(null) // Message d'aide contextuel affiché à l'utilisateur pendant le dessin/édition
+const visibleRides = ref<IRide[]>([]) // Sous-ensemble des balades actuellement visibles dans la zone affichée de la carte
 
-const route = useRoute() // Paramètre dans l'url
-const router = useRouter()
+const route = useRoute() // Instance de la route actuelle pour accéder aux paramètres d'URL
+const router = useRouter() // Instance du routeur pour effectuer des redirections ou modifier l'URL
 
 const geom = defineModel('geom', {
   type: Object as () => IGeoJSON | null,
   default: null
+}) // La géométrie GeoJSON du tracé (celui lors de l'ajout d'une balade)
+
+const isMapLoading = defineModel('is-map-loading', {
+  type: Boolean,
+  default: false
 })
 
-const STORAGE_KEY_FILTER = 'rides-filters'
-provide('STORAGE_KEY_FILTER', STORAGE_KEY_FILTER)
+const STORAGE_KEY_FILTER = 'rides-filters' // Clé utilisée pour sauvegarder les préférences de filtres dans le localStorage
+provide('STORAGE_KEY_FILTER', STORAGE_KEY_FILTER) // Injection de la clé pour qu'elle soit accessible par les composants enfants
 
 const defaultFilters: IFilterObject = {
-  distance: [0, 9999], // Initialiser à de grande valeur pour être sûr que toutes les balades s'affiche au début
+  distance: [0, 9999],
   duration: [0, 99],
   title: '',
   type: [],
@@ -75,7 +83,7 @@ const defaultFilters: IFilterObject = {
   endTown: []
 }
 
-const activeFilters = ref<IFilterObject>(defaultFilters)
+const activeFilters = ref<IFilterObject>(defaultFilters) // État réactif contenant les valeurs de filtres actuellement appliquées
 
 // Liste des fonds de carte disponibles
 const mapItems = ref<MapItem[]>([
@@ -83,7 +91,7 @@ const mapItems = ref<MapItem[]>([
     label: 'Par défaut',
     id: 'default',
     icon: 'i-lucide-map',
-    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+    url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&hl=fr',
     attribution: '&copy; Google'
   },
   {
@@ -97,7 +105,7 @@ const mapItems = ref<MapItem[]>([
     label: 'Satellite',
     id: 'satellite',
     icon: 'i-lucide-satellite',
-    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}&hl=fr',
     attribution: '&copy; Google'
   },
   {
@@ -300,7 +308,7 @@ const handleFilters = () => {
 }
 
 onMounted(async () => {
-  // Si le paramètre est présent dans l'URL
+  // Si le paramètre est présent dans l'URL on scroll
   if (route.query.scroll === 'true') {
     setTimeout(() => {
       scrollToMap('map')
@@ -309,7 +317,7 @@ onMounted(async () => {
     }, 400)
   }
 
-  isLoading.value = true
+  isMapLoading.value = true
 
   const L = await import('leaflet')
   await import('leaflet.markercluster')
@@ -335,12 +343,15 @@ onMounted(async () => {
   convertToFrench(LDraw)
 
   // On crée une couche pour stocker les éléments dessinés
-  const drawnItems = new LDraw.FeatureGroup()
-  map.value.addLayer(drawnItems)
+  drawnItems.value = new LDraw.FeatureGroup()
+  map.value.addLayer(drawnItems.value)
 
   if (props.displayEditorContainer && LDraw.Control?.Draw) {
-    const drawControl = new LDraw.Control.Draw({
-      edit: { featureGroup: drawnItems, poly: { allowIntersection: false } },
+    drawControl = new LDraw.Control.Draw({
+      edit: {
+        featureGroup: drawnItems.value,
+        poly: { allowIntersection: false }
+      },
       draw: {
         polyline: { shapeOptions: { color: '#3B82F6', weight: 4 } },
         polygon: false,
@@ -418,8 +429,8 @@ onMounted(async () => {
     // Quand une ligne est créée
     map.value.on(LDraw.Draw.Event.CREATED, (e: any) => {
       const layer = e.layer
-      drawnItems.addLayer(layer)
-      updateGeomModel(drawnItems)
+      drawnItems.value.addLayer(layer)
+      updateGeomModel(drawnItems.value)
 
       // Désactive complètement le bouton de dessin
       const polylineBtn =
@@ -434,11 +445,13 @@ onMounted(async () => {
       }
     })
     // Quand une ligne est modifiée ou supprimée
-    map.value.on(LDraw.Draw.Event.EDITED, () => updateGeomModel(drawnItems))
+    map.value.on(LDraw.Draw.Event.EDITED, () =>
+      updateGeomModel(drawnItems.value)
+    )
     map.value.on(LDraw.Draw.Event.DELETED, () => {
-      updateGeomModel(drawnItems)
+      updateGeomModel(drawnItems.value)
 
-      if (drawnItems.getLayers().length === 0) {
+      if (drawnItems.value.getLayers().length === 0) {
         const polylineBtn =
           drawControl._toolbars.draw._toolbarContainer.querySelector(
             '.leaflet-draw-draw-polyline'
@@ -456,8 +469,12 @@ onMounted(async () => {
   // Fonction pour transformer la couche en GeoJSON pour le modelValue
   const updateGeomModel = (group: any) => {
     const data = group.toGeoJSON()
-    // data sera une FeatureCollection, on met à jour le model
-    geom.value = data
+    // S'assurer que si c'est vide, on envoie null pour reset la durée
+    if (!data.features || data.features.length === 0) {
+      geom.value = null
+    } else {
+      geom.value = data
+    }
   }
 
   updateMapBackground(selectedId.value, L)
@@ -483,7 +500,7 @@ onMounted(async () => {
     } catch (e) {
       console.error('Erreur fetch:', e)
     } finally {
-      isLoading.value = false
+      isMapLoading.value = false
     }
 
     // Permet d'épaissir le trait des balades en fonction du zoom et de mettre à jour les balades visibles
@@ -503,7 +520,7 @@ onMounted(async () => {
     })
     map.value.on('moveend', updateVisibleRides)
 
-    isLoading.value = false
+    isMapLoading.value = false
   }
 
   if (props.displayFilters) {
@@ -522,7 +539,7 @@ onMounted(async () => {
     )
   }
 
-  isLoading.value = false
+  isMapLoading.value = false
 })
 
 watch(selectedId, (newId: string) =>
@@ -532,6 +549,37 @@ watch(filteredRides, () => {
   renderRides()
   updateVisibleRides()
 })
+
+// Surveille les changements externes du v-model (ex: calcul OSRM)
+watch(
+  () => geom.value,
+  (newGeom) => {
+    if (!map.value || !L_instance.value || !newGeom) return
+
+    isMapLoading.value = true
+
+    // On nettoie l'existant sur la couche d'édition
+    drawnItems.value.clearLayers()
+
+    // On ajoute le nouveau tracé à la couche d'édition
+    const geojsonLayer = L_instance.value.geoJSON(newGeom)
+    geojsonLayer.eachLayer((layer: any) => {
+      // On s'assure que c'est une Polyline (tracé)
+      if (layer instanceof L_instance.value.Polyline) {
+        drawnItems.value.addLayer(layer)
+      }
+    })
+
+    // Ajuster la vue pour voir le tracé calculé
+    const bounds = geojsonLayer.getBounds()
+    if (bounds.isValid()) {
+      map.value.fitBounds(bounds, { padding: [30, 30] })
+    }
+
+    isMapLoading.value = false
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -549,7 +597,7 @@ watch(filteredRides, () => {
     </Transition>
 
     <div id="map"></div>
-    <div v-if="isLoading && props.displayMapLoader" class="loader-overlay">
+    <div v-if="isMapLoading && props.displayMapLoader" class="loader-overlay">
       <div class="loader-content">
         <UIcon name="i-lucide-loader-2" class="loader-icon" />
         <span class="loader-text">Chargement de la carte...</span>
@@ -570,7 +618,7 @@ watch(filteredRides, () => {
         icon="i-lucide-filter"
         color="primary"
         variant="solid"
-        style="cursor: pointer"
+        class="cursor-pointer"
         @click="handleFilters"
       >
         Filtres
@@ -587,7 +635,7 @@ watch(filteredRides, () => {
         icon="i-lucide-clock"
         :color="filterTime ? 'primary' : 'neutral'"
         :variant="filterTime ? 'solid' : 'subtle'"
-        style="cursor: pointer"
+        class="cursor-pointer"
         @click="filterTime = !filterTime"
       >
         -1h30
@@ -597,7 +645,7 @@ watch(filteredRides, () => {
         icon="i-lucide-route"
         :color="filterDistance ? 'primary' : 'neutral'"
         :variant="filterDistance ? 'solid' : 'subtle'"
-        style="cursor: pointer"
+        class="cursor-pointer"
         @click="filterDistance = !filterDistance"
       >
         -50km
@@ -607,7 +655,7 @@ watch(filteredRides, () => {
         icon="i-lucide-heart"
         :color="filterLike ? 'primary' : 'neutral'"
         :variant="filterLike ? 'solid' : 'subtle'"
-        style="cursor: pointer"
+        class="cursor-pointer"
         @click="filterLike = !filterLike"
       >
         Coups de coeur
@@ -617,7 +665,7 @@ watch(filteredRides, () => {
         icon="i-lucide-calendar-days"
         :color="filterRecent ? 'primary' : 'neutral'"
         :variant="filterRecent ? 'solid' : 'subtle'"
-        style="cursor: pointer"
+        class="cursor-pointer"
         @click="filterRecent = !filterRecent"
       >
         Les plus récentes
@@ -626,10 +674,9 @@ watch(filteredRides, () => {
     <UButton
       v-if="props.displayEnlargeButton"
       :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-      class="button-enlarge"
+      class="button-enlarge cursor-pointer"
       color="neutral"
       variant="subtle"
-      style="cursor: pointer"
       @click="toggleFullScreen"
     />
 

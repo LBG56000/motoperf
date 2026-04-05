@@ -11,6 +11,9 @@ export interface IRide {
   like: number
   liked_id: string[]
   image_link: string
+  is_event: boolean
+  date_event: string
+  hour_event: string
   create_date: string
 }
 
@@ -44,5 +47,8 @@ export interface ICreateRideBody {
   rideType: string
   imageLink: string
   userId: string
+  is_event: boolean
+  date_event: string
+  hour_event: string
   geom: IGeoJSON
 }

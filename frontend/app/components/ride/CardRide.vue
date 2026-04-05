@@ -17,6 +17,13 @@ const creator = ref<any>(null)
 const props = defineProps<IProps>()
 const emit = defineEmits(['update:like'])
 
+const participantsAvatars = ref([
+  { src: 'https://avatars.githubusercontent.com/u/739984?v=4', alt: 'User 1' },
+  { src: 'https://avatars.githubusercontent.com/u/739985?v=4', alt: 'User 2' },
+  { label: 'JD', alt: 'John Doe' }, // On peut aussi utiliser des initiales
+  { src: 'https://avatars.githubusercontent.com/u/739986?v=4', alt: 'User 3' }
+])
+
 const srcAvatarCreator = computed<string>(() => {
   return creator.value?.image
     ? `/images/users/${creator.value.image}`
@@ -100,8 +107,8 @@ onMounted(async () => {
     if (currentUser && props.ride.liked_id) {
       isLikedCurrent.value = props.ride.liked_id.includes(currentUser.users._id)
     }
-  } catch (e) {
-    console.error('Non connecté')
+  } catch (e: any) {
+    console.error('Non connecté', e)
   }
 })
 </script>
@@ -118,8 +125,20 @@ onMounted(async () => {
             :style="{ backgroundColor: props.ride.color || '#3b82f6' }"
             aria-hidden="true"
           ></span>
+
           <h2 class="title">{{ props.ride.title }}</h2>
+
+          <UBadge
+            v-if="props.ride.is_event"
+            variant="subtle"
+            size="md"
+            icon="i-lucide-calendar-days"
+            class="event-badge-header"
+          >
+            {{ props.ride.date_event }} • {{ props.ride.hour_event }}
+          </UBadge>
         </div>
+
         <UButton
           :icon="
             isLikedCurrent
@@ -130,9 +149,7 @@ onMounted(async () => {
           variant="subtle"
           color="neutral"
           size="md"
-          style="cursor: pointer"
-          class="like-button"
-          :class="{ 'is-liked': isLikedCurrent }"
+          class="like-button cursor-pointer"
           @click="likeGestion"
         />
       </header>
@@ -175,40 +192,43 @@ onMounted(async () => {
           </UBadge>
         </div>
 
-        <div class="card-footer-actions">
-          <template v-if="creator">
-            <UAvatar
-              :alt="`Avatar de ${creator.pseudo}`"
-              :src="srcAvatarCreator"
-            />
-            <p>
-              Créée par <strong>{{ creator.pseudo }}</strong>
-            </p>
-          </template>
-
-          <template v-else>
-            <UIcon name="i-lucide-loader-2" class="animate-spin" />
-            <p>Chargement de l'auteur...</p>
-          </template>
-          <!-- <UButton
-            label="Participer"
-            color="error"
-            size="lg"
-            class="btn-participate"
-          />
-
-          <div class="participants-pill">
-            <UAvatarGroup size="xs" :max="3">
+        <div class="card-footer-container">
+          <div class="card-footer-item">
+            <template v-if="creator">
               <UAvatar
-                v-for="(avatar, index) in participantsAvatars"
-                :key="index"
-                v-bind="avatar"
-                alt="Avatar participant"
+                :alt="`Avatar de ${creator.pseudo}`"
+                :src="srcAvatarCreator"
               />
-            </UAvatarGroup>
-            <span class="more-count">+{{ 15 }} motards</span>
+              <p>
+                Créée par <strong>{{ creator.pseudo }}</strong>
+              </p>
+            </template>
+
+            <template v-else>
+              <UIcon name="i-lucide-loader-2" class="animate-spin" />
+              <p>Chargement...</p>
+            </template>
           </div>
-          -->
+
+          <div v-if="ride.is_event" class="card-footer-item">
+            <UButton
+              label="Participer"
+              color="error"
+              size="lg"
+              class="btn-participate cursor-pointer"
+            />
+
+            <div class="participants-pill">
+              <UAvatarGroup size="xs" :max="3">
+                <UAvatar
+                  v-for="(avatar, index) in participantsAvatars"
+                  :key="index"
+                  v-bind="avatar"
+                />
+              </UAvatarGroup>
+              <span class="more-count">+15</span>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
@@ -216,38 +236,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.like-button {
-  transition:
-    transform 0.2s ease,
-    color 0.2s ease;
-}
-
-.like-button:active {
-  transform: scale(1.2);
-}
-
-.is-liked {
-  color: #3b82f6 !important;
-}
-
-.card-root {
-  width: 100%;
-  height: 260px;
-  overflow: hidden;
-  border: none !important;
-}
-
-:deep(.u-card-body) {
-  padding: 0 !important;
-}
-
+/* --- CONTENEUR GLOBAL & OVERLAY --- */
 .card-image {
+  position: relative;
   width: 100%;
   min-height: 220px;
-  height: auto;
   background-size: cover;
   background-position: center;
-  position: relative;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
@@ -277,25 +272,22 @@ onMounted(async () => {
   gap: 8px;
 }
 
+/* --- HEADER : TITRE & LIKE --- */
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
 }
 
 .title-wrapper {
   display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
-}
-
-.dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  flex: 1;
 }
 
 .title {
@@ -306,13 +298,39 @@ onMounted(async () => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex-shrink: 1;
 }
 
+.event-badge-header {
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* --- BOUTON LIKE --- */
 .like-button {
   color: white !important;
   font-weight: bold;
+  transition: transform 0.2s ease;
 }
 
+.like-button:active {
+  transform: scale(1.2);
+}
+
+/* --- CORPS : DESCRIPTION & GRILLE D'INFOS --- */
 .description {
   font-size: 0.9rem;
   opacity: 0.85;
@@ -331,7 +349,9 @@ onMounted(async () => {
   margin-bottom: 12px;
 }
 
-.invisible-background {
+/* Style partagé pour tous les badges d'info */
+.invisible-background,
+:deep(.invisible-background) {
   background-color: transparent !important;
   color: white !important;
   border: none !important;
@@ -340,26 +360,29 @@ onMounted(async () => {
   padding-right: 12px !important;
 }
 
-:deep(.invisible-background) {
-  background-color: transparent !important;
-  color: white !important;
-}
-
 :deep(.invisible-background .pointer-events-none) {
   color: white !important;
 }
 
-.card-footer-actions {
+/* --- FOOTER : CREATEUR & PARTICIPATION --- */
+.card-footer-container {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.85rem;
 }
 
+.card-footer-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .btn-participate {
-  padding: 0 30px;
+  padding: 0 20px;
   font-weight: 700;
 }
 
@@ -378,6 +401,7 @@ onMounted(async () => {
   font-weight: 700;
 }
 
+/* --- RESPONSIVE --- */
 @media (min-width: 768px) {
   .title {
     font-size: 1.5rem;
@@ -392,9 +416,11 @@ onMounted(async () => {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
-
   .card-image {
     min-height: 240px;
+  }
+  .btn-participate {
+    padding: 0 10px;
   }
 }
 </style>

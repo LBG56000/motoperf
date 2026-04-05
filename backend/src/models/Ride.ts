@@ -81,6 +81,28 @@ const rideSchema = new Schema({
     type: String,
     required: true,
   },
+  is_event: {
+    type: Boolean,
+    default: false,
+  },
+  date_event: {
+    type: String,
+    validate: {
+      validator: function (v: string) {
+        return this.is_event ? v && v.length > 0 : true
+      },
+      message: "La date de l'événement est requise lorsque c'est un événement.",
+    },
+  },
+  hour_event: {
+    type: String,
+    validate: {
+      validator: function (v: string) {
+        return this.is_event ? v && v.length > 0 : true
+      },
+      message: "L'heure de l'événement est requise lorsque c'est un événement.",
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,

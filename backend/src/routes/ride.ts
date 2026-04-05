@@ -68,6 +68,9 @@ router.post(
         rideType,
         imageLink,
         userId,
+        is_event,
+        date_event,
+        hour_event,
         geom,
       } = req.body
 
@@ -86,6 +89,9 @@ router.post(
         ride_type: rideType,
         user_id: userId,
         image_link: imageLink,
+        is_event: is_event,
+        date_event: date_event,
+        hour_event: hour_event,
       })
 
       const savedRide = await newRide.save()

@@ -13,7 +13,11 @@ import InputDate from '~/components/global/InputDate.vue'
 import InputTime from '~/components/global/InputTime.vue'
 
 const isLoading = ref<boolean>(false)
+const isMapLoading = ref<boolean>(false)
+const isAutoUpdating = ref(false)
 const { user } = useAuth()
+const route = useRoute() // Paramètre dans l'url
+const router = useRouter()
 
 // Termes de recherche séparés pour chaque select
 const startTownSearch = ref<string>('')
@@ -21,14 +25,18 @@ const endTownSearch = ref<string>('')
 
 const now = new Date()
 
-const switchEvent = ref<boolean>(false)
-
 const rideTypeOptions = Object.values(RideType).map((type: string) => ({
   label: type,
   value: type
 }))
 
 const listCommunes = ref<IValueCommuneSelect[]>([])
+
+const resetCommunesList = () => {
+  startTownSearch.value = ''
+  endTownSearch.value = ''
+  loadInitialCommunes()
+}
 
 const rideDistance = computed(() => {
   // On vérifie que la géométrie existe et possède des features
@@ -116,30 +124,79 @@ const handleMenuClose = (isOpen: boolean) => {
   }
 }
 
-onMounted(async () => {
-  loadInitialCommunes()
+// Fonction pour transformer une ville (nom) en coordonnées [long, lat]
+const getCoordsFromCity = async (
+  cityName: string
+): Promise<number[] | null> => {
+  try {
+    const res = await fetch(
+      `https://api-adresse.data.gouv.fr/search/?q=${cityName}&limit=1&type=municipality`
+    )
+    const data = await res.json()
+    if (data.features && data.features.length > 0) {
+      return data.features[0].geometry.coordinates
+    }
+  } catch (e) {
+    console.error(`Erreur géocodage pour ${cityName}:`, e)
+  }
+  return null
+}
 
-  setTimeout(() => {
-    scrollToMap('map')
-  }, 350)
-})
+// Fonction qui génère la geom via OSRM à partir des deux villes
+const calculateRouteFromCities = async () => {
+  if (
+    !stateForm.startTown?.value ||
+    !stateForm.endTown?.value ||
+    isAutoUpdating.value
+  )
+    return
 
-const stateForm = reactive<IValueForm>({
-  title: '',
-  duration: 0,
-  description: '',
-  startTown: undefined,
-  endTown: undefined,
-  rideType: '',
-  picture: undefined,
-  dateEvent: new CalendarDate(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    now.getDate()
-  ),
-  hourEvent: new Time(now.getHours(), now.getMinutes()),
-  geom: null
-})
+  isLoading.value = true
+  isAutoUpdating.value = true
+
+  try {
+    const startCoords = await getCoordsFromCity(stateForm.startTown.value)
+    const endCoords = await getCoordsFromCity(stateForm.endTown.value)
+
+    if (startCoords && endCoords) {
+      const res = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${startCoords.join(',')};${endCoords.join(',')}?overview=full&geometries=geojson`
+      )
+      const data = await res.json()
+
+      if (data.routes && data.routes.length > 0) {
+        const rawGeom = {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: data.routes[0].geometry
+            }
+          ]
+        }
+
+        // On simplifie la geom
+        stateForm.geom = simplifyGeometry(rawGeom, 0.00005)
+
+        // On met à jour la durée et la distance ici aussi pour être sûr
+        stateForm.duration = parseFloat(
+          (data.routes[0].duration / 3600).toFixed(2)
+        )
+
+        stateForm.distance = parseFloat(
+          (data.routes[0].distance / 1000).toFixed(2)
+        )
+      }
+    }
+  } finally {
+    isLoading.value = false
+    // On attend un peu avant de déverrouiller pour laisser les watchers se calmer
+    setTimeout(() => {
+      isAutoUpdating.value = false
+    }, 500)
+  }
+}
 
 async function uploadFile(
   file: File,
@@ -210,14 +267,14 @@ async function onSubmit() {
       userId: user.value?._id
     }
 
-    // Conversion en chaînes de caractères ISO/Lisibles
-    if (switchEvent.value) {
-      payload.dateEvent = stateForm.dateEvent.toString()
-      payload.hourEvent = stateForm.hourEvent.toString()
+    // Conversion en chaînes de caractères
+    if (stateForm.is_event) {
+      payload.date_event = stateForm.date_event.toString()
+      payload.hour_event = stateForm.hour_event.toString()
     } else {
       // Si ce n'est pas une balade groupée, on nettoie les valeurs
-      payload.dateEvent = undefined
-      payload.hourEvent = undefined
+      payload.date_event = undefined
+      payload.hour_event = undefined
     }
 
     await $fetch(`${runtimeConfig.public.apiBase}rides`, {
@@ -263,7 +320,6 @@ const getEstimatedDuration = async (geom: any): Promise<number | undefined> => {
     const coords = feature.geometry.coordinates
 
     // OSRM demande les coordonnées sous forme long,lat;long,lat...
-    // On peut échantillonner les points si le tracé est trop long (limite d'URL)
     const polyline = coords.map((c: any) => `${c[0]},${c[1]}`).join(';')
 
     const res = await fetch(
@@ -272,7 +328,7 @@ const getEstimatedDuration = async (geom: any): Promise<number | undefined> => {
     const data = await res.json()
 
     if (data.routes && data.routes.length > 0) {
-      // La durée est en secondes, on la convertit en heures pour ton champ duration
+      // La durée est en secondes, on la convertit en heures
       const durationSeconds = data.routes[0].duration
       const durationHours = durationSeconds / 3600
       return parseFloat(durationHours.toFixed(2))
@@ -283,9 +339,46 @@ const getEstimatedDuration = async (geom: any): Promise<number | undefined> => {
   return undefined
 }
 
+onMounted(async () => {
+  // Si le paramètre est présent dans l'URL on scroll
+  if (route.query.scroll === 'true') {
+    setTimeout(() => {
+      scrollToMap('map')
+      // Nettoyage de l'URL pour éviter de rescroller au prochain refresh
+      router.replace({ query: {} })
+    }, 400)
+  }
+
+  loadInitialCommunes()
+
+  setTimeout(() => {
+    scrollToMap('map')
+  }, 350)
+})
+
+const stateForm = reactive<IValueForm>({
+  title: '',
+  duration: 0,
+  distance: 0,
+  description: '',
+  startTown: undefined,
+  endTown: undefined,
+  rideType: '',
+  picture: undefined,
+  is_event: false,
+  date_event: new CalendarDate(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    now.getDate()
+  ),
+  hour_event: new Time(now.getHours(), now.getMinutes()),
+  geom: null
+})
+
 watch(
   () => stateForm.geom,
   async (newGeom) => {
+    if (isAutoUpdating.value) return
     if (!newGeom || !newGeom.features || newGeom.features.length === 0) return
 
     const feature = newGeom.features[0]
@@ -315,6 +408,43 @@ watch(
   },
   { deep: true }
 )
+
+// On surveille les villes, mais on n'agit que si c'est un changement utilisateur et pas celui automatique après le tracé manuel
+watch(
+  [() => stateForm.startTown, () => stateForm.endTown],
+  ([newStart, newEnd], [oldStart, oldEnd]) => {
+    // Si l'un des deux a changé et que les deux sont remplis
+    if (newStart?.value && newEnd?.value) {
+      // On vérifie si les valeurs sont différentes des précédentes pour éviter les déclenchements inutiles
+      if (
+        newStart.value !== oldStart?.value ||
+        newEnd.value !== oldEnd?.value
+      ) {
+        calculateRouteFromCities()
+      }
+    }
+  }
+)
+
+// Quand la ville de départ est sélectionnée
+watch(
+  () => stateForm.startTown,
+  (newVal) => {
+    if (newVal) {
+      resetCommunesList()
+    }
+  }
+)
+
+// Quand la ville d'arrivée est sélectionnée
+watch(
+  () => stateForm.endTown,
+  (newVal) => {
+    if (newVal) {
+      resetCommunesList()
+    }
+  }
+)
 </script>
 <template>
   <div id="container-form" class="container-form">
@@ -334,10 +464,20 @@ watch(
         >
           <DisplayMapRide
             v-model:geom="stateForm.geom"
-            display-enlarge-button
+            v-model:is-map-loading="isMapLoading"
             display-editor-container
+            :disable-editing="rideDistance > 200"
             class="grow min-h-100 lg:min-h-0"
           />
+
+          <div
+            v-if="isDistanceTooLong"
+            class="mt-2 text-red-500 flex items-center gap-2 text-sm font-medium"
+          >
+            <UIcon name="i-lucide-alert-triangle" class="size-5" />
+            Distance maximale de 200km dépassée ({{ rideDistance }} km).
+            Veuillez réduire le tracé pour modifier à nouveau.
+          </div>
 
           <div class="container-info-under-map">
             <div v-if="rideDistance > 0" class="ride-line-info">
@@ -375,7 +515,10 @@ watch(
           />
           <h3>Nouvelle balade</h3>
           <p class="text-gray-500 text-sm mt-1">
-            Configurez les détails de votre itinéraire
+            Tracez à la main avec
+            <UIcon name="i-lucide-pen" class="size-4 text-primary" /> ou
+            <strong class="text-primary">choisissez deux villes</strong> pour un
+            calcul GPS automatique.
           </p>
         </header>
 
@@ -455,21 +598,21 @@ watch(
 
         <UFormField name="groupRide" required class="w-full">
           <div class="switch-container">
-            <USwitch v-model="switchEvent" />
+            <USwitch v-model="stateForm.is_event" />
             <p>Créer une balade groupée</p>
           </div>
         </UFormField>
 
         <div
-          v-if="switchEvent"
+          v-if="stateForm.is_event"
           class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           <UFormField label="Date de la balade" required class="w-full">
-            <InputDate v-model="stateForm.dateEvent" />
+            <InputDate v-model="stateForm.date_event" />
           </UFormField>
 
           <UFormField label="Heure de la balade" required class="w-full">
-            <InputTime v-model="stateForm.hourEvent" />
+            <InputTime v-model="stateForm.hour_event" />
           </UFormField>
         </div>
 

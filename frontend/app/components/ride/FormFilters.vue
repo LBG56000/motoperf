@@ -201,8 +201,7 @@ const resetFilter = () => {
         <UButton
           color="neutral"
           variant="subtle"
-          class="w-80 hover:bg-red-400 hover:text-white transition-colors"
-          style="cursor: pointer"
+          class="w-80 hover:bg-red-400 hover:text-white transition-colors cursor-pointer"
           block
           @click="resetFilter"
         >
@@ -211,8 +210,7 @@ const resetFilter = () => {
         <UButton
           color="primary"
           variant="solid"
-          class="w-80"
-          style="cursor: pointer"
+          class="w-80 cursor-pointer"
           block
           @click="handleApply"
         >

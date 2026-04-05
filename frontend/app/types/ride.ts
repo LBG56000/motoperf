@@ -13,6 +13,9 @@ export interface IRide {
   like: number
   liked_id: string[]
   user_id: string
+  is_event: boolean
+  date_event: string
+  hour_event: string
   createdAt: string
 }
 
@@ -62,13 +65,15 @@ export interface IValueCommuneSelect {
 export interface IValueForm {
   title: string
   duration: number
+  distance: number
   description: string
   startTown: IValueCommuneSelect | undefined
   endTown: IValueCommuneSelect | undefined
   rideType: string
   picture: File | undefined
-  dateEvent: any | undefined
-  hourEvent: any | undefined
+  is_event: boolean
+  date_event: any | undefined
+  hour_event: any | undefined
   geom: IGeoJSON | null
 }
 
