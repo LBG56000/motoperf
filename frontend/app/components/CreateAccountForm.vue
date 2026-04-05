@@ -13,6 +13,7 @@ const formErrors = ref<FormError[]>([])
 const state = reactive({
   firstname: '',
   lastname: '',
+  pseudo: '',
   moto: '',
   experience: 'Confirmé',
   yearsExperience: '',
@@ -45,6 +46,8 @@ const validateStep = (step: number): FormError[] => {
   if (step === 2 || step === 3) {
     if (!state.yearsExperience)
       errors.push({ name: 'yearsExperience', message: 'Années requises' })
+
+    if (!state.pseudo) errors.push({ name: 'pseudo', message: 'Pseudo requis' })
   }
 
   if (step === 3) {
@@ -103,7 +106,7 @@ const handleSubmit = async () => {
       state.password,
       state.firstname,
       state.lastname,
-      `${state.firstname} ${state.lastname}`,
+      state.pseudo,
       {
         Débutant: 'beginner',
         Confirmé: 'confirmed',
@@ -185,6 +188,19 @@ const handleSubmit = async () => {
           <!-- ÉTAPE 2 -->
           <div v-if="currentStep === 2" class="form-step">
             <div class="step-content">
+              <UFormField
+                label="Pseudonyme"
+                name="pseudo"
+                :error="getError('pseudo')"
+                required
+              >
+                <UInput
+                  v-model="state.pseudo"
+                  placeholder="Jack22"
+                  variant="soft"
+                  class="w-full"
+                />
+              </UFormField>
               <div class="experience-section">
                 <label class="experience-label">Je suis :</label>
                 <div class="experience-buttons">
