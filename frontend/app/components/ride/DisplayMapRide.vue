@@ -19,6 +19,7 @@ interface IProps {
   displayRide?: boolean
   displayEditorContainer?: boolean
   disableEditing?: boolean
+  disableCreating?: boolean
 }
 
 // Correction de la définition des props
@@ -29,7 +30,8 @@ const props = withDefaults(defineProps<IProps>(), {
   displayMapLoader: true,
   displayRide: false,
   displayEditorContainer: false,
-  disableEditing: false
+  disableEditing: false,
+  disableCreating: false
 })
 
 const map = ref<any>(null) // Instance principale de la carte Leaflet
@@ -66,7 +68,7 @@ const geom = defineModel('geom', {
   default: null
 }) // La géométrie GeoJSON du tracé (celui lors de l'ajout d'une balade)
 
-const isMapLoading = defineModel('is-map-loading', {
+const isMapLoading = defineModel('isMapLoading', {
   type: Boolean,
   default: false
 })
@@ -363,6 +365,58 @@ onMounted(async () => {
     })
 
     map.value.addControl(drawControl)
+
+    // Synchronise l'état du bouton avec la prop disableEditing
+    watch(
+      () => props.disableEditing,
+      (disabled) => {
+        setTimeout(() => {
+          const editBtn =
+            drawControl._toolbars.edit._toolbarContainer.querySelector(
+              '.leaflet-draw-edit-edit'
+            )
+          if (!editBtn) return
+          if (disabled) {
+            editBtn.classList.add('leaflet-disabled')
+            editBtn.style.pointerEvents = 'none'
+            editBtn.style.opacity = '0.4'
+            editBtn.style.cursor = 'not-allowed'
+          } else {
+            editBtn.classList.remove('leaflet-disabled')
+            editBtn.style.pointerEvents = ''
+            editBtn.style.opacity = ''
+            editBtn.style.cursor = ''
+          }
+        }, 100)
+      }
+    )
+
+    // Synchronise l'état du bouton de création avec la prop disableCreating
+    watch(
+      () => props.disableCreating,
+      (disabled) => {
+        setTimeout(() => {
+          const polylineBtn =
+            drawControl._toolbars.draw._toolbarContainer.querySelector(
+              '.leaflet-draw-draw-polyline'
+            )
+          if (!polylineBtn) return
+          if (disabled) {
+            polylineBtn.classList.add('leaflet-disabled')
+            polylineBtn.style.pointerEvents = 'none'
+            polylineBtn.style.opacity = '0.4'
+            polylineBtn.style.cursor = 'not-allowed'
+          } else {
+            if (drawnItems.value.getLayers().length === 0) {
+              polylineBtn.classList.remove('leaflet-disabled')
+              polylineBtn.style.pointerEvents = ''
+              polylineBtn.style.opacity = ''
+              polylineBtn.style.cursor = ''
+            }
+          }
+        }, 100)
+      }
+    )
 
     // Supprime les tooltips natifs des boutons de la toolbar (de leaflet-draw)
     const drawContainer = document.querySelector('.leaflet-draw')

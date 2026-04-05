@@ -78,11 +78,11 @@ export interface IValueForm {
 }
 
 export enum RideType {
+  MIXTE = 'Mixte',
   SINUEUSE = 'Sinueuse',
   GRANDES_ROUTES = 'Grandes routes',
   LIGNES_DROITES = 'Lignes droites',
   BORD_DE_MER = 'Bord de mer',
   VALLONER = 'Valloner',
-  PLAINE = 'Plaine',
-  MIXTE = 'Mixte'
+  PLAINE = 'Plaine'
 }

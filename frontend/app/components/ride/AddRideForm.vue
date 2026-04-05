@@ -12,7 +12,7 @@ import { Time, CalendarDate } from '@internationalized/date'
 import InputDate from '~/components/global/InputDate.vue'
 import InputTime from '~/components/global/InputTime.vue'
 
-const isLoading = ref<boolean>(false)
+const isSelectLoading = ref<boolean>(false)
 const isMapLoading = ref<boolean>(false)
 const isAutoUpdating = ref(false)
 const { user } = useAuth()
@@ -22,6 +22,17 @@ const router = useRouter()
 // Termes de recherche séparés pour chaque select
 const startTownSearch = ref<string>('')
 const endTownSearch = ref<string>('')
+
+const durationHours = ref<number>(0)
+const durationMinutes = ref<number>(0)
+
+const isGpsRoute = ref<boolean>(false)
+const isGeomCreated = computed(() => {
+  if (stateForm.geom) {
+    return true
+  }
+  return false
+}) // Vérifie si une geom est créé
 
 const now = new Date()
 
@@ -64,7 +75,7 @@ const searchCommunes = async (query: string) => {
   // Permet de re fetch seulement s'il y a 1 charactères
   if (!query || query.length <= 1) return
 
-  isLoading.value = true
+  isSelectLoading.value = true
   try {
     const res = await fetch(
       `https://geo.api.gouv.fr/communes?nom=${query}&limit=20&fields=nom,code,codesPostaux`
@@ -81,7 +92,7 @@ const searchCommunes = async (query: string) => {
   } catch (e) {
     console.error(e)
   } finally {
-    isLoading.value = false
+    isSelectLoading.value = false
   }
 }
 
@@ -91,7 +102,7 @@ watch(endTownSearch, (val: string) => searchCommunes(val))
 
 // Fonction pour charger les 50 premières communes
 const loadInitialCommunes = async () => {
-  isLoading.value = true
+  isSelectLoading.value = true
   try {
     const res = await fetch(
       `https://geo.api.gouv.fr/communes?limit=50&fields=nom,codesPostaux`
@@ -106,7 +117,7 @@ const loadInitialCommunes = async () => {
   } catch (e) {
     console.error(e)
   } finally {
-    isLoading.value = false
+    isSelectLoading.value = false
   }
 }
 
@@ -147,11 +158,12 @@ const calculateRouteFromCities = async () => {
   if (
     !stateForm.startTown?.value ||
     !stateForm.endTown?.value ||
-    isAutoUpdating.value
+    isAutoUpdating.value ||
+    stateForm.geom
   )
     return
 
-  isLoading.value = true
+  isMapLoading.value = true
   isAutoUpdating.value = true
 
   try {
@@ -178,6 +190,7 @@ const calculateRouteFromCities = async () => {
 
         // On simplifie la geom
         stateForm.geom = simplifyGeometry(rawGeom, 0.00005)
+        isGpsRoute.value = true
 
         // On met à jour la durée et la distance ici aussi pour être sûr
         stateForm.duration = parseFloat(
@@ -190,8 +203,9 @@ const calculateRouteFromCities = async () => {
       }
     }
   } finally {
-    isLoading.value = false
-    // On attend un peu avant de déverrouiller pour laisser les watchers se calmer
+    isSelectLoading.value = false
+    isMapLoading.value = false
+    // On attend un peu avant de déverrouiller pour laisser les watchers se terminer
     setTimeout(() => {
       isAutoUpdating.value = false
     }, 500)
@@ -379,6 +393,7 @@ watch(
   () => stateForm.geom,
   async (newGeom) => {
     if (isAutoUpdating.value) return
+    if (isGpsRoute.value) return
     if (!newGeom || !newGeom.features || newGeom.features.length === 0) return
 
     const feature = newGeom.features[0]
@@ -387,7 +402,7 @@ watch(
     const coords = feature.geometry.coordinates
     if (coords.length < 2) return
 
-    isLoading.value = true
+    isSelectLoading.value = true
 
     // On ajoute le calcul de durée aux requêtes parallèles
     const [startCity, endCity, estimatedTime] = await Promise.all([
@@ -404,7 +419,7 @@ watch(
       stateForm.duration = estimatedTime
     }
 
-    isLoading.value = false
+    isSelectLoading.value = false
   },
   { deep: true }
 )
@@ -445,6 +460,25 @@ watch(
     }
   }
 )
+
+// Prendre les heures et minutes de la duréer en décimal pour le back
+watch([durationHours, durationMinutes], ([h, m]) => {
+  const decimalValue = h + m / 60
+  stateForm.duration = parseFloat(decimalValue.toFixed(2))
+})
+
+// Si la durée change via le calcul automatique, on met à jour les champs Heures / Minutes
+watch(
+  () => stateForm.duration,
+  (newVal) => {
+    const h = Math.floor(newVal)
+    const m = Math.round((newVal - h) * 60)
+
+    // On ne met à jour que si les valeurs sont différentes pour éviter les boucles infinies
+    if (h !== durationHours.value) durationHours.value = h
+    if (m !== durationMinutes.value) durationMinutes.value = m
+  }
+)
 </script>
 <template>
   <div id="container-form" class="container-form">
@@ -466,17 +500,18 @@ watch(
             v-model:geom="stateForm.geom"
             v-model:is-map-loading="isMapLoading"
             display-editor-container
-            :disable-editing="rideDistance > 200"
+            :disable-editing="isGpsRoute"
+            :disable-creating="isGeomCreated"
             class="grow min-h-100 lg:min-h-0"
           />
 
           <div
-            v-if="isDistanceTooLong"
+            v-if="isGpsRoute"
             class="mt-2 text-red-500 flex items-center gap-2 text-sm font-medium"
           >
             <UIcon name="i-lucide-alert-triangle" class="size-5" />
-            Distance maximale de 200km dépassée ({{ rideDistance }} km).
-            Veuillez réduire le tracé pour modifier à nouveau.
+            Pour des raisons de lenteur, la modification est désactivé lors des
+            tracés générer par GPS.
           </div>
 
           <div class="container-info-under-map">
@@ -492,13 +527,25 @@ watch(
             <div class="ride-line-info">
               <UIcon name="i-lucide-timer" class="w-4 h-4" />
               <span>Durée estimée :</span>
-              <UInputNumber
-                v-model="stateForm.duration"
-                class="w-40"
-                placeholder="Ex: 2"
-                size="xl"
-              />
-              h
+              <div class="flex items-center gap-2">
+                <UInputNumber
+                  v-model="durationHours"
+                  class="w-30"
+                  placeholder="H"
+                  :min="0"
+                  size="xl"
+                />
+                <span>h</span>
+                <UInputNumber
+                  v-model="durationMinutes"
+                  class="w-30"
+                  placeholder="Min"
+                  :min="0"
+                  :max="59"
+                  size="xl"
+                />
+                <span>min</span>
+              </div>
             </div>
           </div>
         </UFormField>
@@ -556,7 +603,7 @@ watch(
               size="xl"
               option-attribute="label"
               value-attribute="value"
-              :loading="isLoading"
+              :loading="isSelectLoading"
               @update:open="handleMenuClose"
             />
           </UFormField>
@@ -575,7 +622,7 @@ watch(
               size="xl"
               option-attribute="label"
               value-attribute="value"
-              :loading="isLoading"
+              :loading="isSelectLoading"
               @update:open="handleMenuClose"
             />
           </UFormField>
