@@ -9,6 +9,7 @@ import Comment from '~/components/forum/Comment.vue'
 import type { IMessage } from '~/types/messages'
 import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
 import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composable/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
@@ -24,6 +25,8 @@ const motorcycle1 = ref<IMotorcycle>()
 const motorcycle2 = ref<IMotorcycle>()
 const motorcycle1Id = ref<string>('')
 const motorcycle2Id = ref<string>('')
+const toast = useToast()
+const { open } = useConnexionModal()
 const fieldCategories = {
   numbers: [
     'year',
@@ -266,7 +269,7 @@ async function postComment() {
   }
 
   try {
-    await $fetch(`${apiBase}messages`, {
+    const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
       body: {
         content: comment.value.content,
@@ -275,9 +278,13 @@ async function postComment() {
         referenceModel: 'Post'
       }
     })
+    if (newMessage.ok) {
+      toast.add({ title: 'Succès', description: 'Votre commentaire a été ajouté.', color: 'success' })
+    }
     messagePosted.value = true
   } catch (error) {
     console.error('Error posting comment:', error)
+    toast.add({ title: 'Erreur', description: 'Votre commentaire n\'a pas pu être ajouté.', color: 'error' })
   }
 
   await fetchMessages()
@@ -375,7 +382,8 @@ onMounted(() => {
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
-              <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl">Se connecter</UButton>
+              <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl" @click="open()">Se connecter
+              </UButton>
             </div>
             <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
               <h4>
