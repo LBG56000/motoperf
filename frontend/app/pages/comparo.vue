@@ -8,13 +8,14 @@ import CarrouselMotorcycles from '~/components/CarrouselMotorcycles.vue'
 import Comment from '~/components/forum/Comment.vue'
 import type { IMessage } from '~/types/messages'
 import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
+import { useAuth } from '~/composable/useAuth'
 
 interface ICommentInput {
   motorcycleId: string
   motorcycleName: string
   brand: string
   content: string
-  user: string // TODO: update quand l'auth sera en place
+  user: string
 }
 
 const apiBase = useRuntimeConfig().public.apiBase
@@ -42,7 +43,7 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
-const isConnected = ref<boolean>(false) // Simule l'état de connexion de l'utilisateur
+const { isAuthenticated, user } = useAuth()
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
@@ -56,7 +57,7 @@ const comment = ref<ICommentInput>({
   motorcycleName: '',
   brand: '',
   content: '',
-  user: '69cbe6342e0cabab3167824a' // TODO: update quand l'auth sera en place
+  user: ''
 })
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -242,10 +243,10 @@ async function postComment() {
         method: 'POST',
         body: {
           title: selectedMotorcycle.name,
-          brand: selectedMotorcycle.brand._id,
+          brand: selectedMotorcycle.brand.name,
           category: 'Modèle',
-          user: comment.value.user,
-          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`
+          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
+          isNewMotoComment: true,
         }
       })
 
@@ -269,7 +270,7 @@ async function postComment() {
       method: 'POST',
       body: {
         content: comment.value.content,
-        user: comment.value.user,
+        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }
@@ -329,107 +330,65 @@ onMounted(() => {
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <UButton
-        icon="i-lucide-arrow-left-right"
-        class="w-fit rounded-4xl"
-        :disabled="!motorcycle1Id || !motorcycle2Id"
-        @click="fetchMotocycles"
-        >Comparer</UButton
-        >
+        <UButton icon="i-lucide-arrow-left-right" class="w-fit rounded-4xl" :disabled="!motorcycle1Id || !motorcycle2Id"
+          @click="fetchMotocycles">Comparer</UButton>
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="resultat-section">
           <div v-if="resultatNumber.length > 0" class="info-container">
             <h3>Résultats</h3>
             <div v-for="field in resultatNumber" :key="field.fieldName">
-              <ResultatFieldNumber
-              :field-name="field.fieldName"
-                :first-value="field.firstValue"
-                :second-value="field.secondValue"
-                />
-                <br />
-              </div>
+              <ResultatFieldNumber :field-name="field.fieldName" :first-value="field.firstValue"
+                :second-value="field.secondValue" />
+              <br />
             </div>
+          </div>
           <div v-if="resultatImg.length > 0">
             <h3>Images</h3>
             <div v-for="field in resultatImg" :key="field.fieldName">
-              <ResultatFieldImg
-                :field-name="field.fieldName"
-                :first-value="field.firstValue"
-                :second-value="field.secondValue"
-                />
-              </div>
+              <ResultatFieldImg :field-name="field.fieldName" :first-value="field.firstValue"
+                :second-value="field.secondValue" />
             </div>
-            <div v-if="resultatSound.length > 0">
-              <h3>Sons</h3>
-              <div v-for="field in resultatSound" :key="field.fieldName">
-                <ResultatFieldSound
-                :field-name="field.fieldName"
-                :first-value="field.firstValue"
-                :second-value="field.secondValue"
-                />
-              </div>
+          </div>
+          <div v-if="resultatSound.length > 0">
+            <h3>Sons</h3>
+            <div v-for="field in resultatSound" :key="field.fieldName">
+              <ResultatFieldSound :field-name="field.fieldName" :first-value="field.firstValue"
+                :second-value="field.secondValue" />
             </div>
-            <div class="display-comment-container">
-              <div class="left-display-comment">
-                <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
-                <Comment
-                v-if="commentsMotorcycle1.length > 0"
-                :responses="commentsMotorcycle1"
-                />
-                <p v-else>Postez le premier commentaire !</p>
-              </div>
-              <div class="right-display-comment">
-                <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
-                <Comment
-                v-if="commentsMotorcycle2.length > 0"
-                :responses="commentsMotorcycle2"
-                />
-                <p v-else>Postez le premier commentaire !</p>
-              </div>
+          </div>
+          <div class="display-comment-container">
+            <div class="left-display-comment">
+              <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
+              <Comment v-if="commentsMotorcycle1.length > 0" :responses="commentsMotorcycle1" />
+              <p v-else>Postez le premier commentaire !</p>
             </div>
-            <div class="input-comment-box">
-              <div v-if="!isConnected" class="need-connection">
-                <h3>
-                  Rejoignez la communauté pour débattre et partager vos avis sur
-                  ces motos !
-                </h3>
-                <UButton
-                color="neutral"
-                class="rounded-4xl self-end text-xs p-2"
-                size="xl"
-                >Se connecter</UButton
-                >
-              </div>
-              <div
-              v-if="!messagePosted"
-              class="input-comment-container"
-              :class="{ blurred: !isConnected }"
-              >
+            <div class="right-display-comment">
+              <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
+              <Comment v-if="commentsMotorcycle2.length > 0" :responses="commentsMotorcycle2" />
+              <p v-else>Postez le premier commentaire !</p>
+            </div>
+          </div>
+          <div class="input-comment-box">
+            <div v-if="!isAuthenticated" class="need-connection">
+              <h3>
+                Rejoignez la communauté pour débattre et partager vos avis sur
+                ces motos !
+              </h3>
+              <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl">Se connecter</UButton>
+            </div>
+            <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
               <h4>
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
               <div class="comment-input">
-                <USelect
-                v-model="comment.motorcycleId"
-                size="lg"
-                class="w-50"
-                :items="optionMotorcycles"
-                :placeholder="motorcycle1?.name"
-                />
-                <UTextarea
-                v-model="comment.content"
-                size="xl"
-                placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
-                />
+                <USelect v-model="comment.motorcycleId" size="lg" class="w-50" :items="optionMotorcycles"
+                  :placeholder="motorcycle1?.name" />
+                <UTextarea v-model="comment.content" size="xl"
+                  placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question" />
               </div>
-              <UButton
-              class="rounded-4xl self-end text-xs m-1"
-              size="xl"
-              @click="postComment"
-              >Poster</UButton
-              >
+              <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
             </div>
             <div v-else class="input-posted-container">
               <h4>Merci pour votre contribution !</h4>
@@ -455,14 +414,9 @@ onMounted(() => {
           <CarrouselMotorcycles :items="carousselAdventureBikes" @selected="handleCaroussel" />
         </div>
         <div class="dual-container">
-          <DualMotorcycle 
-          :left-motorcycle-url="motorcycle1PreviewUrl" 
-          :right-motorcycle-url="motorcycle2PreviewUrl" 
-          :left-name="motorcycle1?.name" 
-          :right-name="motorcycle2?.name" 
-          @compare="fetchMotocycles"
-          @delete="handleDelete"
-          />
+          <DualMotorcycle :left-motorcycle-url="motorcycle1PreviewUrl" :right-motorcycle-url="motorcycle2PreviewUrl"
+            :left-name="motorcycle1?.name" :right-name="motorcycle2?.name" @compare="fetchMotocycles"
+            @delete="handleDelete" />
         </div>
       </div>
       <br />
@@ -569,7 +523,7 @@ onMounted(() => {
   text-align: center;
 }
 
-.input-posted-container{
+.input-posted-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
