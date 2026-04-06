@@ -398,7 +398,7 @@ onMounted(() => {
               </div>
               <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
             </div>
-            <div v-else class="input-posted-container">
+            <div v-else class="input-posted-container" :class="{ blurred: !isAuthenticated }">
               <h4>Merci pour votre contribution !</h4>
               <p>
                 Votre commentaire a été posté avec succès. Il apparaîtra dans la
