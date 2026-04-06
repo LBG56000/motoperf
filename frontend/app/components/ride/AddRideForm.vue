@@ -26,6 +26,8 @@ const endTownSearch = ref<string>('')
 const durationHours = ref<number>(0)
 const durationMinutes = ref<number>(0)
 
+const mapKey = ref(0) // Permet de recherger la carte quand un tracé GPS est supprimé
+
 const isGpsRoute = ref<boolean>(false)
 const isGeomCreated = computed(() => {
   if (stateForm.geom) {
@@ -392,9 +394,16 @@ const stateForm = reactive<IValueForm>({
 watch(
   () => stateForm.geom,
   async (newGeom) => {
+    if (!newGeom || !newGeom.features || newGeom.features.length === 0) {
+      stateForm.startTown = undefined
+      stateForm.endTown = undefined
+      stateForm.duration = 0
+      isGpsRoute.value = false
+      return
+    }
+
     if (isAutoUpdating.value) return
     if (isGpsRoute.value) return
-    if (!newGeom || !newGeom.features || newGeom.features.length === 0) return
 
     const feature = newGeom.features[0]
     if (feature?.geometry.type !== 'LineString') return
@@ -479,6 +488,13 @@ watch(
     if (m !== durationMinutes.value) durationMinutes.value = m
   }
 )
+
+// Quand le tracé GPS est supprimé, on force le rechargement du composant
+watch(isGpsRoute, (newVal) => {
+  if (!newVal) {
+    mapKey.value++
+  }
+})
 </script>
 <template>
   <div id="container-form" class="container-form">
@@ -497,6 +513,7 @@ watch(
           :ui="{ container: 'flex-grow' }"
         >
           <DisplayMapRide
+            :key="mapKey"
             v-model:geom="stateForm.geom"
             v-model:is-map-loading="isMapLoading"
             display-editor-container

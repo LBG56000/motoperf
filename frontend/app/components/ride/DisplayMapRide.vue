@@ -22,7 +22,6 @@ interface IProps {
   disableCreating?: boolean
 }
 
-// Correction de la définition des props
 const props = withDefaults(defineProps<IProps>(), {
   displayFilters: false,
   displayEnlargeButton: false,
@@ -34,60 +33,36 @@ const props = withDefaults(defineProps<IProps>(), {
   disableCreating: false
 })
 
+// INSTANCES LEAFLET
 const map = ref<any>(null) // Instance principale de la carte Leaflet
-const currentTileLayer = ref<any>(null) // Couche de tuiles active (OSM, Google, etc.) affichée sur la carte
-const ridesLayerGroup = ref<any>(null) // Groupe de couches contenant les tracés et marqueurs des balades depuis le backend
-const L_instance = ref<any>(null) // Instance locale de la bibliothèque Leaflet importée dynamiquement
-const LDraw_instance = ref<any>(null) // Instance globale Leaflet enrichie des fonctionnalités de dessin (Leaflet-Draw)
-const drawnItems = ref<any>(null) // Groupe de couches Leaflet contenant les éléments tracés manuellement par l'utilisateur
-let drawControl: any = null // Configuration des interactions de dessin de lignes
+const currentTileLayer = ref<any>(null) // Couche de tuiles active (fond de plan OSM, google, etc.)
+const ridesLayerGroup = ref<any>(null) // Groupe de couches contenant les tracés et marqueurs des balades
+const L_instance = ref<any>(null) // Bibliothèque Leaflet importée dynamiquement côté client uniquement
+const LDraw_instance = ref<any>(null) // Leaflet avec les outils de dessin (Leaflet-Draw)
+const drawnItems = ref<any>(null) // Couche stockant les tracés dessinés manuellement par l'utilisateur lors de l'ajout
+let drawControl: any = null // Contrôle Leaflet-Draw gérant les boutons de création/édition/suppression
 
-const dataRides = ref<IRide[]>([]) // Liste brute de toutes les balades récupérées via l'API
-const searchValue = ref<string>('') // Texte saisi par l'utilisateur dans la barre de recherche rapide
-const filterTime = ref<boolean>(false) // État du filtre rapide pour les balades de moins d'une heure trente
-const filterDistance = ref<boolean>(false) // État du filtre rapide pour les balades de moins de 50 kilomètres
-const filterLike = ref<boolean>(false) // État du filtre pour afficher uniquement les balades les plus populaires
-const filterRecent = ref<boolean>(false) // État du filtre pour afficher les balades créées durant les 7 derniers jours
+const route = useRoute() // Récupérer les paramètres get passé (notamment pour le scroll automatique)
+const router = useRouter() // Changer l'URL pour enlever le paramètre GET quand le scroll est fini
 
-const selectedId = ref<string>('default') // Identifiant du fond de carte sélectionné (ex: 'osm', 'satellite')
-const showFilters = ref<boolean>(false) // Contrôle l'affichage du panneau latéral des filtres avancés
-const distanceMax = ref<number>(1) // Valeur maximale de distance trouvée en base pour borner le slider
-const durationMax = ref<number>(1) // Valeur maximale de durée trouvée en base pour borner le slider
-const listRideTypes = ref<string[]>([]) // Liste unique des catégories de balades disponibles pour le filtre
-const listStartTown = ref<string[]>([]) // Liste unique des villes de départ présentes en base pour le filtre
-const listEndTown = ref<string[]>([]) // Liste unique des villes d'arrivée présentes en base pour le filtre
-const { isFullScreen, toggleFullScreen } = useFullScreenMap(map) // Utilitaire gérant l'état et le basculement du mode plein écran
-const drawInstruction = ref<string | null>(null) // Message d'aide contextuel affiché à l'utilisateur pendant le dessin/édition
-const visibleRides = ref<IRide[]>([]) // Sous-ensemble des balades actuellement visibles dans la zone affichée de la carte
-
-const route = useRoute() // Instance de la route actuelle pour accéder aux paramètres d'URL
-const router = useRouter() // Instance du routeur pour effectuer des redirections ou modifier l'URL
-
+// GeoJSON du tracé dessiné, partagé avec le composant parent
 const geom = defineModel('geom', {
   type: Object as () => IGeoJSON | null,
   default: null
-}) // La géométrie GeoJSON du tracé (celui lors de l'ajout d'une balade)
+})
 
+// État de la carte en chargement, partagé avec le parent pour qu'il puisse mettre la carte en chargement
 const isMapLoading = defineModel('isMapLoading', {
   type: Boolean,
   default: false
 })
 
-const STORAGE_KEY_FILTER = 'rides-filters' // Clé utilisée pour sauvegarder les préférences de filtres dans le localStorage
-provide('STORAGE_KEY_FILTER', STORAGE_KEY_FILTER) // Injection de la clé pour qu'elle soit accessible par les composants enfants
+// État courant de la carte
+const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
+const drawInstruction = ref<string | null>(null) // Message affiché en bas de la carte pendant des actions de dessin/modification/suppression
+const selectedId = ref<string>('default') // Identifiant du fond de plan sélectionné
 
-const defaultFilters: IFilterObject = {
-  distance: [0, 9999],
-  duration: [0, 99],
-  title: '',
-  type: [],
-  startTown: [],
-  endTown: []
-}
-
-const activeFilters = ref<IFilterObject>(defaultFilters) // État réactif contenant les valeurs de filtres actuellement appliquées
-
-// Liste des fonds de carte disponibles
+// Liste des fonds de carte disponibles avec leur URL
 const mapItems = ref<MapItem[]>([
   {
     label: 'Par défaut',
@@ -126,9 +101,41 @@ const mapItems = ref<MapItem[]>([
   }
 ])
 
+// GESTION DES FILTRES ET LEUR ÉTAT
+const STORAGE_KEY_FILTER = 'rides-filters'
+provide('STORAGE_KEY_FILTER', STORAGE_KEY_FILTER)
+
+const defaultFilters: IFilterObject = {
+  distance: [0, 9999],
+  duration: [0, 99],
+  title: '',
+  type: [],
+  startTown: [],
+  endTown: []
+}
+
+const activeFilters = ref<IFilterObject>(defaultFilters) // État de tous les fitres courants
+const showFilters = ref<boolean>(false) // État d'affichage du panel de filtre
+const searchValue = ref<string>('') // Input de recherche global en haut de la carte
+const filterTime = ref<boolean>(false)
+const filterDistance = ref<boolean>(false)
+const filterLike = ref<boolean>(false) // Bouton les coups de coeur
+const filterRecent = ref<boolean>(false) // Bouton les plus récnetes
+
+const distanceMax = ref<number>(1) // Borner le slider de distance à la balade la plus longue+1
+const durationMax = ref<number>(1) // Borner le slider de duration à la balade la plus longue+1
+const listRideTypes = ref<string[]>([]) // Liste de tous les types de balades qui existe (des balades en BDD)
+const listStartTown = ref<string[]>([]) // Liste de toutes les villes de départ de balades qui existe (des balades en BDD)
+const listEndTown = ref<string[]>([]) // Liste de toutes les villes d'arrivée de balades qui existe (des balades en BDD)
+
+// ÉTAT DES BALADES AFFICHÉS
+const dataRides = ref<IRide[]>([]) // Toutes les balades récupérées depuis le back
+const visibleRides = ref<IRide[]>([]) // Balades dont le point de départ est visible dans la vue courante de la carte
+
+// Calcule les balades correspondant à tous les filtres actifs (recherche, sliders, boutons rapides)
 const filteredRides = computed<IRide[]>(() => {
-  // 1. On commence par filtrer selon les critères classiques
   let rides = dataRides.value.filter((ride: IRide) => {
+    // Titre dans le panel ou en dehors
     const searchString = (
       searchValue.value ||
       activeFilters.value.title ||
@@ -136,36 +143,35 @@ const filteredRides = computed<IRide[]>(() => {
     ).toLowerCase()
     const matchesSearch = ride.title.toLowerCase().includes(searchString)
 
-    // Filtres géographiques et types
     const matchesStartTown =
       !activeFilters.value.startTown?.length ||
       activeFilters.value.startTown.includes(ride.start_town)
+
     const matchesEndTown =
       !activeFilters.value.endTown?.length ||
       activeFilters.value.endTown.includes(ride.end_town)
+
     const matchesType =
       !activeFilters.value.type?.length ||
       activeFilters.value.type.includes(ride.ride_type)
 
-    // Filtres Sliders
     const matchesSliderDistance =
       ride.distance >= (activeFilters.value.distance?.[0] ?? 0) &&
       ride.distance <= (activeFilters.value.distance?.[1] ?? 9999)
+
     const matchesSliderDuration =
       ride.duration >= (activeFilters.value.duration?.[0] ?? 0) &&
       ride.duration <= (activeFilters.value.duration?.[1] ?? 99)
 
-    // Filtres rapides (Boutons)
+    // Les boutons rapides en haut de la carte
     const matchesQuickTime = !filterTime.value || ride.duration <= 1.5
     const matchesQuickDistance = !filterDistance.value || ride.distance <= 50
 
-    // Filtre "Plus récentes" (Sorties il y a moins de 7 jours)
     let matchesRecent = true
     if (filterRecent.value) {
       const sevenDaysAgo = new Date()
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
-      const rideDate = new Date(ride.createdAt)
-      matchesRecent = rideDate >= sevenDaysAgo
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7) // Dans les 7 jours avant
+      matchesRecent = new Date(ride.createdAt) >= sevenDaysAgo
     }
 
     return (
@@ -181,6 +187,7 @@ const filteredRides = computed<IRide[]>(() => {
     )
   })
 
+  // Le filtre "coups de cœur" trie par likes et ne garde que les 5 premiers résultats
   if (filterLike.value) {
     rides = [...rides].sort((a, b) => (b.like || 0) - (a.like || 0)).slice(0, 5)
   }
@@ -188,62 +195,80 @@ const filteredRides = computed<IRide[]>(() => {
   return rides
 })
 
-// Fonction appelée quand le formulaire émet 'apply'
-const onApplyFilters = (payload: IFilterObject) => {
-  activeFilters.value = payload
-}
-
-// Changer le fond de plan de la carte
+// FONCTIONS SUR LA CARTE
+/**
+ * Met à jour le fond de carte (tiles) de l'instance Leaflet
+ * @param id - L'identifiant du style de carte sélectionné (ex: 'osm', 'satellite')
+ * @param L  - L'instance de la bibliothèque Leaflet
+ */
 const updateMapBackground = (id: string, L: any) => {
+  // Rechercher la config du fond ce carte demandé
   const style = mapItems.value.find((m: MapItem) => m.id === id)
-  if (!map.value || !style) return
-  if (currentTileLayer.value) map.value.removeLayer(currentTileLayer.value)
 
-  // Re créer la carte avec le fond de plan demandé
+  // Au cas où, si la carte et le fond de carte n'est pas trouvé, on arrête
+  if (!map.value || !style) return
+
+  // Si il y a déjà un fond de carte on le retire d'abord
+  if (currentTileLayer.value) {
+    map.value.removeLayer(currentTileLayer.value)
+  }
+
+  // Créer et ajouter le fond de plan
   currentTileLayer.value = L.tileLayer(style.url, {
-    attribution: style.attribution,
+    attribution: style.attribution, // Crédits obligatoires (ex: © OpenStreetMap)
     maxZoom: 20
   }).addTo(map.value)
 }
 
-// Modifie la variable réactive pour mettre que les balades visibles sur la carte de l'utilisateur
+/**
+ * Filtre les balades pour ne garder que celles dont le départ est visible à l'écran.
+ */
 const updateVisibleRides = () => {
+  // Si pas de carte ou qu'il n'y a pas de ride trouvé pendant les filtres, alors on vide
   if (!map.value || !filteredRides.value.length) {
     visibleRides.value = []
     return
   }
 
+  // On récupère les limites de la carte
   const bounds = map.value.getBounds()
 
-  // On filtre les balades déjà filtrées pour ne garder que celles dans la view box
+  // On filtre la liste déjà filtrée pour y ajouter la contrainte des bounds
   visibleRides.value = filteredRides.value.filter((ride) => {
     const startPoint = ride.geom.features[0].geometry.coordinates[0]
-    const latLng = L_instance.value.latLng(startPoint[1], startPoint[0])
-    return bounds.contains(latLng)
+
+    return bounds.contains(
+      L_instance.value.latLng(startPoint[1], startPoint[0])
+    )
   })
 }
 
-// Créer la couhe des balades
+/**
+ * Gère l'affichage complet des balades sur la carte.
+ * Cette fonction nettoie les anciens tracés et reconstruit les clusters et les markers
+ * en fonction des filtres appliqués (Type, Distance, etc.).
+ */
 const renderRides = () => {
   const L = L_instance.value
   const LDraw = LDraw_instance.value
   if (!map.value || !L || !LDraw) return
 
-  // On supprime la couche existante
+  // On retire le groupe de couches précédent de la carte pour repartir de zéro
   if (ridesLayerGroup.value) map.value.removeLayer(ridesLayerGroup.value)
+
+  // Initialisation d'un nouveau groupe de couches
   ridesLayerGroup.value = L.layerGroup()
 
-  // Si aucune balade correspond à la recherche, on ne créer pas la couche
+  // Si aucune balade ne correspond aux filtres, on s'arrête
   if (filteredRides.value.length === 0) return
 
-  // Bounds sert à ajuster le zoom en fonction de l'emplacement des balades trouvées
-  const bounds = L.latLngBounds([])
+  const bounds = L.latLngBounds([]) // Calcul la vue qu'il faut pour affiché toutes les balades
   const currentZoom = map.value.getZoom()
 
-  // Pour chaque balade correspondant à la recherche
+  // Création des couches de cluster
   const markersCluster = LDraw.markerClusterGroup()
+
   filteredRides.value.forEach((ride: IRide) => {
-    // On créer l'icon dynamiquement en fonction de la couleur de la balade
     const dynamicIcon = L.divIcon({
       html: getMapPinSvg(ride.color || '#3b82f6'),
       iconSize: [26, 26],
@@ -251,86 +276,76 @@ const renderRides = () => {
       className: 'custom-dynamic-pin'
     })
 
-    // On créer le point de départ au premier point de la ligne de la balade
     const start = ride.geom.features[0].geometry.coordinates[0]
+
     const hour = Math.floor(ride.duration)
     const minutes = Math.round((ride.duration - hour) * 60)
 
     let geojsonLayer: any = null
-    const marker = markersCluster.addLayer(
-      L.marker([start[1], start[0]], {
-        icon: dynamicIcon
-      })
-        .bindPopup(
-          `<div class="ride-detail-container">
-          <b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min
-        </div>`
-        )
-        .on('popupopen', () => {
-          // On créé une couche GeoJSON pour afficher les balades
-          geojsonLayer = L.geoJSON(ride.geom as any, {
-            style: {
-              color: ride.color || '#3B82F6',
-              weight: getWeightByZoom(currentZoom),
-              opacity: 1
-            }
-          })
-          geojsonLayer.addTo(ridesLayerGroup.value)
-        })
-        .on('popupclose', () => {
-          // On supprimer la couche
-          if (geojsonLayer) {
-            geojsonLayer.remove(ridesLayerGroup.value)
+
+    // Création du marker du point de départ
+    const marker = L.marker([start[1], start[0]], { icon: dynamicIcon })
+      .bindPopup(
+        `<div class="ride-detail-container"><b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min</div>`
+      )
+      // On affiche le tracé entier que s'il clique dessus
+      .on('popupopen', () => {
+        geojsonLayer = L.geoJSON(ride.geom as any, {
+          style: {
+            color: ride.color || '#3B82F6',
+            weight: getWeightByZoom(currentZoom), // Épaisseur de ligne adaptée au zoom
+            opacity: 1
           }
         })
-    )
+        geojsonLayer.addTo(ridesLayerGroup.value)
+      })
+      // On retire le tracé quand on ferme le popup pour ne pas surcharger la carte
+      .on('popupclose', () => {
+        if (geojsonLayer) geojsonLayer.remove(ridesLayerGroup.value)
+      })
 
-    // Ajouter la couche et le point de départ à la couche
-    // geojsonLayer.addTo(ridesLayerGroup.value)
     markersCluster.addLayer(marker)
-    marker.addTo(ridesLayerGroup.value)
-
-    // On étend les bounds pour inclure le point de départ de la balade
     bounds.extend([start[1], start[0]])
   })
 
-  // On ajoute la couche à la carte
+  // On ajoute la couche de cluster et on l'ajoute à la carte
   ridesLayerGroup.value.addLayer(markersCluster)
   ridesLayerGroup.value.addTo(map.value)
-
-  // Si des balades correspondent à la recherche, on ajuste le zoom pour les afficher dans la view box
-  // if (filteredRides.value.length > 0) {
-  //   map.value.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 })
-  // }
 }
 
+const onApplyFilters = (payload: IFilterObject) => {
+  activeFilters.value = payload
+}
+
+// Affichage ou non du panel de filtre
 const handleFilters = () => {
   showFilters.value = !showFilters.value
   searchValue.value = ''
 }
 
+// PENDANT CREATION DU COMPOSANT
 onMounted(async () => {
-  // Si le paramètre est présent dans l'URL on scroll
+  // On scrolle à la map si le paramètre GET est là
   if (route.query.scroll === 'true') {
     setTimeout(() => {
       scrollToMap('map')
-      // Nettoyage de l'URL pour éviter de rescroller au prochain refresh
       router.replace({ query: {} })
     }, 400)
   }
 
   isMapLoading.value = true
 
+  // Leaflet et ses plugins sont importés dynamiquement pour éviter les erreurs SSR (pas de window côté serveur)
   const L = await import('leaflet')
   await import('leaflet.markercluster')
   await import('leaflet-draw')
-
   await import('leaflet/dist/leaflet.css')
   await import('leaflet-draw/dist/leaflet.draw.css')
   await import('leaflet.markercluster/dist/MarkerCluster.css')
   await import('leaflet.markercluster/dist/MarkerCluster.Default.css')
   L_instance.value = L
 
+  // Paramétrage de la map
   map.value = L.map('map', {
     zoomControl: false,
     preferCanvas: false,
@@ -340,14 +355,16 @@ onMounted(async () => {
   L.control.zoom({ position: 'bottomleft' }).addTo(map.value)
   L.control.scale({ imperial: false }).addTo(map.value)
 
+  // Leaflet-Draw s'attache à window.L après son import, on récupère cette instance
   const LDraw = (window as any).L
   LDraw_instance.value = LDraw
-  convertToFrench(LDraw)
+  convertToFrench(LDraw) // Mettre en français leaflet draw
 
-  // On crée une couche pour stocker les éléments dessinés
+  // Création de la couche pour dessiner le tracé
   drawnItems.value = new LDraw.FeatureGroup()
   map.value.addLayer(drawnItems.value)
 
+  // Les contrôles pour dessiner, modifier et supprimer une ligne
   if (props.displayEditorContainer && LDraw.Control?.Draw) {
     drawControl = new LDraw.Control.Draw({
       edit: {
@@ -363,10 +380,9 @@ onMounted(async () => {
         rectangle: false
       }
     })
-
     map.value.addControl(drawControl)
 
-    // Synchronise l'état du bouton avec la prop disableEditing
+    // Désactive visuellement le bouton d'édition en fonction de la prop disableEditing
     watch(
       () => props.disableEditing,
       (disabled) => {
@@ -391,7 +407,7 @@ onMounted(async () => {
       }
     )
 
-    // Synchronise l'état du bouton de création avec la prop disableCreating
+    // Désactive visuellement le bouton de création en fonction de la prop disableCreating
     watch(
       () => props.disableCreating,
       (disabled) => {
@@ -418,13 +434,12 @@ onMounted(async () => {
       }
     )
 
-    // Supprime les tooltips natifs des boutons de la toolbar (de leaflet-draw)
+    // On supprime les tooltip de leaflet draw car on créer les notres en bas de la carte
     const drawContainer = document.querySelector('.leaflet-draw')
     if (drawContainer) {
       drawContainer
         .querySelectorAll('a')
         .forEach((el) => el.removeAttribute('title'))
-
       const observer = new MutationObserver(() => {
         drawContainer
           .querySelectorAll('a[title]')
@@ -437,22 +452,10 @@ onMounted(async () => {
       })
     }
 
-    // Ferme le mode édition si on commence à dessiner
+    // Empêche d'avoir deux modes actifs simultanément (dessin + édition) + Affiche le bon tooltip en fonction du mode sélectionné
     map.value.on(LDraw.Draw.Event.DRAWSTART, () => {
-      if (drawControl._toolbars.edit._activeMode) {
+      if (drawControl._toolbars.edit._activeMode)
         drawControl._toolbars.edit._activeMode.handler.disable()
-      }
-    })
-
-    // Ferme le mode dessin si on commence à éditer
-    map.value.on(LDraw.Draw.Event.EDITSTART, () => {
-      if (drawControl._toolbars.draw._activeMode) {
-        drawControl._toolbars.draw._activeMode.handler.disable()
-      }
-    })
-
-    // Permet l'affichage des instructions personnalisé en bas
-    map.value.on(LDraw.Draw.Event.DRAWSTART, () => {
       drawInstruction.value = 'Cliquez sur la carte pour commencer votre tracé'
       document
         .querySelectorAll('.leaflet-draw-toolbar a')
@@ -461,7 +464,10 @@ onMounted(async () => {
     map.value.on(LDraw.Draw.Event.DRAWSTOP, () => {
       drawInstruction.value = null
     })
+
     map.value.on(LDraw.Draw.Event.EDITSTART, () => {
+      if (drawControl._toolbars.draw._activeMode)
+        drawControl._toolbars.draw._activeMode.handler.disable()
       drawInstruction.value = 'Déplacez les points pour modifier le tracé'
       document
         .querySelectorAll('.leaflet-draw-toolbar a')
@@ -470,6 +476,7 @@ onMounted(async () => {
     map.value.on(LDraw.Draw.Event.EDITSTOP, () => {
       drawInstruction.value = null
     })
+
     map.value.on(LDraw.Draw.Event.DELETESTART, () => {
       drawInstruction.value = 'Cliquez sur un tracé pour le supprimer'
       document
@@ -480,17 +487,17 @@ onMounted(async () => {
       drawInstruction.value = null
     })
 
-    // Quand une ligne est créée
+    // Quand la ligne dessiner par l'utilisateur est terminé
     map.value.on(LDraw.Draw.Event.CREATED, (e: any) => {
-      const layer = e.layer
-      drawnItems.value.addLayer(layer)
+      drawnItems.value.addLayer(e.layer)
       updateGeomModel(drawnItems.value)
 
-      // Désactive complètement le bouton de dessin
+      // On désactive le bouton de création après le premier tracé pour éviter d'en avoir plusieurs simultanément
       const polylineBtn =
         drawControl._toolbars.draw._toolbarContainer.querySelector(
           '.leaflet-draw-draw-polyline'
         )
+
       if (polylineBtn) {
         polylineBtn.classList.add('leaflet-disabled')
         polylineBtn.style.pointerEvents = 'none'
@@ -498,13 +505,17 @@ onMounted(async () => {
         polylineBtn.style.cursor = 'not-allowed'
       }
     })
-    // Quand une ligne est modifiée ou supprimée
+
+    // Quand la modification est validé
     map.value.on(LDraw.Draw.Event.EDITED, () =>
       updateGeomModel(drawnItems.value)
     )
+
+    // Quand la suppression est validé
     map.value.on(LDraw.Draw.Event.DELETED, () => {
       updateGeomModel(drawnItems.value)
 
+      // On réactive le bouton de création seulement si tous les tracés ont été supprimés
       if (drawnItems.value.getLayers().length === 0) {
         const polylineBtn =
           drawControl._toolbars.draw._toolbarContainer.querySelector(
@@ -520,19 +531,16 @@ onMounted(async () => {
     })
   }
 
-  // Fonction pour transformer la couche en GeoJSON pour le modelValue
+  // Met les couches dessinées en GeoJSON et met à jour le v-model geom (null si vide)
   const updateGeomModel = (group: any) => {
     const data = group.toGeoJSON()
-    // S'assurer que si c'est vide, on envoie null pour reset la durée
-    if (!data.features || data.features.length === 0) {
-      geom.value = null
-    } else {
-      geom.value = data
-    }
+    geom.value = !data.features || data.features.length === 0 ? null : data
   }
 
+  // Appliqué le fond de carte voulu
   updateMapBackground(selectedId.value, L)
 
+  // Affichage des balades
   if (props.displayRide) {
     const runtimeConfig = useRuntimeConfig()
     try {
@@ -540,15 +548,14 @@ onMounted(async () => {
         `${runtimeConfig.public.apiBase}rides?project=all`
       )
       const data: RideResponse = await res.json()
+
       if (data.rides && data.rides.length > 0) {
         dataRides.value = data.rides
-
         distanceMax.value = getMax(data.rides, 'distance')
         durationMax.value = getMax(data.rides, 'duration')
         listRideTypes.value = getUniqueValues(data.rides, 'ride_type')
         listStartTown.value = getUniqueValues(data.rides, 'start_town')
         listEndTown.value = getUniqueValues(data.rides, 'end_town')
-
         renderRides()
       }
     } catch (e) {
@@ -557,33 +564,25 @@ onMounted(async () => {
       isMapLoading.value = false
     }
 
-    // Permet d'épaissir le trait des balades en fonction du zoom et de mettre à jour les balades visibles
+    // Adapte l'épaisseur des tracés au niveau de zoom et met à jour la liste des balades visibles
     map.value.on('zoomend', () => {
-      const newZoom = map.value.getZoom()
-      const newWeight = getWeightByZoom(newZoom)
-
+      const newWeight = getWeightByZoom(map.value.getZoom())
       if (ridesLayerGroup.value) {
         ridesLayerGroup.value.eachLayer((layer: any) => {
-          if (layer.setStyle) {
-            layer.setStyle({ weight: newWeight })
-          }
+          if (layer.setStyle) layer.setStyle({ weight: newWeight })
         })
       }
-
       updateVisibleRides()
     })
     map.value.on('moveend', updateVisibleRides)
-
-    isMapLoading.value = false
   }
 
+  // Gestion de l'affichage et l'état des filtres
   if (props.displayFilters) {
     const saved = localStorage.getItem(STORAGE_KEY_FILTER)
-    if (saved) {
-      activeFilters.value = JSON.parse(saved)
-    }
+    if (saved) activeFilters.value = JSON.parse(saved)
 
-    // Dès que les filtres changent, on les enregistres dans le localStorage
+    // Persiste les filtres dans le localStorage
     watch(
       activeFilters,
       (newVal: IFilterObject) => {
@@ -596,43 +595,40 @@ onMounted(async () => {
   isMapLoading.value = false
 })
 
+// Dès que le fond de plan est changé
 watch(selectedId, (newId: string) =>
   updateMapBackground(newId, L_instance.value)
 )
+
+// Quand les filtres changent
 watch(filteredRides, () => {
   renderRides()
   updateVisibleRides()
 })
 
-// Surveille les changements externes du v-model (ex: calcul OSRM)
+// Quand le v-model geom change depuis l'extérieur (ex: calcul GPS), on redessine le tracé sur la carte
 watch(
   () => geom.value,
   (newGeom) => {
     if (!map.value || !L_instance.value || !newGeom) return
 
     isMapLoading.value = true
-
-    // On nettoie l'existant sur la couche d'édition
     drawnItems.value.clearLayers()
 
-    // On ajoute le nouveau tracé à la couche d'édition
+    // Créer la ligne
     const geojsonLayer = L_instance.value.geoJSON(newGeom)
     geojsonLayer.eachLayer((layer: any) => {
-      // On s'assure que c'est une Polyline (tracé)
-      if (layer instanceof L_instance.value.Polyline) {
+      if (layer instanceof L_instance.value.Polyline)
         drawnItems.value.addLayer(layer)
-      }
     })
 
-    // Ajuster la vue pour voir le tracé calculé
+    // Zoomer sur le tracé
     const bounds = geojsonLayer.getBounds()
-    if (bounds.isValid()) {
-      map.value.fitBounds(bounds, { padding: [30, 30] })
-    }
+    if (bounds.isValid()) map.value.fitBounds(bounds, { padding: [30, 30] })
 
     isMapLoading.value = false
   },
-  { immediate: true }
+  { immediate: true } // Permet le lancement dès le début sans changement
 )
 </script>
 
@@ -896,7 +892,7 @@ watch(
   overflow: visible !important;
 }
 
-/* Bandeau en haut pour les instructions */
+/* Bandeau en bas pour les instructions */
 .draw-instruction-banner {
   position: absolute;
   bottom: 15px;
