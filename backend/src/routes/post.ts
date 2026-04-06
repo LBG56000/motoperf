@@ -98,7 +98,6 @@ router.post('/', async (req, res) => {
     })
     res.status(201).json({ _id: postCreated._id })
   } catch (error) {
-    console.log('TETTTT2')
     console.error('Error accessing message route:', error)
     res.status(500).json({ error: 'Internal server error' })
   }
