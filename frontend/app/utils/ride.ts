@@ -179,3 +179,48 @@ export const simplifyGeometry = (geojson: any, tolerance = 0.001) => {
     return geojson
   }
 }
+
+// Fonction pour transformer une ville (nom) en coordonnées [long, lat]
+export const getCoordsFromCity = async (
+  cityName: string
+): Promise<number[] | null> => {
+  try {
+    const res = await fetch(
+      `https://api-adresse.data.gouv.fr/search/?q=${cityName}&limit=1&type=municipality`
+    )
+    const data = await res.json()
+    if (data.features && data.features.length > 0) {
+      return data.features[0].geometry.coordinates
+    }
+  } catch (e) {
+    console.error(`Erreur géocodage pour ${cityName}:`, e)
+  }
+  return null
+}
+
+export const getEstimatedDuration = async (
+  geom: any
+): Promise<number | undefined> => {
+  try {
+    const feature = geom.features[0]
+    const coords = feature.geometry.coordinates
+
+    // OSRM demande les coordonnées sous forme long,lat;long,lat...
+    const polyline = coords.map((c: any) => `${c[0]},${c[1]}`).join(';')
+
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${polyline}?overview=false`
+    )
+    const data = await res.json()
+
+    if (data.routes && data.routes.length > 0) {
+      // La durée est en secondes, on la convertit en heures
+      const durationSeconds = data.routes[0].duration
+      const durationHours = durationSeconds / 3600
+      return parseFloat(durationHours.toFixed(2))
+    }
+  } catch (e) {
+    console.error('Erreur calcul durée OSRM:', e)
+  }
+  return undefined
+}

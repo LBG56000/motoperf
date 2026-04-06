@@ -12,12 +12,13 @@ import { Time, CalendarDate } from '@internationalized/date'
 import InputDate from '~/components/global/InputDate.vue'
 import InputTime from '~/components/global/InputTime.vue'
 
-const isSelectLoading = ref<boolean>(false)
-const isMapLoading = ref<boolean>(false)
-const isAutoUpdating = ref(false)
-const { user } = useAuth()
-const route = useRoute() // Paramètre dans l'url
-const router = useRouter()
+const isSelectLoading = ref<boolean>(false) // État de chargement des listes déroulantes
+const isMapLoading = ref<boolean>(false) // État de chargement de la carte
+const isAutoUpdating = ref(false) // Verrou pour éviter les boucles lors des mises à jour automatiques
+const { user } = useAuth() // User actuel
+
+const route = useRoute() // Récupérer les paramètres get passé (notamment pour le scroll automatique)
+const router = useRouter() // Changer l'URL pour enlever le paramètre GET quand le scroll est fini
 
 // Termes de recherche séparés pour chaque select
 const startTownSearch = ref<string>('')
@@ -26,7 +27,7 @@ const endTownSearch = ref<string>('')
 const durationHours = ref<number>(0)
 const durationMinutes = ref<number>(0)
 
-const mapKey = ref(0) // Permet de recherger la carte quand un tracé GPS est supprimé
+const mapKey = ref(0) // Permet de recharger la carte quand un tracé GPS est supprimé
 
 const isGpsRoute = ref<boolean>(false)
 const isGeomCreated = computed(() => {
@@ -41,9 +42,28 @@ const now = new Date()
 const rideTypeOptions = Object.values(RideType).map((type: string) => ({
   label: type,
   value: type
-}))
+})) // Chercher dans l'enum les types
 
 const listCommunes = ref<IValueCommuneSelect[]>([])
+
+const stateForm = reactive<IValueForm>({
+  title: '',
+  duration: 0,
+  distance: 0,
+  description: '',
+  startTown: undefined,
+  endTown: undefined,
+  rideType: '',
+  picture: undefined,
+  is_event: false,
+  date_event: new CalendarDate(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    now.getDate()
+  ),
+  hour_event: new Time(now.getHours(), now.getMinutes()),
+  geom: null
+})
 
 const resetCommunesList = () => {
   startTownSearch.value = ''
@@ -51,6 +71,7 @@ const resetCommunesList = () => {
   loadInitialCommunes()
 }
 
+// Propriété calculer pour le calcul de la distance automatique
 const rideDistance = computed(() => {
   // On vérifie que la géométrie existe et possède des features
   if (
@@ -73,6 +94,7 @@ const rideDistance = computed(() => {
   }
 })
 
+// Permet la recherche dynamique dans les select des villes
 const searchCommunes = async (query: string) => {
   // Permet de re fetch seulement s'il y a 1 charactères
   if (!query || query.length <= 1) return
@@ -87,6 +109,7 @@ const searchCommunes = async (query: string) => {
     // Tri alphabétique sur le nom
     const sortedData = data.sort((a: any, b: any) => a.nom.localeCompare(b.nom))
 
+    // Ajout dans le select
     listCommunes.value = sortedData.map((c: ICommune) => ({
       label: `${c.nom} ${c.codesPostaux ? '(' + c.codesPostaux[0] + ')' : ''}`,
       value: c.nom
@@ -97,10 +120,6 @@ const searchCommunes = async (query: string) => {
     isSelectLoading.value = false
   }
 }
-
-// Watch les termes de recherche, pas les valeurs sélectionnées
-watch(startTownSearch, (val: string) => searchCommunes(val))
-watch(endTownSearch, (val: string) => searchCommunes(val))
 
 // Fonction pour charger les 50 premières communes
 const loadInitialCommunes = async () => {
@@ -112,6 +131,7 @@ const loadInitialCommunes = async () => {
     const data = await res.json()
     const sortedData = data.sort((a: any, b: any) => a.nom.localeCompare(b.nom))
 
+    // Ajouter les communes trouvées dans le select
     listCommunes.value = sortedData.map((c: ICommune) => ({
       label: `${c.nom} ${c.codesPostaux ? '(' + c.codesPostaux[0] + ')' : ''}`,
       value: c.nom
@@ -123,6 +143,7 @@ const loadInitialCommunes = async () => {
   }
 }
 
+// Quand les select sont ouverts, vidés tout et recharger les communes de base (les 50)
 const handleMenuClose = (isOpen: boolean) => {
   if (
     !isOpen &&
@@ -135,24 +156,6 @@ const handleMenuClose = (isOpen: boolean) => {
     startTownSearch.value = ''
     endTownSearch.value = ''
   }
-}
-
-// Fonction pour transformer une ville (nom) en coordonnées [long, lat]
-const getCoordsFromCity = async (
-  cityName: string
-): Promise<number[] | null> => {
-  try {
-    const res = await fetch(
-      `https://api-adresse.data.gouv.fr/search/?q=${cityName}&limit=1&type=municipality`
-    )
-    const data = await res.json()
-    if (data.features && data.features.length > 0) {
-      return data.features[0].geometry.coordinates
-    }
-  } catch (e) {
-    console.error(`Erreur géocodage pour ${cityName}:`, e)
-  }
-  return null
 }
 
 // Fonction qui génère la geom via OSRM à partir des deux villes
@@ -190,7 +193,7 @@ const calculateRouteFromCities = async () => {
           ]
         }
 
-        // On simplifie la geom
+        // On simplifie la geom poru éviter que ça lag trop car le tracé est très précis
         stateForm.geom = simplifyGeometry(rawGeom, 0.00005)
         isGpsRoute.value = true
 
@@ -207,6 +210,7 @@ const calculateRouteFromCities = async () => {
   } finally {
     isSelectLoading.value = false
     isMapLoading.value = false
+
     // On attend un peu avant de déverrouiller pour laisser les watchers se terminer
     setTimeout(() => {
       isAutoUpdating.value = false
@@ -314,6 +318,7 @@ async function onSubmit() {
   }
 }
 
+// Message personnalisé pour les champs requis
 async function validate(data: Partial<typeof stateForm>) {
   if (!data.title?.length)
     return [{ name: 'title', message: 'Le titre de la balade est requis' }]
@@ -328,31 +333,6 @@ async function validate(data: Partial<typeof stateForm>) {
   if (!data.geom)
     return [{ name: 'geom', message: 'Le tracé de la balade est requis' }]
   return []
-}
-
-const getEstimatedDuration = async (geom: any): Promise<number | undefined> => {
-  try {
-    const feature = geom.features[0]
-    const coords = feature.geometry.coordinates
-
-    // OSRM demande les coordonnées sous forme long,lat;long,lat...
-    const polyline = coords.map((c: any) => `${c[0]},${c[1]}`).join(';')
-
-    const res = await fetch(
-      `https://router.project-osrm.org/route/v1/driving/${polyline}?overview=false`
-    )
-    const data = await res.json()
-
-    if (data.routes && data.routes.length > 0) {
-      // La durée est en secondes, on la convertit en heures
-      const durationSeconds = data.routes[0].duration
-      const durationHours = durationSeconds / 3600
-      return parseFloat(durationHours.toFixed(2))
-    }
-  } catch (e) {
-    console.error('Erreur calcul durée OSRM:', e)
-  }
-  return undefined
 }
 
 onMounted(async () => {
@@ -372,28 +352,10 @@ onMounted(async () => {
   }, 350)
 })
 
-const stateForm = reactive<IValueForm>({
-  title: '',
-  duration: 0,
-  distance: 0,
-  description: '',
-  startTown: undefined,
-  endTown: undefined,
-  rideType: '',
-  picture: undefined,
-  is_event: false,
-  date_event: new CalendarDate(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    now.getDate()
-  ),
-  hour_event: new Time(now.getHours(), now.getMinutes()),
-  geom: null
-})
-
 watch(
   () => stateForm.geom,
   async (newGeom) => {
+    // Si la geom change (se supprime) on lave tous les champs calculer en fonction
     if (!newGeom || !newGeom.features || newGeom.features.length === 0) {
       stateForm.startTown = undefined
       stateForm.endTown = undefined
@@ -415,8 +377,8 @@ watch(
 
     // On ajoute le calcul de durée aux requêtes parallèles
     const [startCity, endCity, estimatedTime] = await Promise.all([
-      getCommuneFromCoords(coords[0]),
-      getCommuneFromCoords(coords[coords.length - 1]),
+      getCommuneFromCoords(coords[0]), // Point de départ de la geom
+      getCommuneFromCoords(coords[coords.length - 1]), // Point d'arrivé de la geom
       getEstimatedDuration(newGeom)
     ])
 
@@ -444,13 +406,13 @@ watch(
         newStart.value !== oldStart?.value ||
         newEnd.value !== oldEnd?.value
       ) {
-        calculateRouteFromCities()
+        calculateRouteFromCities() // Lancement du calcul GPS
       }
     }
   }
 )
 
-// Quand la ville de départ est sélectionnée
+// Quand la ville de départ est sélectionnée permet de reset les choix
 watch(
   () => stateForm.startTown,
   (newVal) => {
@@ -460,7 +422,7 @@ watch(
   }
 )
 
-// Quand la ville d'arrivée est sélectionnée
+// Quand la ville d'arrivée est sélectionnée permet de reset les choix
 watch(
   () => stateForm.endTown,
   (newVal) => {
@@ -489,12 +451,16 @@ watch(
   }
 )
 
-// Quand le tracé GPS est supprimé, on force le rechargement du composant
+// Quand le tracé GPS est supprimé, on force le rechargement du composant pour reset leaflet draw qui bug sinon
 watch(isGpsRoute, (newVal) => {
   if (!newVal) {
     mapKey.value++
   }
 })
+
+// Watch les input de recherche dans les select des villes, pas les valeurs sélectionnées
+watch(startTownSearch, (val: string) => searchCommunes(val))
+watch(endTownSearch, (val: string) => searchCommunes(val))
 </script>
 <template>
   <div id="container-form" class="container-form">
@@ -701,32 +667,7 @@ watch(isGpsRoute, (newVal) => {
 </template>
 
 <style scoped>
-.switch-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: start;
-  align-items: center;
-  gap: 10px;
-}
-
-.switch-container p {
-  font-size: medium;
-}
-
-.container-info-under-map {
-  display: flex;
-  flex-direction: row;
-  gap: 50px;
-}
-
-.ride-line-info {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  justify-content: start;
-  align-items: center;
-}
-
+/* --- CONTENEURS PRINCIPAUX --- */
 .container-form {
   width: 100%;
   padding: 2rem;
@@ -737,7 +678,6 @@ watch(isGpsRoute, (newVal) => {
   flex-direction: row;
   gap: 2.5rem;
   width: 100%;
-  /* Aligne les hauteurs des deux colonnes */
   align-items: stretch;
 }
 
@@ -752,25 +692,61 @@ watch(isGpsRoute, (newVal) => {
   width: 100%;
 }
 
-.card-image {
-  width: 100%;
-  height: 200px;
-  overflow: hidden;
-}
-
+/* --- ÉLÉMENTS DE FORMULAIRE --- */
 .row-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
+.switch-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch-container p {
+  font-size: medium;
+}
+
+.card-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+/* --- INFORMATIONS SOUS CARTE --- */
+.container-info-under-map {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+  margin-top: 1rem;
+}
+
+.ride-line-info {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: start;
+  align-items: center;
+}
+
+/* --- RESPONSIVE (TABLETTES ET MOBILES) --- */
 @media (max-width: 1024px) {
   .form-wrapper {
     flex-direction: column;
     align-items: stretch;
   }
+
   .form-wrapper > * {
     width: 100%;
+  }
+
+  .container-info-under-map {
+    flex-direction: column;
+    gap: 15px;
   }
 }
 </style>
