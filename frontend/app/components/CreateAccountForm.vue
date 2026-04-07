@@ -44,9 +44,13 @@ const validateStep = (step: number): FormError[] => {
   }
 
   if (step === 2 || step === 3) {
-    if (!state.yearsExperience)
-      errors.push({ name: 'yearsExperience', message: 'Années requises' })
-
+    const years = Number(state.yearsExperience)
+    if (isNaN(years) || years < 0 || !Number.isInteger(years)) {
+      errors.push({
+        name: 'yearsExperience',
+        message: 'Veuillez entrer un nombre entier positif'
+      })
+    }
     if (!state.pseudo) errors.push({ name: 'pseudo', message: 'Pseudo requis' })
   }
 
@@ -93,6 +97,25 @@ const prevStep = () => {
   currentStep.value--
 }
 
+const resetForm = () => {
+  // Réinitialiser tous les champs
+  state.firstname = ''
+  state.lastname = ''
+  state.pseudo = ''
+  state.experience = ''
+  state.moto = ''
+  state.yearsExperience = ''
+  state.email = ''
+  state.password = ''
+  state.confirmPassword = ''
+
+  // Retour à l'étape 1
+  currentStep.value = 1
+
+  // Effacer les erreurs
+  formErrors.value = {}
+}
+
 const handleSubmit = async () => {
   console.log('Soumission du formulaire avec les données:', state)
   try {
@@ -119,6 +142,9 @@ const handleSubmit = async () => {
     )
 
     formErrors.value = []
+
+    isOpen.value = false
+    resetForm()
     console.log('Profil mis à jour:', state)
   } catch (err) {
     console.error(err)
@@ -232,11 +258,9 @@ const handleSubmit = async () => {
                 label="Motard depuis (nombre d'années)"
                 name="yearsExperience"
                 :error="getError('yearsExperience')"
-                required
               >
                 <UInput
                   v-model="state.yearsExperience"
-                  type="number"
                   min="0"
                   placeholder="12"
                   variant="soft"
