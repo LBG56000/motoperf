@@ -237,7 +237,17 @@ watch(
               tr: 'cursor-pointer hover:bg-gray-50'
             }"
             @select="onRowClick"
-          />
+          >
+            <template #empty>
+              <div
+                class="flex flex-col items-center justify-center py-10 gap-2 text-gray-400"
+              >
+                <img src="/svg/motorcycleIcon.svg" width="46" height="25" />
+
+                <p>Aucune moto trouvée</p>
+              </div>
+            </template>
+          </UTable>
 
           <div class="flex justify-end p-4 px-4">
             <USelect v-model="pagination.pageSize" :items="items" />

@@ -24,13 +24,16 @@ const emit = defineEmits<{
       next: 'sm:end-0'
     }"
   >
-    <article>
+    <article
+      class="cursor-pointer"
+      @click="navigateTo(`/motorcycle/${item._id}`)"
+    >
       <h5 class="no-select">{{ item.name }}</h5>
-      <NuxtLink :to="`/motorcycle/${item._id}`">{{ item.name }}</NuxtLink>
       <img
         src="/images/motorcycles/YZF-R1.png"
         width="100"
         height="100"
+        c
         class="rounded-lg"
         loading="lazy"
       />
@@ -41,14 +44,16 @@ const emit = defineEmits<{
         <hr />
         <p>{{ item.price }} €</p>
       </div>
-      <div>
+      <div @click.stop>
         <UButton
           size="sm"
           color="primary"
           class="rounded-full"
           style="color: white"
           icon="i-lucide-arrow-left-right"
-          @click="emit('selected', item._id, item.imageUrl ? item.imageUrl : '')"
+          @click.stop="
+            emit('selected', item._id, item.imageUrl ? item.imageUrl : '')
+          "
           >Comparer</UButton
         >
       </div>

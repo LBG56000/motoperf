@@ -23,7 +23,8 @@ const isOpen = ref(true)
             :src="props.leftMotorcycleUrl"
             alt="Left Motorcycle"
           />
-          <UIcon v-else name="i-lucide-motorbike" class="size-20" />
+          <img src="/svg/motorcycleIcon.svg" class="size-20" />
+
           <p>{{ props.leftName }}</p>
         </div>
         <UButton
@@ -39,7 +40,12 @@ const isOpen = ref(true)
             :src="props.rightMotorcycleUrl"
             alt="Right Motorcycle"
           />
-          <UIcon v-else name="i-lucide-motorbike" class="size-20" />
+          <img
+            src="/svg/motorcycleIcon.svg"
+            class="size-20"
+            style="transform: scaleX(-1)"
+          />
+
           <p>{{ props.rightName }}</p>
         </div>
       </div>
