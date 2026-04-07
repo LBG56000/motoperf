@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import ForumMyFavoritesPost from '~/components/forum/ForumMyFavoritesPost.vue';
 import HeaderInfo from '~/components/global/HeaderInfo.vue';
-import { useAuth } from '~/composable/useAuth';
-import { useConnexionModal } from '~/composable/useConnexionModal';
 import type { IPost } from '~/types/post';
 
 const posts = ref<IPost[]>([])
@@ -13,11 +11,6 @@ const filters = ref({
   onlyMyPost: true,
   searchBar: ''
 })
-
-const { isAuthenticated } = useAuth()
-const { open } = useConnexionModal()
-const modalIsOpen = ref(false)
-
 
 const filter = computed(() => {
   const conditions = []
@@ -51,7 +44,7 @@ const getPosts = async () => {
   const res = await $fetch<{ posts: IPost[] }>(`${useRuntimeConfig().public.apiBase}posts`, {
     params: {
       deep: true,
-      project: 'content,title,id,createdAt,views',
+      project: 'content,title,id,createdAt,views,image',
       filter: filter.value
     }
   })
@@ -119,11 +112,11 @@ onMounted(async () => {
           <p>Aucun post disponible, ajouter le premier</p>
         </div>
         <div v-for="post in posts" :key="post._id">
-          <ForumPost :post="post" class="cursor-pointer" :loading />
+          <ForumPost :post="post" class="cursor-pointer" :loading @post-change="getPosts()" />
         </div>
       </div>
       <div class="panel">
-        <ForumMyPosts @new-post="getPosts" />
+        <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>
     </div>

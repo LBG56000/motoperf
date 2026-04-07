@@ -61,6 +61,15 @@ const seedUser = async () => {
       createdAt: new Date(),
       image: 'test4.png'
     },
+    {
+      firstname: 'MotoCenter',
+      lastname: 'MotoCenter',
+      pseudo: 'MotoCenter',
+      email: 'motocenter@motocenter.com',
+      password: 'hashed_password_6',
+      userType: 'confirmed',
+      image: 'motocenter.png'
+    }
   ])
 
   console.log('User seeding')

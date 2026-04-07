@@ -28,7 +28,8 @@ const handleHaveANewPost = () => {
           <h3>Mes posts</h3>
           <UButton v-if="!isAuthenticated" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
             @click="handleAddPost" />
-          <LazyForumModalAddPost v-else v-model:open="openAddPost" @added-post="handleHaveANewPost" />
+          <LazyForumModalAddPost v-else v-model:open="openAddPost" :is-new-post="true"
+            @added-post="handleHaveANewPost" />
         </div>
       </template>
       <template #default>
