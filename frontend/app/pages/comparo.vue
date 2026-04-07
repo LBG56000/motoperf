@@ -327,13 +327,13 @@ onMounted(() => {
   <div>
     <HeaderInfo :scroll-to-element-id="'form'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Comparez. Choisissez. <br />
           <span class="text-red">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
-        <p>
+        <p class="p-mobile">
           Comparez facilement les performances, prix et caractéristiques de vos
           motos préférées.
         </p>
@@ -406,7 +406,7 @@ onMounted(() => {
           </div>
           <div class="input-comment-box">
             <div v-if="!isAuthenticated" class="need-connection">
-              <h3>
+              <h3 class="h3-mobile">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -423,7 +423,7 @@ onMounted(() => {
               class="input-comment-container"
               :class="{ blurred: !isAuthenticated }"
             >
-              <h4>
+              <h4 class="h4-mobile">
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
@@ -663,5 +663,58 @@ onMounted(() => {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+
+@media (max-width: 1024px) {
+  .form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .display-comment-container {
+    flex-direction: column;
+  }
+
+  .left-display-comment,
+  .right-display-comment {
+    max-width: 100%;
+  }
+
+  .input-comment-box {
+    margin: 1.5rem 1rem;
+    width: auto;
+  }
+
+  .caroussel-container {
+    margin: 0 1rem;
+  }
+
+  .need-connection {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .need-connection h3 {
+    width: auto;
+    font-size: 18px;
+  }
+
+  .input-comment-box {
+    min-height: auto;
+  }
+
+  .input-comment-container {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .input-posted-container {
+    min-height: auto;
+    padding: 1rem;
+  }
 }
 </style>
