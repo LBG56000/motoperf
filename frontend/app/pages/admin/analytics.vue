@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import StatsAnalytics from '~/components/admin/StatsAnalytics.vue'
-import Header from '~/components/admin/Header.vue'
 import type { IPost } from '~/types/post'
 import type { IMotorcycle } from '~/types/motorcycles'
 
@@ -66,7 +65,7 @@ async function fetchMonthly() {
   )
   chartData.value = months.map((month, i) => ({
     month,
-    user: data.stats.find(s => s.month === i + 1)?.total ?? 0
+    user: data.stats.find((s) => s.month === i + 1)?.total ?? 0
   }))
 }
 
@@ -107,8 +106,6 @@ onMounted(() => {
 
 <template>
   <div>
-    <Header />
-    <hr />
     <div class="card-stats-container">
       <StatsAnalytics
         v-for="item in stats"
