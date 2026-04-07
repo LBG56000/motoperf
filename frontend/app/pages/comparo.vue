@@ -7,13 +7,16 @@ import MotocyclesForm from '~/components/form/MotocyclesForm.vue'
 import CarrouselMotorcycles from '~/components/CarrouselMotorcycles.vue'
 import Comment from '~/components/forum/Comment.vue'
 import type { IMessage } from '~/types/messages'
+import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
+import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composable/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
   motorcycleName: string
   brand: string
   content: string
-  user: string // TODO: update quand l'auth sera en place
+  user: string
 }
 
 const apiBase = useRuntimeConfig().public.apiBase
@@ -22,6 +25,8 @@ const motorcycle1 = ref<IMotorcycle>()
 const motorcycle2 = ref<IMotorcycle>()
 const motorcycle1Id = ref<string>('')
 const motorcycle2Id = ref<string>('')
+const toast = useToast()
+const { open } = useConnexionModal()
 const fieldCategories = {
   numbers: [
     'year',
@@ -41,7 +46,7 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
-const isConnected = ref<boolean>(true) // Simule l'état de connexion de l'utilisateur
+const { isAuthenticated, user } = useAuth()
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
@@ -55,7 +60,7 @@ const comment = ref<ICommentInput>({
   motorcycleName: '',
   brand: '',
   content: '',
-  user: '69cbe6342e0cabab3167824a' // TODO: update quand l'auth sera en place
+  user: ''
 })
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -79,6 +84,8 @@ const resultatImg = reactive<
     secondValue: string
   }[]
 >([])
+const motorcycle1PreviewUrl = ref<string>('')
+const motorcycle2PreviewUrl = ref<string>('')
 const commentsMotorcycle1 = ref<IMessage[]>([])
 const commentsMotorcycle2 = ref<IMessage[]>([])
 
@@ -143,7 +150,7 @@ async function fetchMotocycles() {
 }
 
 async function fetchCarrouselMotorcycles() {
-  const project = 'name,horsePower,torque,price'
+  const project = 'name,horsePower,torque,price, imageUrl'
   const limit = 10
   // SportsBikes for Carrousel
   const sportBikesData = await $fetch<{ motorcycles: IMotorcycle[] }>(
@@ -198,9 +205,9 @@ async function fetchMessages() {
       `${apiBase}posts/${post1}/responses`,
       {
         params: {
-          project: 'content, user, createdAt',
+          project: 'content, user, createdAt, like, dislike',
           deep: true,
-          limit: 5,
+          limit: 5
         }
       }
     )
@@ -212,7 +219,7 @@ async function fetchMessages() {
       `${apiBase}posts/${post2}/responses`,
       {
         params: {
-          project: 'content, user, createdAt',
+          project: 'content, user, createdAt, like, dislike',
           deep: true,
           limit: 5
         }
@@ -239,10 +246,10 @@ async function postComment() {
         method: 'POST',
         body: {
           title: selectedMotorcycle.name,
-          brand: selectedMotorcycle.brand._id,
+          brand: selectedMotorcycle.brand.name,
           category: 'Modèle',
-          user: comment.value.user,
-          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`
+          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
+          isNewMotoComment: true
         }
       })
 
@@ -262,21 +269,53 @@ async function postComment() {
   }
 
   try {
-    await $fetch(`${apiBase}messages`, {
+    const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
       body: {
         content: comment.value.content,
-        user: comment.value.user,
+        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }
     })
+    if (newMessage.ok) {
+      toast.add({
+        title: 'Succès',
+        description: 'Votre commentaire a été ajouté.',
+        color: 'success'
+      })
+    }
     messagePosted.value = true
   } catch (error) {
     console.error('Error posting comment:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "Votre commentaire n'a pas pu être ajouté.",
+      color: 'error'
+    })
   }
 
   await fetchMessages()
+}
+
+function handleCaroussel(_id: string, imgUrl: string) {
+  if (!motorcycle1Id.value) {
+    motorcycle1Id.value = _id
+    motorcycle1PreviewUrl.value = imgUrl
+  } else if (!motorcycle2Id.value) {
+    motorcycle2Id.value = _id
+    motorcycle2PreviewUrl.value = imgUrl
+  }
+}
+
+function handleDelete() {
+  motorcycle1Id.value = ''
+  motorcycle2Id.value = ''
+  motorcycle1.value = undefined
+  motorcycle2.value = undefined
+  motorcycle1PreviewUrl.value = ''
+  motorcycle2PreviewUrl.value = ''
+  showResultat.value = false
 }
 
 onMounted(() => {
@@ -311,12 +350,12 @@ onMounted(() => {
           class="w-fit rounded-4xl"
           :disabled="!motorcycle1Id || !motorcycle2Id"
           @click="fetchMotocycles"
-          >Comparo</UButton
+          >Comparer</UButton
         >
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="resultat-section">
-          <div v-if="resultatNumber.length > 0" class="info-container">
+          <div v-if="resultatNumber.length > 0">
             <h3>Résultats</h3>
             <div v-for="field in resultatNumber" :key="field.fieldName">
               <ResultatFieldNumber
@@ -366,7 +405,7 @@ onMounted(() => {
             </div>
           </div>
           <div class="input-comment-box">
-            <div v-if="!isConnected" class="need-connection">
+            <div v-if="!isAuthenticated" class="need-connection">
               <h3>
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
@@ -375,13 +414,14 @@ onMounted(() => {
                 color="neutral"
                 class="rounded-4xl self-end text-xs p-2"
                 size="xl"
-                >Se connecter</UButton
-              >
+                @click="open()"
+                >Se connecter
+              </UButton>
             </div>
             <div
               v-if="!messagePosted"
               class="input-comment-container"
-              :class="{ blurred: !isConnected }"
+              :class="{ blurred: !isAuthenticated }"
             >
               <h4>
                 Déjà roulé une de ces motos ?<br />
@@ -408,7 +448,11 @@ onMounted(() => {
                 >Poster</UButton
               >
             </div>
-            <div v-else class="input-posted-container">
+            <div
+              v-else
+              class="input-posted-container"
+              :class="{ blurred: !isAuthenticated }"
+            >
               <h4>Merci pour votre contribution !</h4>
               <p>
                 Votre commentaire a été posté avec succès. Il apparaîtra dans la
@@ -421,15 +465,34 @@ onMounted(() => {
       <div class="caroussel-container">
         <div>
           <h3>Pour la performance</h3>
-          <CarrouselMotorcycles :items="carousselSportBikes" />
+          <CarrouselMotorcycles
+            :items="carousselSportBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div>
           <h3>Pour le A2</h3>
-          <CarrouselMotorcycles :items="carousselBeginnerBikes" />
+          <CarrouselMotorcycles
+            :items="carousselBeginnerBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div>
           <h3>Pour l'aventure</h3>
-          <CarrouselMotorcycles :items="carousselAdventureBikes" />
+          <CarrouselMotorcycles
+            :items="carousselAdventureBikes"
+            @selected="handleCaroussel"
+          />
+        </div>
+        <div class="dual-container">
+          <DualMotorcycle
+            :left-motorcycle-url="motorcycle1PreviewUrl"
+            :right-motorcycle-url="motorcycle2PreviewUrl"
+            :left-name="motorcycle1?.name"
+            :right-name="motorcycle2?.name"
+            @compare="fetchMotocycles"
+            @delete="handleDelete"
+          />
         </div>
       </div>
       <br />
@@ -536,7 +599,7 @@ onMounted(() => {
   text-align: center;
 }
 
-.input-posted-container{
+.input-posted-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -577,6 +640,13 @@ onMounted(() => {
   filter: blur(3px);
   pointer-events: none;
   user-select: none;
+}
+
+.dual-container {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* Utilitaires */

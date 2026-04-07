@@ -10,6 +10,7 @@
     "dev-back": "cd ./backend && npm run dev"
   },
   "dependencies": {
+    "vue-countup-v3": "^1.4.2",
     "leaflet-draw": "^1.0.4"
   }
 }

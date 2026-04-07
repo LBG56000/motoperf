@@ -1,120 +1,321 @@
 <script setup lang="ts">
 import * as v from 'valibot'
-import type { IBrand } from '~/types/brand'
-import type { ICategory } from '~/types/category'
+import { useAuth } from '~/composable/useAuth';
+import type { IBrand } from '~/types/brand';
+import type { ICategory } from '~/types/category';
+import type { IPost } from '~/types/post';
 
-const props = defineProps({
-  isNewPost: Boolean,
-  categories: Array<ICategory>,
-  brands: Array<IBrand>
-})
+const props = defineProps<{
+  isNewPost: boolean
+  post?: IPost
+  isSameUser?: boolean
+}>()
 
+const categories = ref<ICategory[]>([])
+const brands = ref<IBrand[]>([])
 const toast = useToast()
-const emit = defineEmits<{ close: [boolean] }>()
-
-const labelOfModal = computed(() => {
-  return props.isNewPost ? "Créer un nouveau post" : "Modifier un post"
+const { user } = useAuth()
+const emit = defineEmits(['added-post'])
+const displayModal = defineModel<boolean>('open', { default: false })
+const isHover = ref(false)
+const initialState = ref({
+  title: '',
+  category: '',
+  brand: '',
+  description: ''
 })
+
+const getCategories = async () => {
+  const res = await $fetch<{ categories: ICategory[] }>(
+    `${useRuntimeConfig().public.apiBase}categories`, {
+    params: {
+      project: 'name,_id'
+    }
+  })
+  categories.value = res.categories
+}
+
+const getBrands = async () => {
+  const res = await $fetch<{ brands: IBrand[] }>(
+    `${useRuntimeConfig().public.apiBase}brand`, {
+    params: {
+      project: 'name,_id'
+    }
+  })
+  brands.value = res.brands
+}
 
 const schema = v.object({
   title: v.pipe(v.string(), v.minLength(1, 'Le titre est requis')),
   category: v.pipe(v.string(), v.minLength(1, 'La catégorie est requise')),
   brand: v.pipe(v.string(), v.minLength(1, 'La marque est requise')),
   description: v.pipe(v.string(), v.minLength(1, 'La description est requise')),
-  file: v.pipe(v.instance(File, 'Image requise'), v.mimeType(['image/jpeg', 'image/png'], 'Format invalide'))
+  file: v.optional(
+    v.union([
+      v.pipe(v.instance(File, 'Image requise'), v.mimeType(['image/jpeg', 'image/png'], 'Format invalide')),
+      v.pipe(v.string(), v.minLength(1))
+    ])
+  )
 })
 
 const state = reactive({
-  title: '',
-  category: '',
-  brand: '',
-  description: '',
+  title: props.post?.title || '',
+  category: props.post?.category.name || '',
+  brand: props.post?.brand.name || '',
+  description: props.post?.content || '',
   file: undefined as File | undefined
 })
 
-const onSubmit = async () => {
-  try {
-    // Constrcution et envoi de la requête
-    const response = await $fetch.raw(`${useRuntimeConfig().public.apiBase}posts`, {
-      method: 'POST',
-      body: state
-    })
+const currentImageUrl = ref(props.post?.image || '')
 
-    if (response.status === 201) {
-      toast.add({ title: 'Succès', description: 'Votre post a été ajouté.', color: 'success' })
-      resetForm()
+const uploadImage = async (file: File, name: string): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('type', 'image')
+  formData.append('directory', 'posts')
+  formData.append('name', name)
+
+  const res = await $fetch<{ url: string }>('/api/uploadFile', {
+    method: 'POST',
+    body: formData
+  })
+  return res.url
+}
+
+const onSubmit = async () => {
+  const payload = {
+    brand: state.brand,
+    title: state.title,
+    category: state.category,
+    content: state.description,
+    url: currentImageUrl.value,
+    user: user.value?._id,
+    isNewMotoComment: false
+  }
+
+  try {
+    if (state.file instanceof File) {
+      const regex = /([^/]+)(?=\.\w+$)/
+      const match = props.post?.image?.match(regex)
+      const fileName = match ? match[0] : Date.now().toString()
+      payload.url = await uploadImage(state.file, fileName)
+    }
+
+    try {
+      const method = props.isNewPost ? 'POST' : 'PUT'
+      const response = await $fetch.raw(`${useRuntimeConfig().public.apiBase}posts`, {
+        method,
+        body: payload,
+        ...(!props.isNewPost && { params: { filter: JSON.stringify({ id: props.post?._id }) } })
+      })
+
+      if (response.ok) {
+        toast.add({ title: 'Succès', description: `Votre post a été ${props.isNewPost ? 'ajouté' : 'modifié'}.`, color: 'success' })
+        resetForm()
+        displayModal.value = false
+        emit('added-post')
+      }
+    } catch {
+      toast.add({ title: 'Erreur', description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`, color: 'error' })
     }
   } catch {
-    toast.add({ title: 'Erreur', description: 'Votre post n\' pas pu être ajouté', color: 'error' })
+    toast.add({ title: 'Erreur', description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`, color: 'error' })
   }
 }
 
+const handleCloseModal = () => {
+  displayModal.value = false
+}
+
 const resetForm = () => {
-  state.brand = ''
-  state.title = ''
-  state.category = ''
-  state.description = ''
+  state.brand = props.post?.brand.name || ''
+  state.title = props.post?.title || ''
+  state.category = props.post?.category.name || ''
+  state.description = props.post?.content || ''
   state.file = undefined
 }
+
+const modalTitle = () => {
+  return props.isNewPost ? 'Ajouter post' : 'Modifier un post'
+}
+
+const onImageTitle = () => {
+  return props.isNewPost ? 'Ajouter une image' : 'Image associée à mon post'
+}
+
+const getPreviewUrl = () => {
+  if (state.file instanceof File) {
+    return URL.createObjectURL(state.file)
+  }
+
+  return currentImageUrl.value
+}
+
+const setInitialState = () => {
+  initialState.value = {
+    title: props.post?.title || '',
+    category: props.post?.category.name || '',
+    brand: props.post?.brand.name || '',
+    description: props.post?.content || '',
+  }
+}
+
+const isSameValues = computed(() => {
+  const hasFormChanged =
+    state.title !== initialState.value.title ||
+    state.category !== initialState.value.category ||
+    state.brand !== initialState.value.brand ||
+    state.description !== initialState.value.description
+
+  const hasNewPost = state.file instanceof File
+
+  return hasFormChanged || hasNewPost
+})
+
+onMounted(async () => {
+  await Promise.all([
+    getCategories(), getBrands()
+  ])
+  setInitialState()
+})
 </script>
 
 <template>
   <div>
-    <UModal :transition="true" :close="{ onClick: () => emit('close', false) }">
-      <UButton icon="i-lucide-plus" size="sm" color="primary" variant="solid" />
+    <UModal v-model:open="displayModal" :close="true">
+      <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
+      <UButton v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
+        class="cursor-pointer" />
       <template #header>
-        <h3>Ajouter un post</h3>
+        <div class="modal-header">
+          <h3>{{ modalTitle() }}</h3>
+          <UButton color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
+            @click="handleCloseModal" />
+        </div>
       </template>
       <template #body>
-        <UForm :schema :state="state" @submit="onSubmit">
-          <UFormField label="Titre du post" required name="title">
-            <UInput v-model="state.title" placeholder="Titre du post" />
-          </UFormField>
-          <UFormField label="Catégorie" required name="category">
-            <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
-              value-key="_id" label-key="name" :search-input="{
-                placeholder: 'Rechercher',
-                icon: 'i-lucide-search'
-              }">
-              <template #empty>
-                <span class="text-gray-500 text-sm p-2">
-                  Aucune catégorie trouvée
-                </span>
-              </template>
-            </USelectMenu>
-          </UFormField>
-          <UFormField label="Marques" required name="brand">
-            <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
-              value-key="_id" label-key="name" :search-input="{
-                placeholder: 'Rechercher',
-                icon: 'i-lucide-search'
-              }">
-              <template #empty>
-                <span class="text-gray-500 text-sm p-2">
-                  Aucune marque trouvée
-                </span>
-              </template>
-            </USelectMenu>
-          </UFormField>
-          <UFormField label="Description" required name="description">
-            <UTextarea v-model="state.description" placeholder="Ecrivez votre description" />
-          </UFormField>
-          <UFormField required label="Image associé à mon post" name="file">
-            <!-- TODO: a faire avec une vraie image -->
-            <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG" />
-          </UFormField>
-          <div class="flex gap-2 mt-8">
-            <UButton type="submit" @click="resetForm, emit('close', true)">
-              Valider
-            </UButton>
-
-            <UButton variant="outline">
-              Réinitialiser
-            </UButton>
-          </div>
-        </UForm>
+        <div>
+          <UForm :schema :state="state" @submit="onSubmit" class="form">
+            <UFormField label="Titre du post" required name="title">
+              <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
+            </UFormField>
+            <UFormField label="Catégorie" required name="category">
+              <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
+                value-key="name" label-key="name" :search-input="{
+                  placeholder: 'Rechercher',
+                  icon: 'i-lucide-search'
+                }" size="md" class="w-full">
+                <template #empty>
+                  <span class="text-gray-500 text-sm p-2">
+                    Aucune catégorie trouvée
+                  </span>
+                </template>
+              </USelectMenu>
+            </UFormField>
+            <UFormField label="Marque" required name="brand">
+              <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
+                value-key="name" label-key="name" :search-input="{
+                  placeholder: 'Rechercher',
+                  icon: 'i-lucide-search'
+                }" size="md" class="w-full">
+                <template #empty>
+                  <span class="text-gray-500 text-sm p-2">
+                    Aucune marque trouvée
+                  </span>
+                </template>
+              </USelectMenu>
+            </UFormField>
+            <UFormField label="Description" required name="description">
+              <UTextarea size="md" v-model="state.description" placeholder="Ecrivez votre description" class="w-full" />
+            </UFormField>
+            <UFormField required :label="onImageTitle()" name="file">
+              <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
+                <template #default="{ open }">
+                  <div @click="open" @mouseover="isHover = true" @mouseleave="isHover = false">
+                    <div class="cursor-pointer" :class="isHover ? 'blur-4' : ''">
+                      <img :src="getPreviewUrl()" />
+                    </div>
+                    <div v-if="props.isNewPost && getPreviewUrl() === ''" class="border cursor-pointer">
+                      <div class="helper-upload">
+                        <UIcon name="i-lucide-cloud-upload" class="size-10" />
+                        <p class="text-sm">Sélectionner votre fichier</p>
+                      </div>
+                    </div>
+                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload cursor-pointer" @click="open">
+                      <h4>Cliquer pour modifier la photo</h4>
+                    </div>
+                  </div>
+                </template>
+              </UFileUpload>
+            </UFormField>
+            <div class="flex gap-2 mt-8">
+              <UButton v-if="isNewPost" class="cursor-pointer" type="submit">
+                Ajouter
+              </UButton>
+              <UButton v-else class="cursor-pointer" type="submit" :disabled="!isSameValues">
+                Modifier
+              </UButton>
+              <UButton class="cursor-pointer" variant="outline" @click="resetForm">
+                Réinitialiser
+              </UButton>
+            </div>
+          </UForm>
+        </div>
       </template>
     </UModal>
   </div>
 </template>
-<style scoped></style>
+<style scoped>
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.modal-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.helper-upload {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  transform: translate(-50%, -50%);
+}
+
+.helper-upload p {
+  font-size: 16px;
+}
+
+.helper-upload h4 {
+  font-size: 14px;
+  background-color: rgba(128, 128, 128, 0.865);
+  padding: 0.5em;
+  color: var(--background);
+}
+
+.blur-4 {
+  filter: blur(2px);
+}
+
+.border {
+  border: 2px dashed var(--border-gray);
+  border-radius: 10px;
+  text-align: center;
+  min-height: 100px;
+  max-height: 100px;
+}
+
+img {
+  max-width: 80%;
+}
+</style>
