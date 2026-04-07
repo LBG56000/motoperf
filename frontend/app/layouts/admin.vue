@@ -16,7 +16,7 @@ function getItems() {
     {
       label: 'Statistiques',
       icon: 'i-lucide-chart-pie',
-      to: '/admin/statistiques'
+      to: '/admin/analytics'
     }
   ] satisfies NavigationMenuItem[]
 }
