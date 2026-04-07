@@ -22,8 +22,16 @@ router.get(
 )
 
 router.post('/account', async (req: Request, res: Response) => {
-  const { email, password, firstname, lastname, pseudo, userType, image } =
-    req.body
+  const {
+    email,
+    password,
+    firstname,
+    lastname,
+    pseudo,
+    userType,
+    ridingStartYear,
+    image,
+  } = req.body
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' })
@@ -42,6 +50,7 @@ router.post('/account', async (req: Request, res: Response) => {
       pseudo,
       userType,
       image,
+      ridingStartYear,
       createdAt: new Date(),
     }
 

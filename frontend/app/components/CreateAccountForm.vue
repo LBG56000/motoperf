@@ -112,7 +112,10 @@ const handleSubmit = async () => {
         Confirmé: 'confirmed',
         Expert: 'expert',
         Autre: 'other'
-      }[state.experience] as 'beginner' | 'confirmed' | 'expert' | 'other'
+      }[state.experience] as 'beginner' | 'confirmed' | 'expert' | 'other',
+      (
+        Number(new Date().getFullYear()) - Number(state.yearsExperience)
+      ).toString()
     )
 
     formErrors.value = []
@@ -234,6 +237,7 @@ const handleSubmit = async () => {
                 <UInput
                   v-model="state.yearsExperience"
                   type="number"
+                  min="0"
                   placeholder="12"
                   variant="soft"
                   class="w-full"
