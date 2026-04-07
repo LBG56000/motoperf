@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { IBrand } from '~/types/brand'
 import { MotorcycleCategory, type IMotorcycle } from '~/types/motorcycles'
+import { da } from '@nuxt/ui/runtime/locale/index.js'
 
 const apiBase = useRuntimeConfig().public.apiBase
 
@@ -15,8 +16,7 @@ async function uploadFile(
   formData.append('file', file)
   formData.append('type', type)
   formData.append('directory', directory)
-  formData.append('motoName', state.name)
-  formData.append('motoYear', String(state.year))
+  formData.append('name', `${state.name}_${String(state.year)}`)
 
   const res = await $fetch<{ url: string }>('/api/uploadFile', {
     method: 'POST',
@@ -58,6 +58,7 @@ async function fetchMotoDetails(_id: string) {
   )
 
   const m = data.motorcycles[0]
+  console.log('Moto details:', m)
 
   const brand = brandList.value.find((b) => b._id === m.brand._id)
   state.brand = brand?.name ?? ''
@@ -182,6 +183,7 @@ onMounted(async () => {
 const toast = useToast()
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
+  console.log('Form data:', event.data) // Log des données du formulaire
   try {
     const selectedBrand = brandList.value.find(
       (b) => b.name === event.data.brand

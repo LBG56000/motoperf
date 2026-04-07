@@ -32,6 +32,7 @@ const getResponsesOfPost = async () => {
 
 onMounted(async () => {
   await Promise.all([getPost(), getResponsesOfPost()])
+  scrollToMap('post')
 })
 </script>
 
@@ -85,12 +86,8 @@ onMounted(async () => {
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
-          <img
-            :src="`/images/posts/${post?.image}`"
-            :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            :title="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            class="img margin-1_5 margin-bottom-1"
-          />
+          <img :src="`${post?.image}`" :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
+            :title="`Image du post ${post?.title} par ${post?.user.firstname}`" class="img margin-1_5 margin-bottom-1">
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
         <UFormField

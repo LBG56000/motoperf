@@ -14,14 +14,25 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 <template>
   <div class="sidebar" :class="{ 'is-open': isSidebarOpen }">
     <div class="toggle-wrapper">
-      <UButton :icon="isSidebarOpen ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'
-        " color="neutral" variant="subtle" class="sidebar-toggle" @click="isSidebarOpen = !isSidebarOpen" />
+      <UButton
+        :icon="
+          isSidebarOpen ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'
+        "
+        color="neutral"
+        variant="subtle"
+        class="sidebar-toggle"
+        @click="isSidebarOpen = !isSidebarOpen"
+      />
     </div>
 
     <div class="sidebar-content">
       <h3 class="sidebar-title">Liste des balades</h3>
       <div class="ride-container">
-        <div v-for="ride in props.filteredRides" :key="ride._id" class="ride-item">
+        <div
+          v-for="ride in props.filteredRides"
+          :key="ride._id"
+          class="ride-item"
+        >
           <CardRide :ride="ride" />
         </div>
       </div>
@@ -38,6 +49,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 
 .ride-item {
   border-radius: 12px;
+  height: 25dvh;
 }
 
 .sidebar {

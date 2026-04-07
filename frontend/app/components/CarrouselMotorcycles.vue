@@ -24,30 +24,36 @@ const emit = defineEmits<{
       next: 'sm:end-0'
     }"
   >
-    <article>
-      <h5>{{ item.name }}</h5>
+    <article
+      class="cursor-pointer"
+      @click="navigateTo(`/motorcycle/${item._id}`)"
+    >
+      <h5 class="no-select">{{ item.name }}</h5>
       <img
         src="/images/motorcycles/YZF-R1.png"
         width="100"
         height="100"
+        c
         class="rounded-lg"
         loading="lazy"
       />
-      <div id="description">
+      <div id="description" class="no-select">
         <p>{{ item.horsePower }} ch</p>
         <hr />
         <p>{{ item.torque }} Nm</p>
         <hr />
         <p>{{ item.price }} €</p>
       </div>
-      <div>
+      <div @click.stop>
         <UButton
           size="sm"
           color="primary"
           class="rounded-full"
           style="color: white"
           icon="i-lucide-arrow-left-right"
-          @click="emit('selected', item._id, item.imageUrl ? item.imageUrl : '')"
+          @click.stop="
+            emit('selected', item._id, item.imageUrl ? item.imageUrl : '')
+          "
           >Comparer</UButton
         >
       </div>
@@ -95,5 +101,9 @@ hr {
   justify-content: center;
   align-items: center;
   gap: -5px;
+}
+
+.no-select {
+  user-select: none;
 }
 </style>

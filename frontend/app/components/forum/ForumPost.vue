@@ -3,13 +3,10 @@ import type { IPost } from '~/types/post'
 
 const props = defineProps<{
   post: IPost
-  isUser: boolean
   loading: boolean
 }>()
 
-const handleEditAPost = () => {
-  console.log('Edit post')
-}
+const emit = defineEmits(['post-change'])
 
 const apiBase = useRuntimeConfig().public.apiBase
 
@@ -26,6 +23,10 @@ const handleOpenAPost = async (id: string) => {
   await addViewInAPost(id)
   navigateTo(`/forum/${id}`)
 }
+
+const handlePostChange = () => {
+  emit('post-change')
+}
 </script>
 <template>
   <UCard class="card-forum custom-border" @click="handleOpenAPost(post._id)">
@@ -35,8 +36,7 @@ const handleOpenAPost = async (id: string) => {
       <div class="main">
         <div class="top">
           <h4>{{ props.post.title }}</h4>
-          <!--TODO: à compléter pour la gestion utilisateur-->
-          <UIcon v-if="props.isUser" class="size-6" name="i-lucide-square-pen" @click.stop="handleEditAPost" />
+          <ForumEditAPost :post="post" :is-new-post="false" @edited-post="handlePostChange" />
         </div>
         <div class="grid">
           <div>
@@ -46,7 +46,6 @@ const handleOpenAPost = async (id: string) => {
               }}</UBadge>
               <UBadge size="lg">{{ props.post.category.name }}</UBadge>
             </div>
-
             <p>
               Par {{ props.post.user.firstname }},
               {{ formatTimeAgo(props.post.createdAt) }}

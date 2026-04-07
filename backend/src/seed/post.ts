@@ -10,12 +10,19 @@ const seedPost = async () => {
   await Post.deleteMany({})
 
   const user = await User.findOne({ firstname: "Alice" })
+  const motocenterUser = await User.findOne({ firstname: "MotoCenter" })
   const category1 = await Category.findOne({ name: "Réparation" })
   const category2 = await Category.findOne({ name: "Entretien" })
   const categoryModele = await Category.findOne({ name: "Modèle" })
   const brandHonda = await Brand.findOne({ name: "Honda" })
 
-  if (!user || !category1 || !category2 || !categoryModele || !brandHonda) {
+  // Posts liés aux motos du comparo + mise à jour des motos
+  const gsxr = await Motorcycle.findOne({ name: "GSX-R600" })
+  const cbr = await Motorcycle.findOne({ name: "CBR1000RR-R Fireblade" })
+  const mt07 = await Motorcycle.findOne({ name: "MT-07" })
+
+
+  if (!user || !category1 || !category2 || !categoryModele || !brandHonda || !gsxr || !cbr || !mt07 || !motocenterUser) {
     throw new Error("Missing seeded data")
   }
 
@@ -27,7 +34,7 @@ const seedPost = async () => {
       user: user._id,
       brand: brandHonda._id,
       views: 12,
-      image: "test1.png"
+      image: "/images/posts/test1.png"
     },
     {
       title: "Quelle est la meilleure marque de moto ?",
@@ -35,14 +42,9 @@ const seedPost = async () => {
       category: category2._id,
       user: user._id,
       brand: brandHonda._id,
-      image: "test2.png"
+      image: "/images/posts/test2.png"
     },
   ])
-
-  // Posts liés aux motos du comparo + mise à jour des motos
-  const gsxr = await Motorcycle.findOne({ name: "GSX-R600" })
-  const cbr = await Motorcycle.findOne({ name: "CBR1000RR-R Fireblade" })
-  const mt07 = await Motorcycle.findOne({ name: "MT-07" })
 
   if (gsxr) {
     const post = await new Post({
@@ -50,7 +52,7 @@ const seedPost = async () => {
       content: "GSX-R600",
       category: categoryModele._id,
       brand: gsxr.brand,
-      user: user._id
+      user: motocenterUser._id
     }).save()
     await Motorcycle.findByIdAndUpdate(gsxr._id, { post: post._id })
   }
@@ -61,7 +63,7 @@ const seedPost = async () => {
       content: "CBR1000RR-R Fireblade",
       category: categoryModele._id,
       brand: cbr.brand,
-      user: user._id
+      user: motocenterUser._id
     }).save()
     await Motorcycle.findByIdAndUpdate(cbr._id, { post: post._id })
   }
@@ -72,7 +74,7 @@ const seedPost = async () => {
       content: "MT-07",
       category: categoryModele._id,
       brand: mt07.brand,
-      user: user._id
+      user: motocenterUser._id
     }).save()
     await Motorcycle.findByIdAndUpdate(mt07._id, { post: post._id })
   }

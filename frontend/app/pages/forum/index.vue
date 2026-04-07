@@ -44,7 +44,7 @@ const getPosts = async () => {
   const res = await $fetch<{ posts: IPost[] }>(`${useRuntimeConfig().public.apiBase}posts`, {
     params: {
       deep: true,
-      project: 'content,title,id,createdAt,views',
+      project: 'content,title,id,createdAt,views,image',
       filter: filter.value
     }
   })
@@ -70,10 +70,6 @@ const getResponseOfPost = async (postId: string) => {
 //     return posts.value.push(data.messages)
 //   })
 // }
-
-const isUserOfPost = computed(() => {
-  return true
-})
 
 const handleFilter = async (updateFilter: any) => {
   filters.value = {
@@ -114,14 +110,13 @@ onMounted(async () => {
         <USkeleton v-if="loading" class="size-12 rounded-full" />
         <div v-if="loading === false && posts.length === 0" class="center add-post-empty">
           <p>Aucun post disponible, ajouter le premier</p>
-          <LazyForumModalAddPost />
         </div>
         <div v-for="post in posts" :key="post._id">
-          <ForumPost :post="post" :is-user="isUserOfPost" class="cursor-pointer" :loading />
+          <ForumPost :post="post" class="cursor-pointer" :loading @post-change="getPosts()" />
         </div>
       </div>
       <div class="panel">
-        <ForumMyPosts />
+        <ForumMyPosts @new-post="getPosts()" />
         <ForumMyFavoritesPost />
       </div>
     </div>
