@@ -113,7 +113,7 @@ const resetForm = () => {
   currentStep.value = 1
 
   // Effacer les erreurs
-  formErrors.value = {}
+  formErrors.value = []
 }
 
 const handleSubmit = async () => {
