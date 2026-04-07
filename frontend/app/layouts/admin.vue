@@ -27,7 +27,7 @@ function getItems() {
     <UDashboardSidebar
       :collapsible="true"
       :ui="{
-        root: 'bg-[var(--ui-primary)]',
+        root: 'bg-[var(--ui-primary)] h-screen sticky top-0',
         body: 'py-0'
       }"
     >
