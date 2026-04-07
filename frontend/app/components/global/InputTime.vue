@@ -28,7 +28,10 @@ const selectTime = (h: number) => {
     size="xl"
   >
     <template #trailing>
-      <UPopover :reference="inputRef?.inputsRef[0]?.$el">
+      <UPopover
+        :reference="inputRef?.inputsRef[0]?.$el"
+        :popper="{ placement: 'bottom-end', offset: [0, 8] }"
+      >
         <UButton
           color="neutral"
           variant="link"
@@ -37,7 +40,7 @@ const selectTime = (h: number) => {
           class="px-0"
         />
         <template #content>
-          <div class="p-2 h-48 overflow-y-auto w-32 flex flex-col gap-1">
+          <div class="hours-popover-container">
             <UButton
               v-for="h in 24"
               :key="h"
@@ -53,3 +56,15 @@ const selectTime = (h: number) => {
     </template>
   </UInputTime>
 </template>
+
+<style scoped>
+.hours-popover-container {
+  padding: 0.5rem;
+  height: 12rem;
+  overflow-y: auto;
+  width: 8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+</style>

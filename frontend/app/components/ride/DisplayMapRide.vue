@@ -545,7 +545,7 @@ onMounted(async () => {
     const runtimeConfig = useRuntimeConfig()
     try {
       const res = await fetch(
-        `${runtimeConfig.public.apiBase}rides?project=all`
+        `${runtimeConfig.public.apiBase}rides?project=all&deep=true`
       )
       const data: RideResponse = await res.json()
 

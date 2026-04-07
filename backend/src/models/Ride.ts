@@ -1,5 +1,5 @@
 import type { IRide } from '../types/ride'
-import mongoose, { Schema, model } from 'mongoose'
+import { model, Schema, Types } from 'mongoose'
 
 const rideSchema = new Schema({
   title: {
@@ -102,6 +102,11 @@ const rideSchema = new Schema({
       },
       message: "L'heure de l'événement est requise lorsque c'est un événement.",
     },
+  },
+  participating_user: {
+    type: [Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
   },
   createdAt: {
     type: Date,

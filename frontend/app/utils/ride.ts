@@ -186,14 +186,14 @@ export const getCoordsFromCity = async (
 ): Promise<number[] | null> => {
   try {
     const res = await fetch(
-      `https://api-adresse.data.gouv.fr/search/?q=${cityName}&limit=1&type=municipality`
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(cityName)}&limit=1`
     )
     const data = await res.json()
     if (data.features && data.features.length > 0) {
       return data.features[0].geometry.coordinates
     }
   } catch (e) {
-    console.error(`Erreur géocodage pour ${cityName}:`, e)
+    console.error('Erreur de géocodage:', e)
   }
   return null
 }

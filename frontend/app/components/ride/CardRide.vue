@@ -9,20 +9,42 @@ interface IProps {
   ride: IRide
 }
 
-const isLikedCurrent = ref(false)
 const { user } = useAuth()
+const props = defineProps<IProps>()
+const isLikedCurrent = ref<boolean>(
+  props.ride.liked_id?.includes(user.value?._id ?? '') ?? false
+)
 const { open } = useConnexionModal()
 const creator = ref<any>(null)
 
-const props = defineProps<IProps>()
-const emit = defineEmits(['update:like'])
+const isParticipating = computed(() =>
+  user.value
+    ? props.ride.participating_user?.some(
+        (p: any) => (p._id || p) === user?.value?._id
+      )
+    : false
+)
 
-const participantsAvatars = ref([
-  { src: 'https://avatars.githubusercontent.com/u/739984?v=4', alt: 'User 1' },
-  { src: 'https://avatars.githubusercontent.com/u/739985?v=4', alt: 'User 2' },
-  { label: 'JD', alt: 'John Doe' }, // On peut aussi utiliser des initiales
-  { src: 'https://avatars.githubusercontent.com/u/739986?v=4', alt: 'User 3' }
-])
+const participatingCount = computed(
+  () => props.ride.participating_user?.length ?? 0
+)
+
+// Propriété calculée pour transformer les données participants en format UAvatar
+const participantsAvatars = computed(() => {
+  if (!props.ride.participating_user) return []
+
+  return props.ride.participating_user.map((participant: any) => {
+    return {
+      src: participant.image
+        ? `/images/users/${participant.image}`
+        : `/images/users/default.svg`,
+      alt: participant.pseudo,
+      label: participant.pseudo?.substring(0, 2).toUpperCase()
+    }
+  })
+})
+
+const emit = defineEmits(['update:like', 'update:participants'])
 
 const srcAvatarCreator = computed<string>(() => {
   return creator.value?.image
@@ -51,7 +73,7 @@ const likeGestion = async () => {
   try {
     const userId = user.value?._id
 
-    // Si pas d'ID, on arrête
+    // Si pas d'ID, on arrête et on ouvre la modal de connexion
     if (!userId) {
       open()
       return
@@ -70,6 +92,31 @@ const likeGestion = async () => {
     isLikedCurrent.value = res.isLiked
   } catch (error) {
     console.error('Utilisateur non connecté ou erreur serveur', error)
+  }
+}
+
+const participateGestion = async () => {
+  const runtimeConfig = useRuntimeConfig()
+  const userId = user.value?._id
+
+  if (!userId) {
+    open()
+    return
+  }
+
+  try {
+    const res = await $fetch<{
+      participatingCount: number
+      isParticipating: boolean
+      updatedParticipants: any[]
+    }>(`${runtimeConfig.public.apiBase}rides/${props.ride._id}/participate`, {
+      method: 'PATCH',
+      body: { userId }
+    })
+
+    emit('update:participants', res.updatedParticipants)
+  } catch (error) {
+    console.error('Erreur participation:', error)
   }
 }
 
@@ -212,13 +259,15 @@ onMounted(async () => {
 
           <div v-if="ride.is_event" class="card-footer-item">
             <UButton
-              label="Participer"
-              color="error"
+              :label="isParticipating ? 'Ne plus participer' : 'Participer'"
+              :color="isParticipating ? 'neutral' : 'error'"
+              :variant="isParticipating ? 'subtle' : 'solid'"
               size="lg"
               class="btn-participate cursor-pointer"
+              @click="participateGestion"
             />
 
-            <div class="participants-pill">
+            <div v-if="participatingCount > 0" class="participants-list">
               <UAvatarGroup size="xs" :max="3">
                 <UAvatar
                   v-for="(avatar, index) in participantsAvatars"
@@ -226,8 +275,12 @@ onMounted(async () => {
                   v-bind="avatar"
                 />
               </UAvatarGroup>
-              <span class="more-count">+15</span>
+              <span class="participants-count">
+                {{ participatingCount }}
+              </span>
             </div>
+
+            <span v-else class="no-participants"> Aucun participant </span>
           </div>
         </div>
       </footer>
@@ -386,19 +439,25 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-.participants-pill {
+.no-participants {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.participants-list {
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 4px 12px 4px 6px;
+  padding: 4px 10px 4px 6px;
   border-radius: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: #111;
 }
 
-.more-count {
+.participants-count {
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 /* --- RESPONSIVE --- */

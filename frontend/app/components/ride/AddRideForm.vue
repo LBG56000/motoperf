@@ -37,6 +37,11 @@ const isGeomCreated = computed(() => {
   return false
 }) // Vérifie si une geom est créé
 
+const addressErrors = reactive({
+  start: false,
+  end: false
+}) // Permet de savoir si un des deux select et l'adresse qui correspond n'est pas dans la bonne ville
+
 const now = new Date()
 
 const rideTypeOptions = Object.values(RideType).map((type: string) => ({
@@ -53,15 +58,17 @@ const stateForm = reactive<IValueForm>({
   description: '',
   startTown: undefined,
   endTown: undefined,
+  startAddress: '',
+  endAddress: '',
   rideType: '',
   picture: undefined,
-  is_event: false,
-  date_event: new CalendarDate(
+  isEvent: false,
+  dateEvent: new CalendarDate(
     now.getFullYear(),
     now.getMonth() + 1,
     now.getDate()
   ),
-  hour_event: new Time(now.getHours(), now.getMinutes()),
+  hourEvent: new Time(now.getHours(), now.getMinutes()),
   geom: null
 })
 
@@ -96,7 +103,6 @@ const rideDistance = computed(() => {
 
 // Permet la recherche dynamique dans les select des villes
 const searchCommunes = async (query: string) => {
-  // Permet de re fetch seulement s'il y a 1 charactères
   if (!query || query.length <= 1) return
 
   isSelectLoading.value = true
@@ -105,14 +111,12 @@ const searchCommunes = async (query: string) => {
       `https://geo.api.gouv.fr/communes?nom=${query}&limit=20&fields=nom,code,codesPostaux`
     )
     const data = await res.json()
-
-    // Tri alphabétique sur le nom
     const sortedData = data.sort((a: any, b: any) => a.nom.localeCompare(b.nom))
 
-    // Ajout dans le select
     listCommunes.value = sortedData.map((c: ICommune) => ({
       label: `${c.nom} ${c.codesPostaux ? '(' + c.codesPostaux[0] + ')' : ''}`,
-      value: c.nom
+      value: c.nom,
+      postcode: c.codesPostaux ? c.codesPostaux[0] : undefined
     }))
   } catch (e) {
     console.error(e)
@@ -134,7 +138,8 @@ const loadInitialCommunes = async () => {
     // Ajouter les communes trouvées dans le select
     listCommunes.value = sortedData.map((c: ICommune) => ({
       label: `${c.nom} ${c.codesPostaux ? '(' + c.codesPostaux[0] + ')' : ''}`,
-      value: c.nom
+      value: c.nom,
+      postcode: c.codesPostaux ? c.codesPostaux[0] : undefined
     }))
   } catch (e) {
     console.error(e)
@@ -163,55 +168,58 @@ const calculateRouteFromCities = async () => {
   if (
     !stateForm.startTown?.value ||
     !stateForm.endTown?.value ||
-    isAutoUpdating.value ||
-    stateForm.geom
+    isAutoUpdating.value
   )
     return
 
   isMapLoading.value = true
-  isAutoUpdating.value = true
 
   try {
-    const startCoords = await getCoordsFromCity(stateForm.startTown.value)
-    const endCoords = await getCoordsFromCity(stateForm.endTown.value)
-
-    if (startCoords && endCoords) {
-      const res = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${startCoords.join(',')};${endCoords.join(',')}?overview=full&geometries=geojson`
+    // On récupère les coordonnées en passant le nom de la ville ET le code postal
+    const [startCoords, endCoords] = await Promise.all([
+      getCoordsFromAddress(
+        stateForm.startAddress,
+        stateForm.startTown.value,
+        stateForm.startTown.postcode
+      ),
+      getCoordsFromAddress(
+        stateForm.endAddress,
+        stateForm.endTown.value,
+        stateForm.endTown.postcode
       )
-      const data = await res.json()
+    ])
 
-      if (data.routes && data.routes.length > 0) {
-        const rawGeom = {
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              properties: {},
-              geometry: data.routes[0].geometry
-            }
-          ]
-        }
+    addressErrors.start = !startCoords
+    addressErrors.end = !endCoords
 
-        // On simplifie la geom poru éviter que ça lag trop car le tracé est très précis
-        stateForm.geom = simplifyGeometry(rawGeom, 0.00005)
-        isGpsRoute.value = true
+    if (!startCoords || !endCoords) {
+      return
+    }
 
-        // On met à jour la durée et la distance ici aussi pour être sûr
-        stateForm.duration = parseFloat(
-          (data.routes[0].duration / 3600).toFixed(2)
-        )
+    isAutoUpdating.value = true
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${startCoords.join(',')};${endCoords.join(',')}?overview=full&geometries=geojson`
+    )
+    const data = await res.json()
 
-        stateForm.distance = parseFloat(
-          (data.routes[0].distance / 1000).toFixed(2)
-        )
+    if (data.routes && data.routes.length > 0) {
+      const rawGeom = {
+        type: 'FeatureCollection',
+        features: [
+          { type: 'Feature', properties: {}, geometry: data.routes[0].geometry }
+        ]
       }
+      stateForm.geom = simplifyGeometry(rawGeom, 0.00005)
+      isGpsRoute.value = true
+      stateForm.duration = parseFloat(
+        (data.routes[0].duration / 3600).toFixed(2)
+      )
+      stateForm.distance = parseFloat(
+        (data.routes[0].distance / 1000).toFixed(2)
+      )
     }
   } finally {
-    isSelectLoading.value = false
     isMapLoading.value = false
-
-    // On attend un peu avant de déverrouiller pour laisser les watchers se terminer
     setTimeout(() => {
       isAutoUpdating.value = false
     }, 500)
@@ -272,6 +280,41 @@ const getCommuneFromCoords = async (
   return undefined
 }
 
+// Fonction pour transformer l'adresse en coordonnées tout en filtrant par commune
+const getCoordsFromAddress = async (
+  address: string,
+  city: string,
+  postcode?: string
+): Promise<number[] | null> => {
+  const hasAddress = address.trim().length > 0
+
+  try {
+    // Si pas d'adresse, on cherche directement la ville
+    const searchTerm = hasAddress ? address : city
+    let url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(searchTerm)}&city=${encodeURIComponent(city)}&limit=1`
+
+    if (postcode) {
+      url += `&postcode=${postcode}`
+    }
+
+    const res = await fetch(url)
+    const data = await res.json()
+
+    if (data.features && data.features.length > 0) {
+      const feature = data.features[0]
+
+      if (hasAddress && feature.properties.type === 'municipality') {
+        return null
+      }
+
+      return feature.geometry.coordinates
+    }
+  } catch (e) {
+    console.error('Erreur de géocodage:', e)
+  }
+  return null
+}
+
 async function onSubmit() {
   const runtimeConfig = useRuntimeConfig()
   try {
@@ -288,13 +331,13 @@ async function onSubmit() {
     }
 
     // Conversion en chaînes de caractères
-    if (stateForm.is_event) {
-      payload.date_event = stateForm.date_event.toString()
-      payload.hour_event = stateForm.hour_event.toString()
+    if (stateForm.isEvent) {
+      payload.dateEvent = stateForm.dateEvent.toString()
+      payload.hourEvent = stateForm.hourEvent.toString()
     } else {
       // Si ce n'est pas une balade groupée, on nettoie les valeurs
-      payload.date_event = undefined
-      payload.hour_event = undefined
+      payload.dateEvent = undefined
+      payload.hourEvent = undefined
     }
 
     await $fetch(`${runtimeConfig.public.apiBase}rides`, {
@@ -395,23 +438,6 @@ watch(
   { deep: true }
 )
 
-// On surveille les villes, mais on n'agit que si c'est un changement utilisateur et pas celui automatique après le tracé manuel
-watch(
-  [() => stateForm.startTown, () => stateForm.endTown],
-  ([newStart, newEnd], [oldStart, oldEnd]) => {
-    // Si l'un des deux a changé et que les deux sont remplis
-    if (newStart?.value && newEnd?.value) {
-      // On vérifie si les valeurs sont différentes des précédentes pour éviter les déclenchements inutiles
-      if (
-        newStart.value !== oldStart?.value ||
-        newEnd.value !== oldEnd?.value
-      ) {
-        calculateRouteFromCities() // Lancement du calcul GPS
-      }
-    }
-  }
-)
-
 // Quand la ville de départ est sélectionnée permet de reset les choix
 watch(
   () => stateForm.startTown,
@@ -461,6 +487,16 @@ watch(isGpsRoute, (newVal) => {
 // Watch les input de recherche dans les select des villes, pas les valeurs sélectionnées
 watch(startTownSearch, (val: string) => searchCommunes(val))
 watch(endTownSearch, (val: string) => searchCommunes(val))
+
+// On réinitialise les erreurs quand on change de ville ou d'adresse
+watch(
+  [() => stateForm.startTown, () => stateForm.startAddress],
+  () => (addressErrors.start = false)
+)
+watch(
+  [() => stateForm.endTown, () => stateForm.endAddress],
+  () => (addressErrors.end = false)
+)
 </script>
 <template>
   <div id="container-form" class="container-form">
@@ -547,8 +583,8 @@ watch(endTownSearch, (val: string) => searchCommunes(val))
           <p class="text-gray-500 text-sm mt-1">
             Tracez à la main avec
             <UIcon name="i-lucide-pen" class="size-4 text-primary" /> ou
-            <strong class="text-primary">choisissez deux villes</strong> pour un
-            calcul GPS automatique.
+            <strong class="text-primary">choisissez deux villes</strong> puis
+            calculer l'itinéraire.
           </p>
         </header>
 
@@ -572,43 +608,84 @@ watch(endTownSearch, (val: string) => searchCommunes(val))
         </UFormField>
 
         <div class="row-container">
-          <UFormField label="Ville de départ" name="startTown" required>
-            <USelectMenu
-              v-model="stateForm.startTown"
-              class="w-full"
-              :items="listCommunes"
-              placeholder="Chercher une ville..."
-              :search-input="{
-                placeholder: 'Rechercher...',
-                modelValue: startTownSearch,
-                'onUpdate:modelValue': (val: string) => (startTownSearch = val)
-              }"
-              size="xl"
-              option-attribute="label"
-              value-attribute="value"
-              :loading="isSelectLoading"
-              @update:open="handleMenuClose"
-            />
-          </UFormField>
+          <div class="flex flex-col gap-2">
+            <UFormField label="Ville de départ" name="startTown" required>
+              <USelectMenu
+                v-model="stateForm.startTown"
+                class="w-full"
+                :items="listCommunes"
+                placeholder="Chercher une ville..."
+                :search-input="{
+                  placeholder: 'Rechercher...',
+                  modelValue: startTownSearch,
+                  'onUpdate:modelValue': (val: string) =>
+                    (startTownSearch = val)
+                }"
+                size="xl"
+                option-attribute="label"
+                :loading="isSelectLoading"
+                @update:open="handleMenuClose"
+              />
+            </UFormField>
+            <div class="flex flex-col gap-1">
+              <UInput
+                v-model="stateForm.startAddress"
+                placeholder="Adresse précise..."
+                size="md"
+                :color="addressErrors.start ? 'error' : 'neutral'"
+              />
+              <span v-if="addressErrors.start" class="text-[15px] text-red-500">
+                L'adresse n'est pas présente dans
+                {{ stateForm.startTown?.value }}, vérifier l'orthographe
+              </span>
+            </div>
+          </div>
 
-          <UFormField label="Ville d'arrivée" name="endTown" required>
-            <USelectMenu
-              v-model="stateForm.endTown"
-              class="w-full"
-              :items="listCommunes"
-              placeholder="Chercher une ville..."
-              :search-input="{
-                placeholder: 'Rechercher...',
-                modelValue: endTownSearch,
-                'onUpdate:modelValue': (val: string) => (endTownSearch = val)
-              }"
-              size="xl"
-              option-attribute="label"
-              value-attribute="value"
-              :loading="isSelectLoading"
-              @update:open="handleMenuClose"
-            />
-          </UFormField>
+          <div class="flex flex-col gap-2">
+            <UFormField label="Ville d'arrivée" name="endTown" required>
+              <USelectMenu
+                v-model="stateForm.endTown"
+                class="w-full"
+                :items="listCommunes"
+                placeholder="Chercher une ville..."
+                :search-input="{
+                  placeholder: 'Rechercher...',
+                  modelValue: endTownSearch,
+                  'onUpdate:modelValue': (val: string) => (endTownSearch = val)
+                }"
+                size="xl"
+                option-attribute="label"
+                :loading="isSelectLoading"
+                @update:open="handleMenuClose"
+              />
+            </UFormField>
+            <div class="flex flex-col gap-1">
+              <UInput
+                v-model="stateForm.endAddress"
+                placeholder="Adresse précise..."
+                size="md"
+                :color="addressErrors.end ? 'error' : 'neutral'"
+              />
+              <span v-if="addressErrors.end" class="text-[15px] text-red-500">
+                L'adresse n'est pas présente dans
+                {{ stateForm.endTown?.value }}, vérifier l'orthographe
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end">
+          <UButton
+            icon="i-lucide-navigation"
+            color="neutral"
+            variant="subtle"
+            :loading="isMapLoading"
+            :disabled="!stateForm.startTown?.value || !stateForm.endTown?.value"
+            class="w-1/5 cursor-pointer justify-center"
+            @click="calculateRouteFromCities"
+          >
+            Calculer le tracé
+          </UButton>
         </div>
 
         <UFormField
@@ -628,21 +705,21 @@ watch(endTownSearch, (val: string) => searchCommunes(val))
 
         <UFormField name="groupRide" required class="w-full">
           <div class="switch-container">
-            <USwitch v-model="stateForm.is_event" />
+            <USwitch v-model="stateForm.isEvent" />
             <p>Créer une balade groupée</p>
           </div>
         </UFormField>
 
         <div
-          v-if="stateForm.is_event"
+          v-if="stateForm.isEvent"
           class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           <UFormField label="Date de la balade" required class="w-full">
-            <InputDate v-model="stateForm.date_event" />
+            <InputDate v-model="stateForm.dateEvent" />
           </UFormField>
 
           <UFormField label="Heure de la balade" required class="w-full">
-            <InputTime v-model="stateForm.hour_event" />
+            <InputTime v-model="stateForm.hourEvent" />
           </UFormField>
         </div>
 
@@ -652,15 +729,17 @@ watch(endTownSearch, (val: string) => searchCommunes(val))
           </div>
         </UFormField>
 
-        <UButton
-          type="submit"
-          label="Ajouter la balade"
-          color="primary"
-          size="xl"
-          class="justify-center"
-          icon="i-lucide-check"
-          loading-auto
-        />
+        <div class="flex justify-end">
+          <UButton
+            type="submit"
+            label="Créer"
+            color="primary"
+            size="xl"
+            class="w-1/5 justify-center cursor-pointer"
+            icon="i-lucide-check"
+            loading-auto
+          />
+        </div>
       </UContainer>
     </UForm>
   </div>

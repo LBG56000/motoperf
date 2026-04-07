@@ -16,7 +16,13 @@ const value = computed({
 </script>
 
 <template>
-  <UInputDate ref="inputRef" v-model="value" class="w-full" size="xl">
+  <UInputDate
+    ref="inputRef"
+    v-model="value"
+    class="w-full"
+    size="xl"
+    locale="fr-FR"
+  >
     <template #trailing>
       <UPopover :reference="inputRef?.inputsRef[3]?.$el">
         <UButton

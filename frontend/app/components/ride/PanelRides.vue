@@ -36,6 +36,9 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
           <CardRide
             :ride="ride"
             @update:like="(newCount) => (ride.like = newCount)"
+            @update:participants="
+              (newList) => (ride.participating_user = newList)
+            "
           />
         </div>
       </div>

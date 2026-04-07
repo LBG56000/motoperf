@@ -16,6 +16,7 @@ export interface IRide {
   is_event: boolean
   date_event: string
   hour_event: string
+  participating_user: string[]
   createdAt: string
 }
 
@@ -60,6 +61,7 @@ export interface ICommune {
 export interface IValueCommuneSelect {
   label: string
   value: string
+  postcode: string
 }
 
 export interface IValueForm {
@@ -69,11 +71,13 @@ export interface IValueForm {
   description: string
   startTown: IValueCommuneSelect | undefined
   endTown: IValueCommuneSelect | undefined
+  startAddress: string
+  endAddress: string
   rideType: string
   picture: File | undefined
-  is_event: boolean
-  date_event: any | undefined
-  hour_event: any | undefined
+  isEvent: boolean
+  dateEvent: any | undefined
+  hourEvent: any | undefined
   geom: IGeoJSON | null
 }
 
