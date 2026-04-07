@@ -464,21 +464,21 @@ onMounted(() => {
       </Transition>
       <div class="caroussel-container">
         <div>
-          <h3>Pour la performance</h3>
+          <h3 class="h3-mobile">Pour la performance</h3>
           <CarrouselMotorcycles
             :items="carousselSportBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3>Pour le A2</h3>
+          <h3 class="h3-mobile">Pour le A2</h3>
           <CarrouselMotorcycles
             :items="carousselBeginnerBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3>Pour l'aventure</h3>
+          <h3 class="h3-mobile">Pour l'aventure</h3>
           <CarrouselMotorcycles
             :items="carousselAdventureBikes"
             @selected="handleCaroussel"
