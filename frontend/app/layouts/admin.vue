@@ -41,7 +41,9 @@ function getItems() {
           :items="getItems()"
           orientation="vertical"
           :ui="{
-            link: 'text-white'
+            linkLeadingIcon:
+              'text-white group-data-[active]:text-[var(--ui-primary)]',
+            link: 'text-white data-[active]:text-[var(--ui-primary)]'
           }"
         />
       </template>
