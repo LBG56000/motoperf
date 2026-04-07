@@ -2,7 +2,7 @@
 const props = defineProps<{
   title: string
   value: number
-  percent: number
+  percent?: number
 }>()
 </script>
 
@@ -13,22 +13,24 @@ const props = defineProps<{
     </template>
 
     <template #default>
-      <div class="percent-container">
-        <UIcon
-          :name="
-            props.percent > 0
-              ? 'i-lucide-move-up-right'
-              : 'i-lucide-move-down-right'
-          "
-          size="large"
-          :class="props.percent > 0 ? 'text-green-500' : 'text-red-500'"
-        />
-        <p
-          v-if="props.percent !== undefined"
-          :class="props.percent > 0 ? 'text-green-500' : 'text-red-500'"
-        >
-          {{ props.percent }}%
-        </p>
+      <div class="info-container">
+        <div v-if="props.percent !== undefined" class="percent-container">
+          <UIcon
+            :name="
+              props.percent > 0
+                ? 'i-lucide-move-up-right'
+                : 'i-lucide-move-down-right'
+            "
+            size="large"
+            :class="props.percent > 0 ? 'text-green-500' : 'text-red-500'"
+          />
+          <p
+            v-if="props.percent !== undefined"
+            :class="props.percent > 0 ? 'text-green-500' : 'text-red-500'"
+          >
+            {{ props.percent }}%
+          </p>
+        </div>
         <p>{{ props.title }}</p>
       </div>
     </template>
@@ -52,5 +54,12 @@ p {
 .stats-card {
   min-width: 20%;
   border: 1px solid var(--border-gray);
+}
+
+.info-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 </style>
