@@ -25,7 +25,8 @@ const emit = defineEmits<{
     }"
   >
     <article>
-      <h5>{{ item.name }}</h5>
+      <h5 class="no-select">{{ item.name }}</h5>
+      <NuxtLink :to="`/motorcycle/${item._id}`">{{ item.name }}</NuxtLink>
       <img
         src="/images/motorcycles/YZF-R1.png"
         width="100"
@@ -33,7 +34,7 @@ const emit = defineEmits<{
         class="rounded-lg"
         loading="lazy"
       />
-      <div id="description">
+      <div id="description" class="no-select">
         <p>{{ item.horsePower }} ch</p>
         <hr />
         <p>{{ item.torque }} Nm</p>
@@ -95,5 +96,9 @@ hr {
   justify-content: center;
   align-items: center;
   gap: -5px;
+}
+
+.no-select {
+  user-select: none;
 }
 </style>
