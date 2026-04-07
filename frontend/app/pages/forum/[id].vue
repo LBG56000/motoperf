@@ -27,7 +27,7 @@ const getPost = async () => {
 const getResponsesOfPost = async () => {
   const res = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${route.params.id}/responses`, {
     params: {
-      project: 'like,dislike,user,content,description,createdAt',
+      project: 'like,dislike,user,content,description,createdAt,usersLikeId,usersDislikeId',
       deep: true
     }
   })
