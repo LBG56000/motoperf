@@ -18,8 +18,6 @@ const seedMessage = async () => {
   await Message.insertMany([
     {
       content: "Pense aussi au coût de l'assurance",
-      like: 7,
-      dislike: 0,
       isRep: true,
       reference: post1._id,
       referenceModel: "Post",
@@ -33,8 +31,6 @@ const seedMessage = async () => {
   await Message.insertMany([
     {
       content: "Réponse au cout de l'assurance",
-      like: 7,
-      dislike: 0,
       isRep: true,
       reference: message._id,
       referenceModel: "Message",
@@ -42,8 +38,6 @@ const seedMessage = async () => {
     },
     {
       content: "Deuxième Réponse au cout de l'assurance",
-      like: 7,
-      dislike: 0,
       isRep: true,
       reference: message._id,
       referenceModel: "Message",
@@ -83,8 +77,6 @@ const seedMessage = async () => {
     await Message.insertMany([
       {
         content: "La Fireblade est une machine exigeante et radicale, presque fatigante en ville, mais une fois sur circuit ou sur une départementale dégagée, l'agilité du train avant et l'électronique de pointe donnent l'impression de ne faire qu'un avec la piste.",
-        like: 31,
-        dislike: 0,
         isRep: true,
         reference: postCbr._id,
         referenceModel: "Post",
@@ -92,8 +84,6 @@ const seedMessage = async () => {
       },
       {
         content: "Le moteur Crossplane de la CBR1000RR-R offre des sensations uniques. Ce calage moteur particulier donne vraiment ce sentiment de piloter un prototype de MotoGP plutôt qu'une simple moto de série.",
-        like: 31,
-        dislike: 0,
         isRep: true,
         reference: postCbr._id,
         referenceModel: "Post",
@@ -106,8 +96,6 @@ const seedMessage = async () => {
     await Message.insertMany([
       {
         content: "La MT-07 est la moto parfaite pour débuter sans se priver de sensations. Légère, agile, et ce twin qui grogne dès qu'on ouvre les gaz.",
-        like: 18,
-        dislike: 0,
         isRep: true,
         reference: postMt07._id,
         referenceModel: "Post",
@@ -115,8 +103,6 @@ const seedMessage = async () => {
       },
       {
         content: "Après 3 ans dessus je comprends pourquoi c'est une des motos les plus vendues en Europe. Elle fait tout bien, sans être excellente dans un domaine précis.",
-        like: 22,
-        dislike: 1,
         isRep: true,
         reference: postMt07._id,
         referenceModel: "Post",

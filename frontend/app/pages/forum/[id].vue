@@ -25,9 +25,13 @@ const getPost = async () => {
 }
 
 const getResponsesOfPost = async () => {
-  const res = await fetch(`${apiBase}posts/${route.params.id}/responses`)
-  const data = await res.json()
-  responses.value = data.messages
+  const res = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${route.params.id}/responses`, {
+    params: {
+      project: 'like,dislike,user,content,description,createdAt,usersLikeId,usersDislikeId',
+      deep: true
+    }
+  })
+  responses.value = res.messages
 }
 
 onMounted(async () => {
@@ -103,8 +107,10 @@ onMounted(async () => {
         <p v-if="responses.length === 0">
           Aucune réponse à ce post, ajouter la première
         </p>
-        <div v-else class="margin-bottom-1 w-5/6">
-          <Comment :responses="responses" />
+        <div v-else class="margin-bottom-1 w-5/6 comments">
+          <div v-for="response in responses" :key="response._id">
+            <Comment :response="response" />
+          </div>
         </div>
       </div>
     </div>
@@ -114,6 +120,13 @@ onMounted(async () => {
 <style scoped>
 .margin-2 {
   margin-right: 0.5em;
+}
+
+.comments {
+  margin-top: 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
 }
 
 .icon-and-text {
