@@ -205,7 +205,7 @@ async function fetchMessages() {
       `${apiBase}posts/${post1}/responses`,
       {
         params: {
-          project: 'content, user, createdAt, like, dislike',
+          project: 'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
           deep: true,
           limit: 5
         }
@@ -219,7 +219,7 @@ async function fetchMessages() {
       `${apiBase}posts/${post2}/responses`,
       {
         params: {
-          project: 'content, user, createdAt, like, dislike',
+          project: 'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
           deep: true,
           limit: 5
         }
