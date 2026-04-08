@@ -25,9 +25,13 @@ const getPost = async () => {
 }
 
 const getResponsesOfPost = async () => {
-  const res = await fetch(`${apiBase}posts/${route.params.id}/responses`)
-  const data = await res.json()
-  responses.value = data.messages
+  const res = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${route.params.id}/responses`, {
+    params: {
+      project: 'like,dislike,user,content,description,createdAt,usersLikeId,usersDislikeId',
+      deep: true
+    }
+  })
+  responses.value = res.messages
 }
 
 onMounted(async () => {
@@ -55,7 +59,12 @@ onMounted(async () => {
       </div>
       <div>
         <div class="icon-and-text">
-          <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
+          <UAvatar
+            :src="`/images/users/${post?.user.image}`"
+            size="3xl"
+            loading="lazy"
+            class="margin-2"
+          />
           <h2>{{ post?.title }}</h2>
         </div>
         <div>
@@ -85,15 +94,23 @@ onMounted(async () => {
             :title="`Image du post ${post?.title} par ${post?.user.firstname}`" class="img margin-1_5 margin-bottom-1">
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
-        <UFormField label="Ecrire une réponse" required :ui="{ container: 'w-5/6' }">
+        <UFormField
+          label="Ecrire une réponse"
+          required
+          :ui="{ container: 'w-5/6' }"
+        >
           <UTextarea v-model="newReponseOfPost" class="w-5/6" />
         </UFormField>
-        <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''">Ajouter ma réponse</UButton>
+        <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''"
+          >Ajouter ma réponse</UButton
+        >
         <p v-if="responses.length === 0">
           Aucune réponse à ce post, ajouter la première
         </p>
-        <div v-else class="margin-bottom-1 w-5/6">
-          <Comment :responses="responses" />
+        <div v-else class="margin-bottom-1 w-5/6 comments">
+          <div v-for="response in responses" :key="response._id">
+            <Comment :response="response" />
+          </div>
         </div>
       </div>
     </div>
@@ -103,6 +120,13 @@ onMounted(async () => {
 <style scoped>
 .margin-2 {
   margin-right: 0.5em;
+}
+
+.comments {
+  margin-top: 1.5em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
 }
 
 .icon-and-text {
@@ -119,11 +143,11 @@ onMounted(async () => {
   margin: 2rem 5rem;
 }
 
-.post-filters>div:first-child {
+.post-filters > div:first-child {
   flex-shrink: 0;
 }
 
-.post-filters>div:nth-child(2) {
+.post-filters > div:nth-child(2) {
   flex: 1;
   min-width: 0;
 }
