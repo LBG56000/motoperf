@@ -382,17 +382,13 @@ onMounted(async () => {
   // Si le paramètre est présent dans l'URL on scroll
   if (route.query.scroll === 'true') {
     setTimeout(() => {
-      scrollToMap('map')
+      scrollToMap('container-form')
       // Nettoyage de l'URL pour éviter de rescroller au prochain refresh
       router.replace({ query: {} })
     }, 400)
   }
 
   loadInitialCommunes()
-
-  setTimeout(() => {
-    scrollToMap('map')
-  }, 350)
 })
 
 watch(
@@ -506,71 +502,7 @@ watch(
       :validate="validate"
       @submit="onSubmit"
     >
-      <UContainer class="flex flex-col h-full">
-        <UFormField
-          label="Tracé de la balade"
-          name="geom"
-          required
-          class="flex flex-col grow"
-          :ui="{ container: 'flex-grow' }"
-        >
-          <DisplayMapRide
-            :key="mapKey"
-            v-model:geom="stateForm.geom"
-            v-model:is-map-loading="isMapLoading"
-            display-editor-container
-            :disable-editing="isGpsRoute"
-            :disable-creating="isGeomCreated"
-            class="grow min-h-100 lg:min-h-0"
-          />
-
-          <div
-            v-if="isGpsRoute"
-            class="mt-2 text-red-500 flex items-center gap-2 text-sm font-medium"
-          >
-            <UIcon name="i-lucide-alert-triangle" class="size-5" />
-            Pour des raisons de lenteur, la modification est désactivé lors des
-            tracés générer par GPS.
-          </div>
-
-          <div class="container-info-under-map">
-            <div v-if="rideDistance > 0" class="ride-line-info">
-              <UIcon name="i-lucide-map-pinned" class="w-4 h-4" />
-              <span
-                >Distance estimée :
-                <strong style="color: var(--ui-primary)"
-                  >{{ rideDistance }} km</strong
-                ></span
-              >
-            </div>
-            <div class="ride-line-info">
-              <UIcon name="i-lucide-timer" class="w-4 h-4" />
-              <span>Durée estimée :</span>
-              <div class="flex items-center gap-2">
-                <UInputNumber
-                  v-model="durationHours"
-                  class="w-30"
-                  placeholder="H"
-                  :min="0"
-                  size="xl"
-                />
-                <span>h</span>
-                <UInputNumber
-                  v-model="durationMinutes"
-                  class="w-30"
-                  placeholder="Min"
-                  :min="0"
-                  :max="59"
-                  size="xl"
-                />
-                <span>min</span>
-              </div>
-            </div>
-          </div>
-        </UFormField>
-      </UContainer>
-
-      <UContainer class="flex flex-col space-y-6">
+      <UContainer class="column-info flex flex-col space-y-6">
         <header class="form-header">
           <UButton
             to="/ride?scroll=true"
@@ -579,7 +511,7 @@ watch(
             color="neutral"
             label="Retour"
           />
-          <h3>Nouvelle balade</h3>
+          <h3 class="text-xl font-bold mt-2">Nouvelle balade</h3>
           <p class="text-gray-500 text-sm mt-1">
             Tracez à la main avec
             <UIcon name="i-lucide-pen" class="size-4 text-primary" /> ou
@@ -630,13 +562,12 @@ watch(
             <div class="flex flex-col gap-1">
               <UInput
                 v-model="stateForm.startAddress"
-                placeholder="Adresse précise..."
+                placeholder="Adresse précise (optionnel)..."
                 size="md"
                 :color="addressErrors.start ? 'error' : 'neutral'"
               />
-              <span v-if="addressErrors.start" class="text-[15px] text-red-500">
-                L'adresse n'est pas présente dans
-                {{ stateForm.startTown?.value }}, vérifier l'orthographe
+              <span v-if="addressErrors.start" class="text-[14px] text-red-500">
+                L'adresse n'existe pas à {{ stateForm.startTown?.value }}
               </span>
             </div>
           </div>
@@ -662,13 +593,12 @@ watch(
             <div class="flex flex-col gap-1">
               <UInput
                 v-model="stateForm.endAddress"
-                placeholder="Adresse précise..."
+                placeholder="Adresse précise (optionnel)..."
                 size="md"
                 :color="addressErrors.end ? 'error' : 'neutral'"
               />
-              <span v-if="addressErrors.end" class="text-[15px] text-red-500">
-                L'adresse n'est pas présente dans
-                {{ stateForm.endTown?.value }}, vérifier l'orthographe
+              <span v-if="addressErrors.end" class="text-[14px] text-red-500">
+                L'adresse n'existe pas à {{ stateForm.endTown?.value }}
               </span>
             </div>
           </div>
@@ -681,19 +611,14 @@ watch(
             variant="subtle"
             :loading="isMapLoading"
             :disabled="!stateForm.startTown?.value || !stateForm.endTown?.value"
-            class="w-1/5 cursor-pointer justify-center"
+            class="w-full sm:w-fit justify-center cursor-pointer"
             @click="calculateRouteFromCities"
           >
-            Calculer le tracé
+            Calculer le tracé GPS
           </UButton>
         </div>
 
-        <UFormField
-          label="Type de la balade"
-          name="rideType"
-          required
-          class="w-full"
-        >
+        <UFormField label="Type de la balade" name="rideType" required>
           <USelect
             v-model="stateForm.rideType"
             class="w-full"
@@ -703,7 +628,7 @@ watch(
           />
         </UFormField>
 
-        <UFormField name="groupRide" required class="w-full">
+        <UFormField name="groupRide" required>
           <div class="switch-container">
             <USwitch v-model="stateForm.isEvent" />
             <p>Créer une balade groupée</p>
@@ -714,11 +639,10 @@ watch(
           v-if="stateForm.isEvent"
           class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
-          <UFormField label="Date de la balade" required class="w-full">
+          <UFormField label="Date" required>
             <InputDate v-model="stateForm.dateEvent" />
           </UFormField>
-
-          <UFormField label="Heure de la balade" required class="w-full">
+          <UFormField label="Heure" required>
             <InputTime v-model="stateForm.hourEvent" />
           </UFormField>
         </div>
@@ -728,19 +652,73 @@ watch(
             <UFileUpload v-model="stateForm.picture" class="w-full h-full" />
           </div>
         </UFormField>
-
-        <div class="flex justify-end">
-          <UButton
-            type="submit"
-            label="Créer"
-            color="primary"
-            size="xl"
-            class="w-1/5 justify-center cursor-pointer"
-            icon="i-lucide-check"
-            loading-auto
-          />
-        </div>
       </UContainer>
+
+      <UContainer class="column-map flex flex-col">
+        <UFormField
+          label="Tracé de la balade"
+          name="geom"
+          required
+          class="flex flex-col grow mt-25"
+          :ui="{ container: 'flex-grow' }"
+        >
+          <DisplayMapRide
+            :key="mapKey"
+            v-model:geom="stateForm.geom"
+            v-model:is-map-loading="isMapLoading"
+            display-editor-container
+            :disable-editing="isGpsRoute"
+            :disable-creating="isGeomCreated"
+            class="grow min-h-100 lg:min-h-0"
+          />
+
+          <div
+            v-if="isGpsRoute"
+            class="mt-2 text-red-500 flex items-center gap-2 text-sm font-medium"
+          >
+            <UIcon name="i-lucide-alert-triangle" class="size-5" />
+            Modification désactivée pour les tracés GPS.
+          </div>
+
+          <div class="container-info-under-map">
+            <div v-if="rideDistance > 0" class="ride-line-info">
+              <UIcon name="i-lucide-map-pinned" class="w-4 h-4 text-primary" />
+              <span
+                >Distance :
+                <strong style="color: var(--ui-primary)"
+                  >{{ rideDistance }} km</strong
+                ></span
+              >
+            </div>
+            <div class="ride-line-info">
+              <UIcon name="i-lucide-timer" class="w-4 h-4 text-primary" />
+              <div class="flex items-center gap-2">
+                <UInputNumber v-model="durationHours" class="w-22" size="md" />
+                <span>h</span>
+                <UInputNumber
+                  v-model="durationMinutes"
+                  class="w-22"
+                  :max="59"
+                  size="md"
+                />
+                <span>min</span>
+              </div>
+            </div>
+          </div>
+        </UFormField>
+      </UContainer>
+
+      <div class="submit-container flex justify-center">
+        <UButton
+          type="submit"
+          label="Créer la balade"
+          color="primary"
+          size="xl"
+          class="w-full lg:w-fit justify-center cursor-pointer"
+          icon="i-lucide-check"
+          loading-auto
+        />
+      </div>
     </UForm>
   </div>
 </template>
@@ -749,33 +727,29 @@ watch(
 /* --- CONTENEURS PRINCIPAUX --- */
 .container-form {
   width: 100%;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .form-wrapper {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 2.5rem;
   width: 100%;
   align-items: stretch;
 }
 
-.form-wrapper > * {
-  flex: 1;
-  width: 50%;
-}
-
 :deep(.u-container) {
   max-width: none !important;
   margin: 0 !important;
+  padding: 0 !important;
   width: 100%;
 }
 
 /* --- ÉLÉMENTS DE FORMULAIRE --- */
 .row-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
 .switch-container {
@@ -799,8 +773,9 @@ watch(
 /* --- INFORMATIONS SOUS CARTE --- */
 .container-info-under-map {
   display: flex;
-  flex-direction: row;
-  gap: 50px;
+  flex-direction: column;
+  gap: 15px;
+  min-width: 200px;
   margin-top: 1rem;
 }
 
@@ -810,22 +785,51 @@ watch(
   gap: 10px;
   justify-content: start;
   align-items: center;
+  white-space: nowrap;
 }
 
 /* --- RESPONSIVE (TABLETTES ET MOBILES) --- */
-@media (max-width: 1024px) {
+@media (min-width: 1024px) {
   .form-wrapper {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: stretch;
   }
 
-  .form-wrapper > * {
+  .column-info {
+    flex: 1;
+    order: 1;
+    width: 50%;
+  }
+
+  .column-map {
+    flex: 1;
+    order: 2;
+    width: 50%;
+  }
+
+  .submit-container {
+    order: 3;
     width: 100%;
+    margin-top: 1rem;
   }
 
   .container-info-under-map {
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    gap: 40px;
+    align-items: center;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-form {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .row-container {
+    grid-template-columns: 1fr 1fr;
   }
 }
 </style>

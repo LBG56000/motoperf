@@ -62,6 +62,8 @@ const { isFullScreen, toggleFullScreen } = useFullScreenMap(map)
 const drawInstruction = ref<string | null>(null) // Message affiché en bas de la carte pendant des actions de dessin/modification/suppression
 const selectedId = ref<string>('default') // Identifiant du fond de plan sélectionné
 
+let activeTraceLayer: any = null
+
 // Liste des fonds de carte disponibles avec leur URL
 const mapItems = ref<MapItem[]>([
   {
@@ -248,11 +250,16 @@ const updateVisibleRides = () => {
  * Cette fonction nettoie les anciens tracés et reconstruit les clusters et les markers
  * en fonction des filtres appliqués (Type, Distance, etc.).
  */
-const renderRides = () => {
+const renderRides = (isZooming = false) => {
   const L = L_instance.value
   const LDraw = LDraw_instance.value
   if (!map.value || !L || !LDraw) return
 
+  // Nettoyage du tracé actif avant de reconstruire les couches
+  if (activeTraceLayer && !isZooming) {
+    map.value.removeLayer(activeTraceLayer)
+    activeTraceLayer = null
+  }
   // On retire le groupe de couches précédent de la carte pour repartir de zéro
   if (ridesLayerGroup.value) map.value.removeLayer(ridesLayerGroup.value)
 
@@ -281,27 +288,32 @@ const renderRides = () => {
     const hour = Math.floor(ride.duration)
     const minutes = Math.round((ride.duration - hour) * 60)
 
-    let geojsonLayer: any = null
-
     // Création du marker du point de départ
     const marker = L.marker([start[1], start[0]], { icon: dynamicIcon })
       .bindPopup(
         `<div class="ride-detail-container"><b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min</div>`
       )
-      // On affiche le tracé entier que s'il clique dessus
       .on('popupopen', () => {
-        geojsonLayer = L.geoJSON(ride.geom as any, {
+        // On retire l'ancien tracé actif s'il existe
+        if (activeTraceLayer) {
+          map.value.removeLayer(activeTraceLayer)
+        }
+
+        // On crée le tracé sur une couche directement rattachée à la carte, pas au cluster
+        activeTraceLayer = L.geoJSON(ride.geom as any, {
           style: {
             color: ride.color || '#3B82F6',
-            weight: getWeightByZoom(currentZoom), // Épaisseur de ligne adaptée au zoom
+            weight: getWeightByZoom(currentZoom),
             opacity: 1
           }
-        })
-        geojsonLayer.addTo(ridesLayerGroup.value)
+        }).addTo(map.value)
       })
-      // On retire le tracé quand on ferme le popup pour ne pas surcharger la carte
       .on('popupclose', () => {
-        if (geojsonLayer) geojsonLayer.remove(ridesLayerGroup.value)
+        // On retire le tracé quand le popup est fermé manuellement
+        if (activeTraceLayer) {
+          map.value.removeLayer(activeTraceLayer)
+          activeTraceLayer = null
+        }
       })
 
     markersCluster.addLayer(marker)
@@ -348,7 +360,7 @@ onMounted(async () => {
   // Paramétrage de la map
   map.value = L.map('map', {
     zoomControl: false,
-    preferCanvas: false,
+    preferCanvas: true,
     zoomAnimation: true,
     markerZoomAnimation: true
   }).setView([48.26, -3], 9)
@@ -566,12 +578,20 @@ onMounted(async () => {
 
     // Adapte l'épaisseur des tracés au niveau de zoom et met à jour la liste des balades visibles
     map.value.on('zoomend', () => {
-      const newWeight = getWeightByZoom(map.value.getZoom())
+      const currentZoom = map.value.getZoom()
+      const newWeight = getWeightByZoom(currentZoom)
+
       if (ridesLayerGroup.value) {
         ridesLayerGroup.value.eachLayer((layer: any) => {
           if (layer.setStyle) layer.setStyle({ weight: newWeight })
         })
       }
+
+      if (activeTraceLayer) {
+        activeTraceLayer.setStyle({ weight: newWeight })
+        activeTraceLayer.bringToFront()
+      }
+
       updateVisibleRides()
     })
     map.value.on('moveend', updateVisibleRides)
@@ -602,8 +622,12 @@ watch(selectedId, (newId: string) =>
 
 // Quand les filtres changent
 watch(filteredRides, () => {
-  renderRides()
+  renderRides(true)
   updateVisibleRides()
+
+  if (activeTraceLayer && map.value) {
+    activeTraceLayer.bringToFront()
+  }
 })
 
 // Quand le v-model geom change depuis l'extérieur (ex: calcul GPS), on redessine le tracé sur la carte
@@ -851,6 +875,7 @@ watch(
   display: flex;
   flex-direction: row;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   z-index: 1001;
   pointer-events: none;
@@ -895,6 +920,7 @@ watch(
 /* Bandeau en bas pour les instructions */
 .draw-instruction-banner {
   position: absolute;
+  width: 70%;
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);

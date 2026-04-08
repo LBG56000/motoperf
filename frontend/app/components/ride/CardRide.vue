@@ -203,7 +203,7 @@ onMounted(async () => {
 
       <p class="description">{{ props.ride.description }}</p>
 
-      <footer class="footer-section">
+      <footer>
         <div class="info-grid">
           <UBadge
             variant="subtle"
@@ -293,6 +293,7 @@ onMounted(async () => {
 .card-image {
   position: relative;
   width: 100%;
+  height: auto;
   min-height: 220px;
   background-size: cover;
   background-position: center;
@@ -300,17 +301,19 @@ onMounted(async () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .overlay {
   position: absolute;
+  border-radius: 12px;
   inset: 0;
+  background: rgba(0, 0, 0, 0.6);
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.4) 60%,
-    rgba(0, 0, 0, 0.2) 100%
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.7) 50%,
+    rgba(0, 0, 0, 0.4) 100%
   );
   z-index: 1;
 }
@@ -330,12 +333,14 @@ onMounted(async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   width: 100%;
 }
 
 .title-wrapper {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   align-items: center;
   gap: 8px;
@@ -348,7 +353,7 @@ onMounted(async () => {
   font-weight: 700;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
   flex-shrink: 1;
@@ -422,6 +427,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -471,15 +477,21 @@ onMounted(async () => {
 }
 
 @media (max-width: 480px) {
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .card-footer-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
-  .card-image {
-    min-height: 240px;
+
+  .card-footer-item {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
+
   .btn-participate {
-    padding: 0 10px;
+    flex: 1;
+    justify-content: center;
   }
 }
 </style>

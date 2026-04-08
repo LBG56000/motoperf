@@ -61,8 +61,15 @@ const goToForm = async () => {
   display: flex;
   flex-direction: row;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 50px;
   margin-left: 20px;
+}
+
+@media (max-width: 410px) {
+  .add-container {
+    justify-content: center;
+  }
 }
 </style>

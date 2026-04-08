@@ -68,7 +68,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
   width: 40dvw;
   background-color: var(--background);
   backdrop-filter: blur(8px);
-  z-index: 1001;
+  z-index: 1020;
   transition: transform 0.3s ease-in-out;
   transform: translateX(100%);
   border-left: 1px solid #e5e7eb;
@@ -111,5 +111,11 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
   font-weight: 700;
   margin-bottom: 1rem;
   color: var(--text-color);
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 90dvw;
+  }
 }
 </style>

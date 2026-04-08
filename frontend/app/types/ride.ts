@@ -39,6 +39,8 @@ export interface IFilterObject {
   type: string[]
   startTown: string[]
   endTown: string[]
+  date: string
+  time: string
 }
 
 export type MapItem = {

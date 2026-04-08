@@ -28,7 +28,9 @@ const filters = reactive<IFilterObject>({
   startTown: [],
   endTown: [],
   distance: [0, 9999],
-  duration: [0, 99]
+  duration: [0, 99],
+  date: '',
+  time: ''
 })
 
 const STORAGE_KEY_FILTER = inject<string>('STORAGE_KEY_FILTER')
@@ -82,6 +84,8 @@ const resetFilter = () => {
   filters.endTown = []
   filters.distance = [0, maxRoundedDistance.value]
   filters.duration = [0, maxRoundedDuration.value]
+  filters.date = ''
+  filters.time = ''
 
   if (STORAGE_KEY_FILTER) {
     localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(filters))
@@ -135,17 +139,24 @@ const resetFilter = () => {
         />
       </UFormField>
 
-      <!-- <UFormField label="Date de la balade">
-        <UInputDate trailing-icon="i-lucide-calendar" class="w-80" />
+      <UFormField label="Date de la balade">
+        <UInputDate
+          v-model="filters.date"
+          trailing-icon="i-lucide-calendar"
+          class="w-80"
+          locale="fr-FR"
+        />
       </UFormField>
 
       <UFormField label="Date de la balade">
         <UInputTime
+          v-model="filters.time"
           :hour-cycle="24"
           trailing-icon="i-lucide-clock"
           class="w-80"
+          locale="fr-FR"
         />
-      </UFormField> -->
+      </UFormField>
 
       <UFormField label="Distance (km)">
         <div class="value-slider-container">
@@ -256,6 +267,8 @@ h3 {
   justify-content: center;
   align-items: center;
   gap: 1rem;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
 .filters-container {
@@ -264,15 +277,32 @@ h3 {
   gap: 1rem;
   background-color: var(--background);
   width: 20dvw;
-  min-width: 400px;
+  min-width: 350px;
+  max-height: calc(100vh - 100px);
   position: absolute;
   top: 60px;
-  left: 15px;
-  z-index: 999;
+  bottom: 20px;
+  z-index: 2000;
   border-radius: 7px;
   border: 1px solid var(--border-gray);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   padding: 1rem;
   overflow-y: auto;
+  transition:
+    left 0.3s,
+    transform 0.3s,
+    width 0.3s;
+}
+
+@media (max-width: 410px) {
+  .filters-container {
+    width: 90%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    margin-top: 40px;
+    top: 20px;
+    max-height: 90vh;
+  }
 }
 </style>
