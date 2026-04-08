@@ -9,9 +9,15 @@ export interface IRide {
   start_town: string
   end_town: string
   ride_type: string
-  picture: string
+  image_link: string
   like: number
-  create_date: string
+  liked_id: string[]
+  user_id: string
+  is_event: boolean
+  date_event: string
+  hour_event: string
+  participating_user: string[]
+  createdAt: string
 }
 
 export interface IGeoJSON {
@@ -33,6 +39,8 @@ export interface IFilterObject {
   type: string[]
   startTown: string[]
   endTown: string[]
+  date: string
+  time: string
 }
 
 export type MapItem = {
@@ -55,24 +63,32 @@ export interface ICommune {
 export interface IValueCommuneSelect {
   label: string
   value: string
+  postcode: string
 }
 
 export interface IValueForm {
   title: string
   duration: number
+  distance: number
   description: string
   startTown: IValueCommuneSelect | undefined
   endTown: IValueCommuneSelect | undefined
+  startAddress: string
+  endAddress: string
   rideType: string
+  picture: File | undefined
+  isEvent: boolean
+  dateEvent: any | undefined
+  hourEvent: any | undefined
   geom: IGeoJSON | null
 }
 
 export enum RideType {
+  MIXTE = 'Mixte',
   SINUEUSE = 'Sinueuse',
   GRANDES_ROUTES = 'Grandes routes',
   LIGNES_DROITES = 'Lignes droites',
   BORD_DE_MER = 'Bord de mer',
   VALLONER = 'Valloner',
-  PLAINE = 'Plaine',
-  MIXTE = 'Mixte'
+  PLAINE = 'Plaine'
 }

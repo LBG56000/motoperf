@@ -1,6 +1,23 @@
 <script setup lang="ts">
+import { useAuth } from '~/composable/useAuth.js'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
 import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
+import { useConnexionModal } from '~/composable/useConnexionModal.js'
+
+const { user } = useAuth()
+const { open } = useConnexionModal()
+
+const goToForm = async () => {
+  if (!user.value?._id) {
+    open()
+    return
+  }
+
+  await navigateTo({
+    path: '/ride/addRide',
+    query: { scroll: 'true' }
+  })
+}
 </script>
 <template>
   <div>
@@ -29,7 +46,11 @@ import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
 
     <div class="add-container">
       <p class="p-mobile">Vous ne trouvez pas votre balade, vous pouvez l’ajouter :</p>
-      <UButton color="primary" to="/ride/addRide" icon="i-lucide-map-pinned"
+      <UButton
+        color="primary"
+        icon="i-lucide-map-pinned"
+        class="cursor-pointer"
+        @click="goToForm"
         >Ajouter une balade</UButton
       >
     </div>
@@ -40,8 +61,15 @@ import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
   display: flex;
   flex-direction: row;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 50px;
   margin-left: 20px;
+}
+
+@media (max-width: 410px) {
+  .add-container {
+    justify-content: center;
+  }
 }
 </style>

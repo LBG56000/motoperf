@@ -1,5 +1,5 @@
 import type { IRide } from '../types/ride'
-import mongoose, { Schema, model } from 'mongoose'
+import { model, Schema, Types } from 'mongoose'
 
 const rideSchema = new Schema({
   title: {
@@ -69,9 +69,44 @@ const rideSchema = new Schema({
     type: Number,
     default: 0,
   },
-  picture: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Picture',
+  liked_id: {
+    type: [String],
+    default: [],
+  },
+  image_link: {
+    type: String,
+    required: true,
+  },
+  user_id: {
+    type: String,
+    required: true,
+  },
+  is_event: {
+    type: Boolean,
+    default: false,
+  },
+  date_event: {
+    type: String,
+    validate: {
+      validator: function (v: string) {
+        return this.is_event ? v && v.length > 0 : true
+      },
+      message: "La date de l'événement est requise lorsque c'est un événement.",
+    },
+  },
+  hour_event: {
+    type: String,
+    validate: {
+      validator: function (v: string) {
+        return this.is_event ? v && v.length > 0 : true
+      },
+      message: "L'heure de l'événement est requise lorsque c'est un événement.",
+    },
+  },
+  participating_user: {
+    type: [Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
   },
   createdAt: {
     type: Date,

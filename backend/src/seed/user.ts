@@ -16,7 +16,7 @@ const seedUser = async () => {
       userType: 'expert',
       ridingStartYear: 2005,
       createdAt: new Date(),
-      image: 'test2.png'
+      image: 'test2.png',
     },
     {
       firstname: 'Bob',
@@ -27,7 +27,7 @@ const seedUser = async () => {
       userType: 'confirmed',
       ridingStartYear: 2015,
       createdAt: new Date(),
-      image: 'test1.png'
+      image: 'test1.png',
     },
     {
       firstname: 'Clara',
@@ -38,7 +38,7 @@ const seedUser = async () => {
       userType: 'beginner',
       ridingStartYear: 2023,
       createdAt: new Date(),
-      image: 'test4.png'
+      image: 'test4.png',
     },
     {
       firstname: 'David',
@@ -49,7 +49,7 @@ const seedUser = async () => {
       userType: 'confirmed',
       ridingStartYear: 2018,
       createdAt: new Date(),
-      image: 'test3.png'
+      image: 'test3.png',
     },
     {
       firstname: 'Emma',
@@ -59,7 +59,7 @@ const seedUser = async () => {
       password: 'hashed_password_5',
       userType: 'other',
       createdAt: new Date(),
-      image: 'test4.png'
+      image: 'test4.png',
     },
     {
       firstname: 'MotoCenter',

@@ -33,7 +33,13 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
           :key="ride._id"
           class="ride-item"
         >
-          <CardRide :ride="ride" />
+          <CardRide
+            :ride="ride"
+            @update:like="(newCount) => (ride.like = newCount)"
+            @update:participants="
+              (newList) => (ride.participating_user = newList)
+            "
+          />
         </div>
       </div>
     </div>
@@ -44,15 +50,18 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 .ride-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  padding-bottom: 20px;
 }
 
 .ride-item {
   border-radius: 12px;
-  height: 25dvh;
+  height: auto;
+  width: 100%;
 }
 
 .sidebar {
+  display: flex;
   position: absolute;
   top: 80px;
   bottom: 20px;
@@ -60,12 +69,11 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
   width: 40dvw;
   background-color: var(--background);
   backdrop-filter: blur(8px);
-  z-index: 1001;
+  z-index: 1020;
   transition: transform 0.3s ease-in-out;
   transform: translateX(100%);
   border-left: 1px solid #e5e7eb;
   border-radius: 12px 0 0 12px;
-  display: flex;
 }
 
 .sidebar.is-open {
@@ -103,5 +111,11 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
   font-weight: 700;
   margin-bottom: 1rem;
   color: var(--text-color);
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 90dvw;
+  }
 }
 </style>

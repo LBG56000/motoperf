@@ -289,26 +289,6 @@ section {
   font-weight: bold;
 }
 
-.box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-
-  gap: 1rem;
-
-  border: solid 3px var(--background-secondary);
-  border-radius: 10px;
-
-  width: 100%;
-  aspect-ratio: 1 / 1;
-}
-
-.box img {
-  width: 75px;
-  height: auto;
-}
 
 .invitation {
   display: flex;
@@ -317,6 +297,7 @@ section {
 
   border-radius: 40px;
   background-color: var(--background-secondary);
+  border: solid 2px var(--border-gray);
 
   margin: 0 20%;
   padding: 4rem;

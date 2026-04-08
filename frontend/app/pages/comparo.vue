@@ -409,8 +409,8 @@ onMounted(() => {
             </div>
           </div>
           <div class="input-comment-box">
-            <div v-if="!isAuthenticated" class="need-connection">
-              <h3 class="h3-mobile">
+            <div v-if="!isConnected" class="need-connection">
+              <h3>
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -425,9 +425,9 @@ onMounted(() => {
             <div
               v-if="!messagePosted"
               class="input-comment-container"
-              :class="{ blurred: !isAuthenticated }"
+              :class="{ blurred: !isConnected }"
             >
-              <h4 class="h4-mobile">
+              <h4>
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
@@ -468,21 +468,21 @@ onMounted(() => {
       </Transition>
       <div class="caroussel-container">
         <div>
-          <h3 class="h3-mobile">Pour la performance</h3>
+          <h3>Pour la performance</h3>
           <CarrouselMotorcycles
             :items="carousselSportBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3 class="h3-mobile">Pour le A2</h3>
+          <h3>Pour le A2</h3>
           <CarrouselMotorcycles
             :items="carousselBeginnerBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3 class="h3-mobile">Pour l'aventure</h3>
+          <h3>Pour l'aventure</h3>
           <CarrouselMotorcycles
             :items="carousselAdventureBikes"
             @selected="handleCaroussel"

@@ -2,14 +2,23 @@ import Ride from '../models/Ride'
 import { type Request, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
 import { RideColor, ICreateRideBody } from '../types/ride'
+import { Types } from 'mongoose'
 
 const router = Router()
+
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: any) => {
-    const { project, sort, limit } = prepareQuery(req.query)
+    const { project, sort, limit, deep } = prepareQuery(req.query)
     try {
-      const rides = await Ride.find().select(project).sort(sort).limit(limit)
+      let query = Ride.find().select(project).sort(sort).limit(limit)
+
+      if (deep) {
+        query = query.populate('participating_user', 'image pseudo')
+      }
+
+      const rides = await query
+
       res.status(200).json({ rides })
     } catch (error) {
       console.error('Error accessing ride route:', error)
@@ -17,6 +26,40 @@ router.get(
     }
   },
 )
+
+router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
+  const { userId } = req.body
+  const rideId = req.params.id
+
+  if (!userId) return res.status(400).json({ error: 'User ID is required' })
+
+  try {
+    const ride = await Ride.findById(rideId)
+    if (!ride) return res.status(404).json({ error: 'Ride not found' })
+
+    const hasLiked = ride.liked_id.includes(userId.toString())
+
+    const update = hasLiked
+      ? { $pull: { liked_id: userId }, $inc: { like: -1 } }
+      : { $addToSet: { liked_id: userId }, $inc: { like: 1 } }
+
+    const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
+      new: true,
+    })
+
+    if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
+
+    res.status(200).json({
+      like: updatedRide.like,
+      isLiked: !hasLiked,
+    })
+  } catch (error: any) {
+    console.error('MONGODB ERROR:', error.message)
+    res
+      .status(500)
+      .json({ error: 'Internal server error', details: error.message })
+  }
+})
 
 router.get('/count', async (req, res) => {
   try {
@@ -47,7 +90,11 @@ router.post(
         startTown,
         endTown,
         rideType,
-        picture,
+        imageLink,
+        userId,
+        isEvent,
+        dateEvent,
+        hourEvent,
         geom,
       } = req.body
 
@@ -64,20 +111,71 @@ router.post(
         start_town: startTown?.value,
         end_town: endTown?.value,
         ride_type: rideType,
-        picture: picture,
+        user_id: userId,
+        image_link: imageLink,
+        is_event: isEvent,
+        date_event: dateEvent,
+        hour_event: hourEvent,
       })
 
       const savedRide = await newRide.save()
 
       res.status(201).json({
-        message: 'Balade créée avec succès',
+        message: 'Ride created successfully',
         ride: savedRide,
       })
     } catch (error) {
       console.error('Error creating ride:', error)
       res.status(400).json({
-        error: 'Erreur lors de la création de la balade',
+        error: 'Failed to create ride',
         details: error,
+      })
+    }
+  },
+)
+
+router.patch(
+  '/:id/participate',
+  async (req: Request<{ id: string }>, res: any) => {
+    const { userId } = req.body
+    const rideId = req.params.id
+
+    if (!userId) return res.status(400).json({ error: 'User ID is required' })
+    if (!Types.ObjectId.isValid(userId))
+      return res.status(400).json({ error: 'Invalid User ID format' })
+
+    try {
+      const ride = await Ride.findById(rideId)
+      if (!ride) return res.status(404).json({ error: 'Ride not found' })
+
+      if (!ride.is_event) {
+        return res.status(400).json({ error: 'This ride is not an event' })
+      }
+
+      const isParticipating = ride.participating_user.some(
+        (id) => id.toString() === userId.toString(),
+      )
+
+      const update = isParticipating
+        ? { $pull: { participating_user: userId } }
+        : { $addToSet: { participating_user: userId } }
+
+      const updatedRide = await Ride.findByIdAndUpdate(rideId, update, {
+        new: true,
+      }).populate('participating_user', 'image pseudo')
+
+      if (!updatedRide) return res.status(404).json({ error: 'Update failed' })
+
+      res.status(200).json({
+        participatingCount: updatedRide.participating_user.length,
+        isParticipating: !isParticipating,
+        updatedParticipants: updatedRide.participating_user,
+      })
+    } catch (error: any) {
+      console.error('Participation error:', error.message)
+      res.status(500).json({
+        error: 'Internal server error',
+        details: error.message,
       })
     }
   },

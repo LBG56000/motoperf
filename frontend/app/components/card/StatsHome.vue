@@ -22,7 +22,7 @@ const props = defineProps<{
 
   gap: 1rem;
 
-  border: solid 3px var(--background-secondary);
+  border: solid 2px var(--border-gray);
   border-radius: 10px;
 
   width: 100%;
