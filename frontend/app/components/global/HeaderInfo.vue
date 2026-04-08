@@ -44,4 +44,14 @@ const props = defineProps<IProps>()
   width: 50%;
   margin: 0 auto;
 }
+
+@media (max-width: 1024px) {
+  .subtitle {
+    width: 95%;
+  }
+
+  .header-container {
+    min-height: 50vh;
+  }
+}
 </style>

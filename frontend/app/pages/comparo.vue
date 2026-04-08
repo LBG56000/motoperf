@@ -327,13 +327,13 @@ onMounted(() => {
   <div>
     <HeaderInfo :scroll-to-element-id="'form'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Comparez. Choisissez. <br />
           <span class="text-red">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
-        <p>
+        <p class="p-mobile">
           Comparez facilement les performances, prix et caractéristiques de vos
           motos préférées.
         </p>
@@ -394,15 +394,19 @@ onMounted(() => {
           </div>
           <div class="input-comment-box">
             <div v-if="!isAuthenticated" class="need-connection">
-              <h3>
+              <h3 class="h3-mobile">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
               <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl" @click="open()">Se connecter
               </UButton>
             </div>
-            <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
-              <h4>
+            <div
+              v-if="!messagePosted"
+              class="input-comment-container"
+              :class="{ blurred: !isAuthenticated }"
+            >
+              <h4 class="h4-mobile">
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
@@ -426,16 +430,25 @@ onMounted(() => {
       </Transition>
       <div class="caroussel-container">
         <div>
-          <h3>Pour la performance</h3>
-          <CarrouselMotorcycles :items="carousselSportBikes" @selected="handleCaroussel" />
+          <h3 class="h3-mobile">Pour la performance</h3>
+          <CarrouselMotorcycles
+            :items="carousselSportBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div>
-          <h3>Pour le A2</h3>
-          <CarrouselMotorcycles :items="carousselBeginnerBikes" @selected="handleCaroussel" />
+          <h3 class="h3-mobile">Pour le A2</h3>
+          <CarrouselMotorcycles
+            :items="carousselBeginnerBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div>
-          <h3>Pour l'aventure</h3>
-          <CarrouselMotorcycles :items="carousselAdventureBikes" @selected="handleCaroussel" />
+          <h3 class="h3-mobile">Pour l'aventure</h3>
+          <CarrouselMotorcycles
+            :items="carousselAdventureBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div class="dual-container">
           <DualMotorcycle :left-motorcycle-url="motorcycle1PreviewUrl" :right-motorcycle-url="motorcycle2PreviewUrl"
@@ -611,5 +624,58 @@ onMounted(() => {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+
+@media (max-width: 1024px) {
+  .form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .display-comment-container {
+    flex-direction: column;
+  }
+
+  .left-display-comment,
+  .right-display-comment {
+    max-width: 100%;
+  }
+
+  .input-comment-box {
+    margin: 1.5rem 1rem;
+    width: auto;
+  }
+
+  .caroussel-container {
+    margin: 0 1rem;
+  }
+
+  .need-connection {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .need-connection h3 {
+    width: auto;
+    font-size: 18px;
+  }
+
+  .input-comment-box {
+    min-height: auto;
+  }
+
+  .input-comment-container {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .input-posted-container {
+    min-height: auto;
+    padding: 1rem;
+  }
 }
 </style>
