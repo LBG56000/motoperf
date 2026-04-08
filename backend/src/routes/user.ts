@@ -63,6 +63,79 @@ router.post('/account', async (req: Request, res: Response) => {
   }
 })
 
+router.put(
+  '/account',
+  authenticateToken,
+
+  async (req: Request, res: Response) => {
+    const { id } = req.user as { id: string }
+    const {
+      firstname,
+      lastname,
+      pseudo,
+      userType,
+      ridingStartYear,
+      image,
+      password,
+    } = req.body
+
+    const allowedFields = [
+      'firstname',
+      'lastname',
+      'pseudo',
+      'userType',
+      'ridingStartYear',
+      'image',
+      'password',
+    ]
+
+    const updateData: any = {}
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updateData[field] = req.body[field]
+      }
+    })
+
+    if (updateData.pseudo) {
+      const existingUser = await User.findOne({
+        pseudo: updateData.pseudo,
+        _id: { $ne: id },
+      })
+      if (existingUser) {
+        return res.status(409).json({ error: 'Pseudo already taken' })
+      }
+    }
+
+    if (updateData.ridingStartYear) {
+      const year = Number(updateData.ridingStartYear)
+      const currentYear = new Date().getFullYear()
+      if (isNaN(year) || year < 1950 || year > currentYear) {
+        return res.status(400).json({
+          error: `Riding start year must be between 1950 and ${currentYear}`,
+        })
+      }
+    }
+
+    try {
+      updateData.updatedAt = new Date()
+
+      const users = await User.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+      }).select('-password') // Ne pas retourner le mot de passe
+
+      if (!users) {
+        return res.status(404).json({ error: 'User not found' })
+      }
+
+      res.status(200).json({ users })
+    } catch (error) {
+      console.error('Error updating user:', error)
+      res.status(500).json({ error: 'Internal server error' })
+    }
+  },
+)
+
 router.get(
   '/',
   async (req: Request<unknown, unknown, unknown, ReqQuery>, res: Response) => {

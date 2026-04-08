@@ -2,4 +2,5 @@
   <ConnexionForm />
   <CreateAccountForm />
   <ProfileInfos />
+  <ProfileEdit />
 </template>

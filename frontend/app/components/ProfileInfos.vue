@@ -103,6 +103,8 @@ watch(
   flex-direction: column;
   align-items: center;
   padding: 3rem;
+
+  overflow-y: auto;
 }
 
 .avatar {
