@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import LogoApp from '~/components/LogoApp.vue'
+
 const guides = [
   { label: 'Accueil', to: '/' },
-  { label: 'Comparateur' },
+  { label: 'Comparateur', to: '/comparator' },
   { label: 'Forum', to: '/forum' },
   { label: 'Balades', to: '/ride' },
   { label: 'Nous connaitre', to: '/knowUs' }
@@ -31,207 +33,280 @@ const socials = [
   { label: 'X', href: 'https://www.x.com', icon: 'i-simple-icons-x' }
 ]
 
-const contacts = [
-  'sloan.morgant@mgtsoftware.com',
-  'loris.caruhel@mgtsoftware.com',
-  'milio.lintanff--castel@mgtsoftware.com',
-  'leo.bruneau-gache@mgtsoftware.com',
-  'nominoe.barbotaud@mgtsoftware.com'
-]
+const contactEmail = 'contact@mgtsoftware.com'
 </script>
 
 <template>
-  <div>
-    <div class="footer">
-      <div>
-        <h4>Guides</h4>
-        <div class="list">
-          <div
-            v-for="(item, idx) in guides"
-            :key="`guide-${idx}`"
-            class="list-item"
-          >
-            <template v-if="item.to">
-              <NuxtLink :to="item.to">{{ item.label }}</NuxtLink>
-            </template>
-            <template v-else>
-              {{ item.label }}
-            </template>
-          </div>
-        </div>
+  <footer class="footer-wrapper">
+    <div class="footer-top-border" />
+
+    <div class="footer-main">
+      <div class="footer-logo">
+        <LogoApp />
+        <p class="footer-tagline">La communauté des passionnés de moto</p>
       </div>
 
-      <div>
-        <h4 class="text-hidden">Réseaux sociaux</h4>
-        <div class="list">
-          <div
+      <nav class="footer-col">
+        <h5 class="footer-heading">Guides</h5>
+        <ul class="footer-list">
+          <li
+            v-for="(item, idx) in guides"
+            :key="`guide-${idx}`"
+            class="footer-list-item"
+          >
+            <NuxtLink :to="item.to" class="footer-link">{{ item.label }}</NuxtLink>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="footer-col">
+        <h5 class="footer-heading text-hidden">Réseaux sociaux</h5>
+        <ul class="footer-list footer-socials-list">
+          <li
             v-for="(item, idx) in socials"
             :key="`social-${idx}`"
-            class="list-item-rs"
           >
             <a
               :href="item.href"
               target="_blank"
               rel="noopener noreferrer"
-              class="align-icon"
+              :aria-label="`${item.label} (ouvre un nouvel onglet)`"
+              class="footer-social-link"
             >
-              <span class="span-rs">{{ item.label }}</span>
-              <UIcon :name="item.icon" class="size-7 icons" />
+              <UIcon :name="item.icon" class="footer-social-icon" />
+              <span class="footer-social-label">{{ item.label }}</span>
             </a>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
 
-      <div>
-        <h4>Contact</h4>
-        <div class="list">
-          <div
-            v-for="(email, idx) in contacts"
-            :key="`contact-${idx}`"
-            class="list-item"
-          >
-            <a class="link-mail" :href="`mailto:${email}`">{{ email }}</a>
-          </div>
-        </div>
+      <div class="footer-col">
+        <h5 class="footer-heading">Contact</h5>
+        <ul class="footer-list">
+          <li class="footer-list-item">
+            <a class="footer-link" :href="`mailto:${contactEmail}`">{{ contactEmail }}</a>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <hr class="text-hidden" />
+    <div class="footer-separator" />
 
-    <div class="footer end">
-      <p class="p-mini">Droit d’auteur © 2026 MotoCenter Tout droit réservé</p>
-      <p class="p-mini">Mentions légales</p>
-      <p class="p-mini">
-        Conditions d'utilisation et politique de confidentialité
-      </p>
+    <div class="footer-bottom">
+      <p class="footer-bottom-text">&copy; 2026 MotoCenter &mdash; Tout droit réservé</p>
+      <div class="footer-bottom-links">
+        <NuxtLink class="footer-bottom-link" to="/legal">Mentions légales</NuxtLink>
+        <span class="footer-bottom-dot">&middot;</span>
+        <NuxtLink class="footer-bottom-link" to="/terms">Confidentialité</NuxtLink>
+      </div>
     </div>
-  </div>
+  </footer>
 </template>
 
 <style scoped>
-.footer {
+/* ── Footer wrapper ── */
+.footer-wrapper {
+  margin-top: 5rem;
+}
+
+.footer-top-border {
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--ui-primary), transparent);
+}
+
+/* ── Main grid ── */
+.footer-main {
   display: flex;
-  justify-content: space-around;
-  align-items: start;
-  padding-top: 4em;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 3.5rem 5% 2.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.end {
-  margin-bottom: 2em;
-}
-
-.footer div {
-  flex: 1;
-  text-align: center;
-}
-
-.icons {
-  display: flex;
-  align-items: end;
-}
-
-.footer div .list {
+/* ── Logo column ── */
+.footer-logo {
+  flex: 1.2;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  text-align: left;
-  margin: 0.5rem auto;
-  max-width: 370px;
-  width: 100%;
+  gap: 0.8rem;
+}
+
+.footer-tagline {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--label-text);
+}
+
+/* ── Content columns ── */
+.footer-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.footer-heading {
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ── Lists ── */
+.footer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
   list-style: none;
   padding-left: 0;
 }
 
-.footer div .list-item {
-  width: 100%;
-  display: flex;
-  align-items: start;
-  margin-bottom: 0.4em;
-}
-
-.footer div .list-item-rs {
-  width: 100%;
-  margin-bottom: 0.4em;
-}
-
-.footer div h4,
-.footer div h3 {
-  margin-bottom: 0.6rem;
-}
-
-.align-icon {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 0.6rem;
-}
-
-.align-icon > span {
-  order: 1;
-  margin-left: 0;
-}
-
-.align-icon > u-icon {
-  order: 2;
+.footer-link {
+  font-family: 'Poppins', sans-serif;
   font-size: 15px;
   font-weight: 300;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  word-break: break-all;
 }
 
-.p-mini {
+.footer-link:hover {
+  color: var(--ui-primary);
+}
+
+/* ── Social links ── */
+.footer-socials-list {
+  gap: 0.75rem;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-social-link:hover {
+  color: var(--ui-primary);
+}
+
+.footer-social-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.footer-social-label {
   font-family: 'Poppins', sans-serif;
   font-size: 15px;
   font-weight: 300;
 }
 
-hr {
-  margin: 2em;
+/* ── Separator ── */
+.footer-separator {
+  height: 1px;
+  background-color: var(--border-gray);
+  margin: 0 5%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Mobile layout  */
+/* ── Bottom bar ── */
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 5%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-bottom-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--label-text);
+}
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-bottom-link {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: var(--label-text);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-bottom-link:hover {
+  color: var(--ui-primary);
+}
+
+.footer-bottom-dot {
+  color: var(--label-text);
+  font-size: 13px;
+}
+
+/* ── Mobile ── */
 @media (max-width: 1024px) {
-  .footer {
+  .footer-main {
     flex-wrap: wrap;
+    padding: 2.5rem 6% 2rem;
+    gap: 2rem 1rem;
   }
 
-  .footer div {
-    flex: 1 1 50%;
-  }
-
-  .footer div:nth-child(2) {
-    order: 3;
+  .footer-logo {
     flex: 1 1 100%;
-  }
-
-  .text-hidden {
-    visibility: hidden;
-  }
-
-  .footer.end {
-    flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0.4rem;
   }
 
-  .span-rs {
+  .footer-col {
+    flex: 1 1 45%;
+  }
+
+  /* Socials row in mobile */
+  .footer-col:nth-child(3) {
+    flex: 1 1 100%;
+    order: 4;
+    align-items: center;
+  }
+
+  .footer-col:nth-child(3) .footer-socials-list {
+    flex-direction: row;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+
+  .footer-social-label {
     display: none;
   }
 
-  .footer div:nth-child(2) .list {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    gap: 1.5rem;
+  .footer-social-icon {
+    font-size: 26px;
   }
 
-  .align-icon {
-    justify-content: center;
+  .text-hidden {
+    display: none;
   }
 
-  .list-item-rs {
-    max-width: 40px;
+  /* Bottom bar stacked */
+  .footer-bottom {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+    padding: 1rem 5%;
   }
 }
 </style>
