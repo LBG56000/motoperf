@@ -97,7 +97,6 @@ router.post(
         hourEvent,
         geom,
       } = req.body
-      console.log('req.body : ', req.body)
 
       const colors = Object.values(RideColor)
       const randomColor = colors[Math.floor(Math.random() * colors.length)]
@@ -120,7 +119,6 @@ router.post(
       })
 
       const savedRide = await newRide.save()
-      console.log('saved ride : ', savedRide)
 
       res.status(201).json({
         message: 'Ride created successfully',
