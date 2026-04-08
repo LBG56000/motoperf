@@ -117,7 +117,7 @@ onMounted(async () => {
               <p>{{ post?.views }} vues</p>
             </div>
           </div>
-          <div class="icon-and-text margin-bottom-1 margin-top-0_5">
+          <div class="icon-and-text margin-bottom-1 margin-top-0_5 put-in-favorite">
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
@@ -148,6 +148,13 @@ onMounted(async () => {
 <style scoped>
 .margin-2 {
   margin-right: 0.5em;
+}
+
+.put-in-favorite {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+  align-items: center;
 }
 
 .comments {
