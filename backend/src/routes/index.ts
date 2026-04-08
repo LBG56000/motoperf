@@ -6,7 +6,6 @@ import motorcycleRoutes from './motorcycle'
 import postRoutes from './post'
 import categoryRoutes from './category'
 import rideRoutes from './ride'
-import ridePictures from './picture'
 import token from './auth'
 
 const router = Router()
@@ -19,7 +18,6 @@ router.use('/posts', postRoutes)
 router.use('/categories', categoryRoutes)
 router.use('/brand', brandRoutes)
 router.use('/rides', rideRoutes)
-router.use('/pictures', ridePictures)
 router.use('/auth', token)
 
 export default router
