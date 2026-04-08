@@ -3,14 +3,16 @@ import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
 import { useAuth } from '~/composable/useAuth'
 import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useProfileModal } from '~/composable/useProfileModal'
 
-const { isAuthenticated, logout, user } = useAuth()
+const { isAuthenticated, user } = useAuth()
 
 const isOpen = ref(false)
 const mode = ref(false)
 const colorMode = useColorMode()
 
 const connexionModal = useConnexionModal()
+const profileModal = useProfileModal()
 
 function toggle_open() {
   isOpen.value = !isOpen.value
@@ -64,7 +66,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
           :src="'/images/users/' + user?.image"
           size="xl"
           loading="lazy"
-          @click="logout"
+          @click="profileModal.open()"
         />
       </div>
     </div>

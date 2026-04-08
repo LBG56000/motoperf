@@ -7,7 +7,7 @@ export function useAuth() {
   const apiBase = useRuntimeConfig().public.apiBase
 
   async function fetchUser(
-    projects: string = 'email, pseudo, userType, image, firstname, lastname, ridingStartYear, moto, CreatedAt, UpdatedAt'
+    projects: string = 'email, pseudo, userType, image, firstname, lastname, ridingStartYear, moto, CreatedAt, UpdatedAt, experience, image'
   ) {
     try {
       const data = await $fetch<{ users: IUser }>(`${apiBase}users/account`, {
