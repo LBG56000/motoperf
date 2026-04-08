@@ -3,7 +3,7 @@ import { onMounted, ref, computed, watch, nextTick, reactive } from 'vue'
 import type { IMotorcycle } from '~/types/motorcycles'
 import CountUp from 'vue-countup-v3'
 import type { IMessage } from '~/types/messages'
-import Comment from '~/components/forum/Comment.vue'
+// import Comment from '~/components/forum/Comment.vue'
 
 interface ICommentInput {
   motorcycleId: string
@@ -271,7 +271,7 @@ watch(
     </div>
 
     <div v-if="commentsMotorcycle.length > 0" class="display-comment">
-      <Comment :responses="commentsMotorcycle" />
+      <!-- <Comment :responses="commentsMotorcycle" /> -->
     </div>
 
     <div class="input-comment-box">
