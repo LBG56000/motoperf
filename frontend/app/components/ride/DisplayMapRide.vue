@@ -113,7 +113,9 @@ const defaultFilters: IFilterObject = {
   title: '',
   type: [],
   startTown: [],
-  endTown: []
+  endTown: [],
+  date: '',
+  time: ''
 }
 
 const activeFilters = ref<IFilterObject>(defaultFilters) // État de tous les fitres courants

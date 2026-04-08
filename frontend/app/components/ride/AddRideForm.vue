@@ -271,7 +271,8 @@ const getCommuneFromCoords = async (
 
       return {
         label: `${properties.city} (${properties.postcode})`,
-        value: properties.city
+        value: properties.city,
+        postcode: properties.postcode
       }
     }
   } catch (e) {
