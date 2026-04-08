@@ -133,7 +133,7 @@ onMounted(async () => {
             commentaire</UButton>
         </div>
         <p v-if="responses.length === 0">
-          Aucune réponse à ce post, ajouter la première
+          Aucun commentaire à ce post, ajouter le premier
         </p>
         <div v-else class="margin-bottom-1 w-5/6 comments">
           <div v-for="response in responses" :key="response._id">
