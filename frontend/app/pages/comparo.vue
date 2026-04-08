@@ -347,38 +347,55 @@ onMounted(() => {
           <MotocyclesForm v-model="motorcycle1Id" form-title="Moto 1" />
           <MotocyclesForm v-model="motorcycle2Id" form-title="Moto 2" />
         </div>
-        <UButton icon="i-lucide-arrow-left-right" class="w-fit rounded-4xl" :disabled="!motorcycle1Id || !motorcycle2Id"
-          @click="fetchMotocycles">Comparer</UButton>
+        <UButton
+          icon="i-lucide-arrow-left-right"
+          class="w-fit rounded-4xl"
+          :disabled="!motorcycle1Id || !motorcycle2Id"
+          @click="fetchMotocycles"
+          >Comparer</UButton
+        >
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="resultat-section">
           <div v-if="resultatNumber.length > 0">
             <h3>Résultats</h3>
             <div v-for="field in resultatNumber" :key="field.fieldName">
-              <ResultatFieldNumber :field-name="field.fieldName" :first-value="field.firstValue"
-                :second-value="field.secondValue" />
+              <ResultatFieldNumber
+                :field-name="field.fieldName"
+                :first-value="field.firstValue"
+                :second-value="field.secondValue"
+              />
               <br />
             </div>
           </div>
           <div v-if="resultatImg.length > 0">
             <h3>Images</h3>
             <div v-for="field in resultatImg" :key="field.fieldName">
-              <ResultatFieldImg :field-name="field.fieldName" :first-value="field.firstValue"
-                :second-value="field.secondValue" />
+              <ResultatFieldImg
+                :field-name="field.fieldName"
+                :first-value="field.firstValue"
+                :second-value="field.secondValue"
+              />
             </div>
           </div>
           <div v-if="resultatSound.length > 0">
             <h3>Sons</h3>
             <div v-for="field in resultatSound" :key="field.fieldName">
-              <ResultatFieldSound :field-name="field.fieldName" :first-value="field.firstValue"
-                :second-value="field.secondValue" />
+              <ResultatFieldSound
+                :field-name="field.fieldName"
+                :first-value="field.firstValue"
+                :second-value="field.secondValue"
+              />
             </div>
           </div>
           <div class="display-comment-container">
             <div class="left-display-comment">
               <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
               <template v-if="commentsMotorcycle1.length > 0">
-                <div v-for="comment1 in commentsMotorcycle1" :key="comment1._id">
+                <div
+                  v-for="comment1 in commentsMotorcycle1"
+                  :key="comment1._id"
+                >
                   <Comment :response="comment1" />
                 </div>
               </template>
@@ -387,7 +404,10 @@ onMounted(() => {
             <div class="right-display-comment">
               <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
               <template v-if="commentsMotorcycle2.length > 0">
-                <div v-for="comment2 in commentsMotorcycle2" :key="comment2._id">
+                <div
+                  v-for="comment2 in commentsMotorcycle2"
+                  :key="comment2._id"
+                >
                   <Comment :response="comment2" />
                 </div>
               </template>
@@ -395,7 +415,7 @@ onMounted(() => {
             </div>
           </div>
           <div class="input-comment-box">
-            <div v-if="!isConnected" class="need-connection">
+            <div v-if="!isAuthenticated" class="need-connection">
               <h3>
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
@@ -408,20 +428,41 @@ onMounted(() => {
                 >Se connecter
               </UButton>
             </div>
-            <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isConnected }">
+            <div
+              v-if="!messagePosted"
+              class="input-comment-container"
+              :class="{ blurred: !isAuthenticated }"
+            >
               <h4>
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>
               <div class="comment-input">
-                <USelect v-model="comment.motorcycleId" size="lg" class="w-50" :items="optionMotorcycles"
-                  :placeholder="motorcycle1?.name" />
-                <UTextarea v-model="comment.content" size="xl"
-                  placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
+                <USelect
+                  v-model="comment.motorcycleId"
+                  size="lg"
+                  class="w-50"
+                  :items="optionMotorcycles"
+                  :placeholder="motorcycle1?.name"
+                />
+                <UTextarea
+                  v-model="comment.content"
+                  size="xl"
+                  placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question"
+                />
               </div>
-              <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
+              <UButton
+                class="rounded-4xl self-end text-xs m-1"
+                size="xl"
+                @click="postComment"
+                >Poster</UButton
+              >
             </div>
-            <div v-else class="input-posted-container" :class="{ blurred: !isAuthenticated }">
+            <div
+              v-else
+              class="input-posted-container"
+              :class="{ blurred: !isAuthenticated }"
+            >
               <h4>Merci pour votre contribution !</h4>
               <p>
                 Votre commentaire a été posté avec succès. Il apparaîtra dans la
@@ -433,21 +474,35 @@ onMounted(() => {
       </Transition>
       <div class="caroussel-container">
         <div>
-          <h3>Pour la performance</h3>
-          <CarrouselMotorcycles :items="carousselSportBikes" @selected="handleCaroussel" />
+          <h3 class="h3-mobile">Pour la performance</h3>
+          <CarrouselMotorcycles
+            :items="carousselSportBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div>
-          <h3>Pour le A2</h3>
-          <CarrouselMotorcycles :items="carousselBeginnerBikes" @selected="handleCaroussel" />
+          <h3 class="h3-mobile">Pour le A2</h3>
+          <CarrouselMotorcycles
+            :items="carousselBeginnerBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div>
-          <h3>Pour l'aventure</h3>
-          <CarrouselMotorcycles :items="carousselAdventureBikes" @selected="handleCaroussel" />
+          <h3 class="h3-mobile">Pour l'aventure</h3>
+          <CarrouselMotorcycles
+            :items="carousselAdventureBikes"
+            @selected="handleCaroussel"
+          />
         </div>
         <div class="dual-container">
-          <DualMotorcycle :left-motorcycle-url="motorcycle1PreviewUrl" :right-motorcycle-url="motorcycle2PreviewUrl"
-            :left-name="motorcycle1?.name" :right-name="motorcycle2?.name" @compare="fetchMotocycles"
-            @delete="handleDelete" />
+          <DualMotorcycle
+            :left-motorcycle-url="motorcycle1PreviewUrl"
+            :right-motorcycle-url="motorcycle2PreviewUrl"
+            :left-name="motorcycle1?.name"
+            :right-name="motorcycle2?.name"
+            @compare="fetchMotocycles"
+            @delete="handleDelete"
+          />
         </div>
       </div>
       <br />

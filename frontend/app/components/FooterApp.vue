@@ -3,7 +3,7 @@ import LogoApp from '~/components/LogoApp.vue'
 
 const guides = [
   { label: 'Accueil', to: '/' },
-  { label: 'Comparateur', to: '/comparator' },
+  { label: 'Comparateur', to: '/comparo' },
   { label: 'Forum', to: '/forum' },
   { label: 'Balades', to: '/ride' },
   { label: 'Nous connaitre', to: '/knowUs' }
@@ -95,9 +95,9 @@ const contactEmail = 'contact@mgtsoftware.com'
     <div class="footer-bottom">
       <p class="footer-bottom-text">&copy; 2026 MotoCenter &mdash; Tout droit réservé</p>
       <div class="footer-bottom-links">
-        <NuxtLink class="footer-bottom-link" to="/legal">Mentions légales</NuxtLink>
+        <NuxtLink class="footer-bottom-link" to="/">Mentions légales</NuxtLink>
         <span class="footer-bottom-dot">&middot;</span>
-        <NuxtLink class="footer-bottom-link" to="/terms">Confidentialité</NuxtLink>
+        <NuxtLink class="footer-bottom-link" to="/">Confidentialité</NuxtLink>
       </div>
     </div>
   </footer>
