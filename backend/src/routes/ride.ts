@@ -61,6 +61,20 @@ router.patch('/:id/like', async (req: Request<{ id: string }>, res: any) => {
   }
 })
 
+router.get('/count', async (req, res) => {
+  try {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth() - 2, 1)
+
+    const count = await Ride.countDocuments({
+      createdAt: { $gte: start, $lt: now },
+    })
+    res.status(200).json({ count })
+  } catch (error) {
+    console.error('Error counting rides:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
 router.post(
   '/',
   async (

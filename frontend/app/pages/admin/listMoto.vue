@@ -3,21 +3,23 @@ import Header from '~/components/admin/Header.vue'
 import { h, resolveComponent } from 'vue'
 import CardMoto from '../../components/admin/CardMoto.vue'
 import type { IMotorcycle } from '~/types/motorcycles'
+import { getPaginationRowModel } from '@tanstack/vue-table'
+import type { ColumnDef } from '@tanstack/vue-table'
 
 definePageMeta({
   layout: 'admin'
 })
-
+const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase
 const motos = ref<IMotorcycle[]>([])
 const selectedMoto = ref<IMotorcycle | null>(null)
-const search = ref<string>()
-const panelOpen = ref(false)
-const refreshing = ref(false)
+const search = ref<string>('')
+const panelOpen = ref<boolean>(false)
+const refreshing = ref<boolean>(false)
 const UButton = resolveComponent('UButton')
 
-const columns = [
+const columns: ColumnDef<IMotorcycle>[] = [
   {
     accessorKey: 'brand',
     header: ({ column }) =>
@@ -163,7 +165,7 @@ async function refreshAll() {
 function onRowClick(row) {
   const rowIndex = row.srcElement.parentElement.rowIndex
 
-  const moto = motos.value[rowIndex - 2]
+  const moto = listMotosearch.value[rowIndex - 2]
 
   if (!moto) return console.error('moto introuvable')
   selectedMoto.value = moto
@@ -182,16 +184,27 @@ const listMotosearch = computed(() => {
   }
 })
 
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 10
+})
+
+const items = ref([10, 20, 50, 100])
+
 onMounted(() => {
   fetchData()
 })
+
+watch(
+  () => pagination.value.pageSize,
+  (newSize) => {
+    table.value?.tableApi?.setPageSize(newSize)
+  }
+)
 </script>
 
 <template>
   <div>
-    <Header />
-    <hr />
-
     <main>
       <div class="header-page">
         <UInput
@@ -210,22 +223,52 @@ onMounted(() => {
       <div class="main-content">
         <div class="table-moto">
           <UTable
+            ref="table"
+            v-model:pagination="pagination"
             sticky
             :data="listMotosearch"
             :columns="columns"
+            :pagination-options="{
+              getPaginationRowModel: getPaginationRowModel()
+            }"
             :ui="{
               tr: 'cursor-pointer hover:bg-gray-50'
             }"
             @select="onRowClick"
-          />
+          >
+            <template #empty>
+              <div
+                class="flex flex-col items-center justify-center py-10 gap-2 text-gray-400"
+              >
+                <img src="/svg/motorcycleIcon.svg" width="46" height="25" />
+
+                <p>Aucune moto trouvée</p>
+              </div>
+            </template>
+          </UTable>
+
+          <div class="flex justify-end p-4 px-4">
+            <USelect v-model="pagination.pageSize" :items="items" />
+          </div>
+
+          <div class="flex justify-end border-t border-default pt-4 px-4">
+            <UPagination
+              :page="
+                (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+              "
+              :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+              :total="table?.tableApi?.getFilteredRowModel().rows.length"
+              @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+            />
+          </div>
         </div>
         <div v-if="panelOpen" class="panel-moto">
           <CardMoto
             :key="selectedMoto?._id ?? 'create'"
             :mode="selectedMoto ? 'edit' : 'create'"
             :moto="selectedMoto"
-            :onClosePanel="closePanel"
-            :onRefresh="refreshAll"
+            :on-close-panel="closePanel"
+            :on-refresh="refreshAll"
           />
         </div>
       </div>

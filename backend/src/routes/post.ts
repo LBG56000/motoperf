@@ -26,26 +26,42 @@ router.get(
   },
 )
 
-router.get(
-  '/:id/responses',
-  async (
-    req: Request<{ id: string }, unknown, unknown, ReqQuery>,
-    res: any,
-  ) => {
-    const { project, sort, deep, limit } = prepareQuery(req.query)
-    try {
-      const post = await Post.findOne({ _id: req.params.id })
-      if (!post) {
-        return res.status(404).json({ error: 'Post not found' })
-      }
-      let query = Message.find({
-        // TODO: mettre filter
-        reference: post._id,
-        referenceModel: 'Post',
-      })
-        .select(project)
-        .sort(sort)
-        .limit(limit)
+router.get('/count', async (req, res) => {
+  try {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth() - 2, 1)
+    const intermediate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const end = new Date(now.getFullYear(), now.getMonth(), 1)
+    const countFirstPeriod = await Post.countDocuments({
+      createdAt: { $gte: start, $lt: intermediate },
+    })
+    const countSecondPeriod = await Post.countDocuments({
+      createdAt: { $gte: intermediate, $lt: end },
+    })
+
+    const percent = countFirstPeriod === 0 ? countSecondPeriod * 100 : ((countSecondPeriod - countFirstPeriod) / countFirstPeriod) * 100
+    
+    res.status(200).json({ count: countSecondPeriod, percent })
+  } catch (error) {
+    console.error('Error counting posts:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.get('/:id/responses', async (req: Request<{ id: string }, unknown, unknown, ReqQuery>, res) => {
+  const { project, sort, deep, limit } = prepareQuery(req.query)
+  try {
+    const post = await Post.findOne({ _id: req.params.id })
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' })
+    }
+    let query = Message.find({ // TODO: mettre filter
+      reference: post._id,
+      referenceModel: 'Post'
+    })
+      .select(project)
+      .sort(sort)
+      .limit(limit)
 
       if (deep) {
         query = query.populate('user')
@@ -80,8 +96,10 @@ router.post('/', async (req, res) => {
     const body = req.body
     const brand = await Brand.findOne({ name: body.brand })
     const category = await Category.findOne({ name: body.category })
-    const user = await User.findOne({ _id: body.user })
-    // TODO: a modifier dans le front et le back avec des vrai user et des vrai images
+    let user = await User.findOne({ firstname: 'MotoCenter' })
+    if (body.isNewMotoComment === false) {
+      user = await User.findOne({ _id: body.user })
+    }
 
     if (!brand || !category || !user) {
       return res.status(500).json({ error: 'Internal server error' })

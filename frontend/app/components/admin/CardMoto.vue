@@ -3,6 +3,7 @@ import * as v from 'valibot'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { IBrand } from '~/types/brand'
 import { MotorcycleCategory, type IMotorcycle } from '~/types/motorcycles'
+import { da } from '@nuxt/ui/runtime/locale/index.js'
 
 const apiBase = useRuntimeConfig().public.apiBase
 
@@ -57,6 +58,7 @@ async function fetchMotoDetails(_id: string) {
   )
 
   const m = data.motorcycles[0]
+  console.log('Moto details:', m)
 
   const brand = brandList.value.find((b) => b._id === m.brand._id)
   state.brand = brand?.name ?? ''
@@ -181,6 +183,7 @@ onMounted(async () => {
 const toast = useToast()
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
+  console.log('Form data:', event.data) // Log des données du formulaire
   try {
     const selectedBrand = brandList.value.find(
       (b) => b.name === event.data.brand
@@ -268,7 +271,11 @@ async function removeMotorcycle() {
 <template>
   <div class="header-cardMoto">
     <h3>{{ mode === 'edit' ? 'Modifier la moto' : "Ajout d'une moto" }}</h3>
-    <UIcon name="i-lucide-x" class="cursor-pointer size-6" @click="props.onClosePanel" />
+    <UIcon
+      name="i-lucide-x"
+      class="cursor-pointer size-6"
+      @click="props.onClosePanel"
+    />
   </div>
   <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
     <UFormField label="Marque" name="brand" required>
@@ -316,16 +323,30 @@ async function removeMotorcycle() {
     </UFormField>
 
     <UFormField label="Son" name="soundLink">
-      <UFileUpload icon="i-lucide-music" label="Glisser le son ici" description="MP3, MP4, WAV"
-        accept="audio/mpeg,audio/wav,audio/ogg" @update:model-value="onSoundChange" />
+      <UFileUpload
+        icon="i-lucide-music"
+        label="Glisser le son ici"
+        description="MP3, MP4, WAV"
+        accept="audio/mpeg,audio/wav,audio/ogg"
+        @update:model-value="onSoundChange"
+      />
       <p v-if="state.soundLink" class="text-sm text-gray-500 mt-1">
         ✓ {{ state.soundLink }}
       </p>
     </UFormField>
     <UFormField label="Image" name="imageUrl">
-      <UFileUpload icon="i-lucide-image" label="Glisser l'image ici" description="PNG, JPG, WEBP"
-        accept="image/png,image/jpeg,image/webp" @update:model-value="onImageChange" />
-      <img v-if="state.imageUrl" :src="state.imageUrl" class="mt-2 h-24 rounded object-cover" />
+      <UFileUpload
+        icon="i-lucide-image"
+        label="Glisser l'image ici"
+        description="PNG, JPG, WEBP"
+        accept="image/png,image/jpeg,image/webp"
+        @update:model-value="onImageChange"
+      />
+      <img
+        v-if="state.imageUrl"
+        :src="state.imageUrl"
+        class="mt-2 h-24 rounded object-cover"
+      />
     </UFormField>
 
     <h4>Accélération</h4>
@@ -352,7 +373,12 @@ async function removeMotorcycle() {
 
     <div class="form-end">
       <UButton type="submit" color="primary"> Enregistrer </UButton>
-      <UIcon v-if="mode === 'edit'" name="i-lucide-trash-2" class="cursor-pointer size-6" @click="removeMotorcycle()" />
+      <UIcon
+        v-if="mode === 'edit'"
+        name="i-lucide-trash-2"
+        class="cursor-pointer size-6"
+        @click="removeMotorcycle()"
+      />
     </div>
   </UForm>
 </template>

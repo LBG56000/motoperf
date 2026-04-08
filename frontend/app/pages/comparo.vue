@@ -8,13 +8,15 @@ import CarrouselMotorcycles from '~/components/CarrouselMotorcycles.vue'
 import Comment from '~/components/forum/Comment.vue'
 import type { IMessage } from '~/types/messages'
 import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
+import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composable/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
   motorcycleName: string
   brand: string
   content: string
-  user: string // TODO: update quand l'auth sera en place
+  user: string
 }
 
 const apiBase = useRuntimeConfig().public.apiBase
@@ -23,6 +25,8 @@ const motorcycle1 = ref<IMotorcycle>()
 const motorcycle2 = ref<IMotorcycle>()
 const motorcycle1Id = ref<string>('')
 const motorcycle2Id = ref<string>('')
+const toast = useToast()
+const { open } = useConnexionModal()
 const fieldCategories = {
   numbers: [
     'year',
@@ -42,7 +46,7 @@ const resultatTemplate = useTemplateRef('resultat')
 const carousselBeginnerBikes = ref<IMotorcycle[]>([])
 const carousselSportBikes = ref<IMotorcycle[]>([])
 const carousselAdventureBikes = ref<IMotorcycle[]>([])
-const isConnected = ref<boolean>(false) // Simule l'état de connexion de l'utilisateur
+const { isAuthenticated, user } = useAuth()
 const messagePosted = ref<boolean>(false)
 const optionMotorcycles = computed(() => {
   if (!motorcycle1.value || !motorcycle2.value) return []
@@ -56,7 +60,7 @@ const comment = ref<ICommentInput>({
   motorcycleName: '',
   brand: '',
   content: '',
-  user: '69cbe6342e0cabab3167824a' // TODO: update quand l'auth sera en place
+  user: ''
 })
 // Tableau pour chaque Categories
 const resultatNumber = reactive<
@@ -201,7 +205,8 @@ async function fetchMessages() {
       `${apiBase}posts/${post1}/responses`,
       {
         params: {
-          project: 'content, user, createdAt',
+          project:
+            'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
           deep: true,
           limit: 5
         }
@@ -215,7 +220,8 @@ async function fetchMessages() {
       `${apiBase}posts/${post2}/responses`,
       {
         params: {
-          project: 'content, user, createdAt',
+          project:
+            'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
           deep: true,
           limit: 5
         }
@@ -242,10 +248,10 @@ async function postComment() {
         method: 'POST',
         body: {
           title: selectedMotorcycle.name,
-          brand: selectedMotorcycle.brand._id,
+          brand: selectedMotorcycle.brand.name,
           category: 'Modèle',
-          user: comment.value.user,
-          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`
+          content: `Discussion autour de la ${selectedMotorcycle.brand.name} ${selectedMotorcycle.name}`,
+          isNewMotoComment: true
         }
       })
 
@@ -265,18 +271,30 @@ async function postComment() {
   }
 
   try {
-    await $fetch(`${apiBase}messages`, {
+    const newMessage = await $fetch.raw(`${apiBase}messages`, {
       method: 'POST',
       body: {
         content: comment.value.content,
-        user: comment.value.user,
+        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }
     })
+    if (newMessage.ok) {
+      toast.add({
+        title: 'Succès',
+        description: 'Votre commentaire a été ajouté.',
+        color: 'success'
+      })
+    }
     messagePosted.value = true
   } catch (error) {
     console.error('Error posting comment:', error)
+    toast.add({
+      title: 'Erreur',
+      description: "Votre commentaire n'a pas pu être ajouté.",
+      color: 'error'
+    })
   }
 
   await fetchMessages()
@@ -311,13 +329,13 @@ onMounted(() => {
   <div>
     <HeaderInfo :scroll-to-element-id="'form'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Comparez. Choisissez. <br />
           <span class="text-red">Pilotez</span>
         </h1>
       </template>
       <template #subtitle>
-        <p>
+        <p class="p-mobile">
           Comparez facilement les performances, prix et caractéristiques de vos
           motos préférées.
         </p>
@@ -339,7 +357,7 @@ onMounted(() => {
       </div>
       <Transition>
         <div v-if="showResultat" ref="resultat" class="resultat-section">
-          <div v-if="resultatNumber.length > 0" class="info-container">
+          <div v-if="resultatNumber.length > 0">
             <h3>Résultats</h3>
             <div v-for="field in resultatNumber" :key="field.fieldName">
               <ResultatFieldNumber
@@ -431,7 +449,11 @@ onMounted(() => {
                 >Poster</UButton
               >
             </div>
-            <div v-else class="input-posted-container">
+            <div
+              v-else
+              class="input-posted-container"
+              :class="{ blurred: !isAuthenticated }"
+            >
               <h4>Merci pour votre contribution !</h4>
               <p>
                 Votre commentaire a été posté avec succès. Il apparaîtra dans la
@@ -642,5 +664,57 @@ onMounted(() => {
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
+}
+
+@media (max-width: 1024px) {
+  .form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .display-comment-container {
+    flex-direction: column;
+  }
+
+  .left-display-comment,
+  .right-display-comment {
+    max-width: 100%;
+  }
+
+  .input-comment-box {
+    margin: 1.5rem 1rem;
+    width: auto;
+  }
+
+  .caroussel-container {
+    margin: 0 1rem;
+  }
+
+  .need-connection {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .need-connection h3 {
+    width: auto;
+    font-size: 18px;
+  }
+
+  .input-comment-box {
+    min-height: auto;
+  }
+
+  .input-comment-container {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .input-posted-container {
+    min-height: auto;
+    padding: 1rem;
+  }
 }
 </style>

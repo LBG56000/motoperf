@@ -11,7 +11,7 @@ export default defineNuxtConfig({
     }
   },
 
-  modules: ['@nuxt/eslint', '@nuxt/ui'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', 'nuxt-charts'],
   css: ['~/assets/css/main.css'],
   icon: {
     provider: 'server',

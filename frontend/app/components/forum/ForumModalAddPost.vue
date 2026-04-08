@@ -89,7 +89,8 @@ const onSubmit = async () => {
     category: state.category,
     content: state.description,
     url: currentImageUrl.value,
-    user: user.value?._id
+    user: user.value?._id,
+    isNewMotoComment: false
   }
 
   try {

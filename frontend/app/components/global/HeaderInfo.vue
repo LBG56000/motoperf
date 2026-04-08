@@ -49,5 +49,9 @@ const props = defineProps<IProps>()
   .subtitle {
     width: 95%;
   }
+
+  .header-container {
+    min-height: 50vh;
+  }
 }
 </style>

@@ -55,4 +55,11 @@ p {
   text-align: center;
   width: 100%;
 }
+
+@media (max-width: 1024px) {
+  .container-row {
+    width: 95%;
+    gap: 10px;
+  }
+}
 </style>

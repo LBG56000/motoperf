@@ -11,6 +11,8 @@ export interface IMessage {
   parentId: string | null
   user: IUser
   createdAt: string
+  usersLikeId: Array<string>
+  usersDislikeId: Array<string>
 }
 
 export interface IPublicationResponse extends IMessage {

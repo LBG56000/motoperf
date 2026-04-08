@@ -1,59 +1,70 @@
 <script setup lang="ts">
+import { useAuth } from '~/composable/useAuth';
+import { useConnexionModal } from '~/composable/useConnexionModal';
 import type { IMessage } from '~/types/messages'
 
 const props = defineProps<{
-  responses: IMessage[]
+  response: IMessage
 }>()
 
-const handleAddLike = () => {
-  console.log('Add like')
-}
+const { user } = useAuth()
+const { open } = useConnexionModal()
 
-const handleAddDislike = () => {
-  console.log('Add dislike')
+const apiBase = useRuntimeConfig().public.apiBase
+const message = ref<IMessage>({ ...props.response })
+const isSolidThumbUp = computed(() => user.value && message.value.usersLikeId.includes(user.value._id))
+const isSolidThumbDown = computed(() => user.value && message.value.usersDislikeId.includes(user.value._id))
+
+const handleAddLikeOrDislike = async (isLike: boolean, messageId: string) => {
+  if (!user.value) {
+    open()
+  } else {
+    const updateMessage = await $fetch<{ populatedMessage: IMessage }>(`${apiBase}messages`, {
+      method: 'PATCH',
+      body: {
+        userId: user.value?._id,
+        messageId: messageId,
+        like: isLike
+      }
+    })
+    message.value = updateMessage.populatedMessage
+  }
 }
 
 const handleAddResponse = () => {
   console.log('Add response')
 }
+
+watch(() => props.response, (newVal) => {
+  message.value = { ...newVal }
+}, { deep: true })
 </script>
 
 <template>
-  <div class="comments-list">
-    <div
-      v-for="response in props.responses"
-      :key="response._id"
-      class="comment"
-    >
-      <UAvatar
-        :src="`/images/users/${response.user.image}`"
-        :alt="response.user.firstname"
-        size="3xl"
-        :title="response.user.firstname"
-        class="margin-right-0_5"
-      />
+  <div class="comment">
+    <UAvatar :src="`/images/users/${message.user.image}`" :alt="message.user.firstname" size="3xl"
+      :title="message.user.firstname" class="margin-right-0_5" />
 
-      <div class="comment-content">
-        <div class="comment-header">
-          <p class="bold">{{ response.user.firstname }},&nbsp;</p>
-          <p>{{ formatTimeAgo(response.createdAt) }}</p>
+    <div class="comment-content">
+      <div class="comment-header">
+        <p class="bold">{{ message.user.firstname }},&nbsp;</p>
+        <p>{{ formatTimeAgo(message.createdAt) }}</p>
+      </div>
+      <p class="comment-text">{{ message.content }}</p>
+      <div class="comment-actions">
+        <div class="action-button" @click="handleAddLikeOrDislike(true, message._id)">
+          <UIcon :name="isSolidThumbUp ? 'i-heroicons-hand-thumb-up-solid' : 'i-heroicons-hand-thumb-up'"
+            class="size-6" />
+          <p>{{ message.like }}</p>
         </div>
-
-        <p class="comment-text">{{ response.content }}</p>
-
-        <div class="comment-actions">
-          <div class="action-button" @click="handleAddLike">
-            <UIcon name="i-lucide-thumbs-up" class="size-6" />
-            <p>{{ response.like }}</p>
-          </div>
-          <div class="action-button" @click="handleAddDislike">
-            <UIcon name="i-lucide-thumbs-down" class="size-6" />
-            <p>{{ response.dislike }}</p>
-          </div>
-          <div class="action-button" @click="handleAddResponse">
-            <UIcon name="i-lucide-messages-square" class="size-6" />
-            <p>Répondre</p>
-          </div>
+        <div class="action-button" @click="handleAddLikeOrDislike(false, message._id)">
+          <UIcon :name="isSolidThumbDown ? 'i-heroicons-hand-thumb-down-solid' : 'i-heroicons-hand-thumb-down'"
+            class="size-6" />
+          <p>{{ message.dislike }}</p>
+        </div>
+        <div class="action-button" @click="handleAddResponse">
+          <UIcon name="i-lucide-messages-square" class="size-6" />
+          <p>Répondre</p>
         </div>
       </div>
     </div>
@@ -63,11 +74,8 @@ const handleAddResponse = () => {
 .comment {
   display: flex;
   flex-direction: row;
-  gap: 0.5em;
-}
-
-.comments-list {
-  margin-top: 1.5em;
+  gap: 1em;
+  margin-bottom: 1em;
 }
 
 .comment-item {

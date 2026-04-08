@@ -19,35 +19,42 @@ const emit = defineEmits<{
     :items="items"
     :ui="{
       container: 'flex items-stretch h-full',
-      item: 'basis-1/5 ps-0 self-stretch',
-      prev: 'sm:start-0',
-      next: 'sm:end-0'
+      item: 'basis-1/2 sm:basis-1/3 lg:basis-1/5 ps-0 self-stretch',
+      prev: 'start-0',
+      next: 'end-0'
     }"
   >
-    <article>
-      <h5>{{ item.name }}</h5>
+    <article
+      class="cursor-pointer"
+      @click="navigateTo(`/motorcycle/${item._id}`)"
+    >
+      <h5 class="no-select h5-mobile">{{ item.name }}</h5>
       <img
-        src="/images/motorcycles/YZF-R1.png"
+        :src="`${item.imageUrl}`"
         width="100"
         height="100"
+        :alt="item.name"
         class="rounded-lg"
         loading="lazy"
       />
-      <div id="description">
+      <div id="description" class="no-select">
         <p>{{ item.horsePower }} ch</p>
         <hr />
         <p>{{ item.torque }} Nm</p>
         <hr />
         <p>{{ item.price }} €</p>
       </div>
-      <div>
+      <div @click.stop>
         <UButton
           size="sm"
           color="primary"
           class="rounded-full"
+          cursor-pointer
           style="color: white"
           icon="i-lucide-arrow-left-right"
-          @click="emit('selected', item._id, item.imageUrl ? item.imageUrl : '')"
+          @click.stop="
+            emit('selected', item._id, item.imageUrl ? item.imageUrl : '')
+          "
           >Comparer</UButton
         >
       </div>
@@ -57,6 +64,7 @@ const emit = defineEmits<{
 
 <style scoped>
 article {
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -94,6 +102,20 @@ hr {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: -5px;
+  gap: -5px
+}
+
+.no-select {
+  user-select: none;
+}
+
+
+@media (max-width: 1024px) {
+  article {
+    width: 180px;
+  }
+  img {
+    width: 70px;
+  }
 }
 </style>
