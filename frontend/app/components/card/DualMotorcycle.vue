@@ -23,7 +23,11 @@ const isOpen = ref(true)
             :src="props.leftMotorcycleUrl"
             alt="Left Motorcycle"
           />
-          <img src="/svg/motorcycleIcon.svg" class="size-20" />
+          <img
+            v-if="!props.leftMotorcycleUrl"
+            src="/svg/motorcycleIcon.svg"
+            class="size-20"
+          />
 
           <p>{{ props.leftName }}</p>
         </div>
@@ -39,8 +43,10 @@ const isOpen = ref(true)
             v-if="props.rightMotorcycleUrl"
             :src="props.rightMotorcycleUrl"
             alt="Right Motorcycle"
+            style="transform: scaleX(-1)"
           />
           <img
+            v-if="!props.rightMotorcycleUrl"
             src="/svg/motorcycleIcon.svg"
             class="size-20"
             style="transform: scaleX(-1)"
