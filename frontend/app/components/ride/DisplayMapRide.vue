@@ -20,6 +20,7 @@ interface IProps {
   displayEditorContainer?: boolean
   disableEditing?: boolean
   disableCreating?: boolean
+  disableDeleting?: boolean
 }
 
 const props = withDefaults(defineProps<IProps>(), {
@@ -30,7 +31,8 @@ const props = withDefaults(defineProps<IProps>(), {
   displayRide: false,
   displayEditorContainer: false,
   disableEditing: false,
-  disableCreating: false
+  disableCreating: false,
+  disableDeleting: false
 })
 
 // INSTANCES LEAFLET
@@ -363,6 +365,7 @@ onMounted(async () => {
   map.value = L.map('map', {
     zoomControl: false,
     preferCanvas: true,
+    doubleClickZoom: false,
     zoomAnimation: true,
     markerZoomAnimation: true
   }).setView([48.26, -3], 9)
@@ -386,7 +389,11 @@ onMounted(async () => {
         poly: { allowIntersection: false }
       },
       draw: {
-        polyline: { shapeOptions: { color: '#3B82F6', weight: 4 } },
+        polyline: {
+          shapeOptions: { color: '#3B82F6', weight: 4 },
+          finishOn: 'dblclick',
+          repeatMode: true
+        },
         polygon: false,
         circle: false,
         marker: false,
@@ -443,6 +450,32 @@ onMounted(async () => {
               polylineBtn.style.opacity = ''
               polylineBtn.style.cursor = ''
             }
+          }
+        }, 100)
+      }
+    )
+
+    // Désactive visuellement le bouton de suppression
+    watch(
+      () => props.disableDeleting,
+      (disabled) => {
+        setTimeout(() => {
+          const removeBtn =
+            drawControl._toolbars.edit._toolbarContainer.querySelector(
+              '.leaflet-draw-edit-remove'
+            )
+          if (!removeBtn) return
+
+          if (disabled) {
+            removeBtn.classList.add('leaflet-disabled')
+            removeBtn.style.pointerEvents = 'none'
+            removeBtn.style.opacity = '0.4'
+            removeBtn.style.cursor = 'not-allowed'
+          } else {
+            removeBtn.classList.remove('leaflet-disabled')
+            removeBtn.style.pointerEvents = ''
+            removeBtn.style.opacity = ''
+            removeBtn.style.cursor = ''
           }
         }, 100)
       }
@@ -867,6 +900,7 @@ watch(
   width: 100%;
   height: 100%;
   z-index: 1;
+  touch-action: none;
 }
 
 /* --- FILTRES --- */

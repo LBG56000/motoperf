@@ -11,6 +11,7 @@ import { useAuth } from '~/composable/useAuth.js'
 import { Time, CalendarDate } from '@internationalized/date'
 import InputDate from '~/components/global/InputDate.vue'
 import InputTime from '~/components/global/InputTime.vue'
+import { useMediaQuery } from '@vueuse/core'
 
 const isSelectLoading = ref<boolean>(false) // État de chargement des listes déroulantes
 const isMapLoading = ref<boolean>(false) // État de chargement de la carte
@@ -50,6 +51,7 @@ const rideTypeOptions = Object.values(RideType).map((type: string) => ({
 })) // Chercher dans l'enum les types
 
 const listCommunes = ref<IValueCommuneSelect[]>([])
+const isMobile = useMediaQuery('(max-width: 1023px)')
 
 const stateForm = reactive<IValueForm>({
   title: '',
@@ -513,10 +515,15 @@ watch(
             label="Retour"
           />
           <h3 class="text-xl font-bold mt-2">Nouvelle balade</h3>
-          <p class="text-gray-500 text-sm mt-1">
+          <p v-if="!isMobile" class="text-gray-500 text-sm mt-1">
             Tracez à la main avec
             <UIcon name="i-lucide-pen" class="size-4 text-primary" /> ou
             <strong class="text-primary">choisissez deux villes</strong> puis
+            calculer l'itinéraire.
+          </p>
+          <p v-else>
+            Tracez une balade en
+            <strong class="text-primary">choisissant deux villes</strong> puis
             calculer l'itinéraire.
           </p>
         </header>
@@ -667,18 +674,17 @@ watch(
             :key="mapKey"
             v-model:geom="stateForm.geom"
             v-model:is-map-loading="isMapLoading"
-            display-editor-container
-            :disable-editing="isGpsRoute"
-            :disable-creating="isGeomCreated"
+            display-enlarge-button
+            :display-editor-container="!isGpsRoute && !isMobile"
             class="grow min-h-100 lg:min-h-0"
           />
 
           <div
-            v-if="isGpsRoute"
+            v-if="isGpsRoute || isMobile"
             class="mt-2 text-red-500 flex items-center gap-2 text-sm font-medium"
           >
             <UIcon name="i-lucide-alert-triangle" class="size-5" />
-            Modification désactivée pour les tracés GPS.
+            Modification désactivée pour les tracés GPS et sur téléphone
           </div>
 
           <div class="container-info-under-map">
@@ -709,10 +715,10 @@ watch(
         </UFormField>
       </UContainer>
 
-      <div class="submit-container flex justify-center">
+      <div class="submit-container flex justify-start ml-7">
         <UButton
           type="submit"
-          label="Créer la balade"
+          label="Créer"
           color="primary"
           size="xl"
           class="w-full lg:w-fit justify-center cursor-pointer"
