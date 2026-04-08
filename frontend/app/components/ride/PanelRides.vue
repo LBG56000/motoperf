@@ -61,6 +61,7 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 }
 
 .sidebar {
+  display: flex;
   position: absolute;
   top: 80px;
   bottom: 20px;
@@ -73,7 +74,6 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
   transform: translateX(100%);
   border-left: 1px solid #e5e7eb;
   border-radius: 12px 0 0 12px;
-  display: flex;
 }
 
 .sidebar.is-open {

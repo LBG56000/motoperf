@@ -275,8 +275,10 @@ h3 {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-left: 10px;
   background-color: var(--background);
   width: 20dvw;
+  height: 46rem;
   min-width: 350px;
   max-height: calc(100vh - 100px);
   position: absolute;
@@ -294,15 +296,16 @@ h3 {
     width 0.3s;
 }
 
-@media (max-width: 410px) {
+@media (max-width: 480px) {
   .filters-container {
-    width: 90%;
+    width: 95%;
+    min-width: 0;
+    height: auto;
+    max-height: 80vh;
+
     left: 50%;
     transform: translateX(-50%);
     margin: 0;
-    margin-top: 40px;
-    top: 20px;
-    max-height: 90vh;
   }
 }
 </style>
