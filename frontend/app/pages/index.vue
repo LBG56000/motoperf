@@ -69,7 +69,7 @@ async function fetchMotocycles() {
     `${apiBase}motorcycles`,
     {
       params: {
-        project: 'name,horsePower,torque,price'
+        project: 'name,horsePower,torque,price,imageUrl',
       }
     }
   )
@@ -168,7 +168,9 @@ onMounted(async () => {
     </section>
     <section class="basic-section">
       <h2 class="h2-mobile" style="text-align: center">Les best-sellers</h2>
-      <CarrouselMotorcycles :items="itemsCaroussel" />
+      <ClientOnly>
+        <CarrouselMotorcycles :items="itemsCaroussel" />
+      </ClientOnly>
     </section>
     <section class="invitation justify-content-center basic-section">
       <h3 class="h3-mobile" style="text-align: center">Tester le comparateur dès maintenant !</h3>
