@@ -19,7 +19,8 @@ const state = reactive({
   yearsExperience: '',
   email: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  file: undefined as File | undefined
 })
 
 const experienceLevels = ['Débutant', 'Confirmé', 'Expert', 'Autre']
@@ -80,6 +81,20 @@ const validateStep = (step: number): FormError[] => {
   return errors
 }
 
+const uploadImage = async (file: File, name: string): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('type', 'image')
+  formData.append('directory', 'users')
+  formData.append('name', name)
+
+  await $fetch<{ url: string }>('/api/uploadFile', {
+    method: 'POST',
+    body: formData
+  })
+  return name + '.' + file.name.split('.').pop()
+}
+
 const getError = (path: string) => {
   return formErrors.value.find((e) => e.name === path)?.message
 }
@@ -117,14 +132,23 @@ const resetForm = () => {
 }
 
 const handleSubmit = async () => {
-  console.log('Soumission du formulaire avec les données:', state)
   try {
     validateStep(currentStep.value)
-    if (formErrors.value.length > 0) {
-      return
+    if (formErrors.value.length > 0) return
+
+    // Calcul de l'année
+    const startYear = (
+      new Date().getFullYear() - Number(state.yearsExperience)
+    ).toString()
+
+    // Upload
+    let imageUrl = ''
+    if (state.file) {
+      // On attend l'URL de l'image avant d'appeler register
+      imageUrl = await uploadImage(state.file, Date.now().toString())
     }
 
-    register(
+    await register(
       state.email,
       state.password,
       state.firstname,
@@ -136,18 +160,15 @@ const handleSubmit = async () => {
         Expert: 'expert',
         Autre: 'other'
       }[state.experience] as 'beginner' | 'confirmed' | 'expert' | 'other',
-      (
-        Number(new Date().getFullYear()) - Number(state.yearsExperience)
-      ).toString()
+      startYear,
+      imageUrl
     )
 
     formErrors.value = []
-
     isOpen.value = false
     resetForm()
-    console.log('Profil mis à jour:', state)
   } catch (err) {
-    console.error(err)
+    console.error('Erreur lors de la soumission:', err)
   }
 }
 </script>
@@ -175,12 +196,13 @@ const handleSubmit = async () => {
           <!-- ÉTAPE 1 -->
           <div v-if="currentStep === 1" class="form-step">
             <div class="step-content">
-              <button type="button" class="avatar-button">
-                <div class="avatar-circle">
-                  <UIcon name="i-lucide-user" />
-                </div>
-                Insérer +
-              </button>
+              <UFormField name="file" class="avatar-button">
+                <UFileUpload
+                  v-model="state.file"
+                  accept="image/*"
+                  label="Déposez votre avatar"
+                  description="PNG ou JPG"
+              /></UFormField>
               <div class="form-field">
                 <UFormField
                   label="Prénom"
@@ -435,6 +457,7 @@ const handleSubmit = async () => {
   cursor: pointer;
   color: #4b5563;
   font-size: 0.875rem;
+  text-align: center;
   text-decoration: underline;
   transition: color 0.2s ease;
 }

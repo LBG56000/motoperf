@@ -27,11 +27,21 @@ export function useAuth() {
     lastname: string,
     pseudo: string,
     userType: string,
+    ridingStartYear: string,
     image?: string
   ) {
     await $fetch(`${apiBase}users/account`, {
       method: 'POST',
-      body: { email, password, firstname, lastname, pseudo, userType, image }
+      body: {
+        email,
+        password,
+        firstname,
+        lastname,
+        pseudo,
+        userType,
+        ridingStartYear,
+        image
+      }
     })
     await login(email, password)
   }
