@@ -13,14 +13,14 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 
 <template>
   <div class="sidebar" :class="{ 'is-open': isSidebarOpen }">
-    <div class="toggle-wrapper">
+    <div class="absolute -left-10 top-1/2 -translate-y-1/2 h-10 w-10 z-1002">
       <UButton
         :icon="
           isSidebarOpen ? 'i-lucide-chevron-right' : 'i-lucide-chevron-left'
         "
         color="neutral"
         variant="subtle"
-        class="sidebar-toggle"
+        class="w-10 h-10 rounded-r-none rounded-l-lg cursor-pointer bg-(--background)"
         @click="isSidebarOpen = !isSidebarOpen"
       />
     </div>
@@ -78,25 +78,6 @@ const isSidebarOpen = ref(false) // État du volet latéral (ouvert/fermé)
 
 .sidebar.is-open {
   transform: translateX(0);
-}
-
-.toggle-wrapper {
-  position: absolute;
-  left: -40px;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 40px;
-  width: 40px;
-  z-index: 1002;
-}
-
-.sidebar-toggle {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px 0 0 8px !important;
-  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  background-color: var(--background) !important;
 }
 
 .sidebar-content {
