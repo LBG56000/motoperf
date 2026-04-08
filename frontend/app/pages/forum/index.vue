@@ -95,7 +95,7 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <div>
+      <div class="panel-filters">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
       <div class="posts">
@@ -140,9 +140,14 @@ onMounted(async () => {
     gap: 1.5rem;
     width: 300px;
     position: sticky;
-    top: 0;
+    top: 70px;
     right: 0;
   }
+}
+
+.panel-filters {
+  position: sticky;
+  top: 70px;
 }
 
 .center {
