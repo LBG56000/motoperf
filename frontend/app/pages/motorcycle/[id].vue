@@ -176,7 +176,9 @@ async function postComment() {
         }
       })
 
-      m.value.post = postId
+      if (m.value) {
+        m.value.post = postId
+      }
     } catch (error) {
       console.error('Error creating post:', error)
       return
@@ -213,7 +215,7 @@ watch(
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0]?.isIntersecting) {
           countStarted.value = true
           observer.disconnect()
         }
