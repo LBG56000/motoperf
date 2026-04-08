@@ -87,7 +87,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         color="neutral"
         variant="ghost"
         style="justify-content: center"
-        to="/"
+        to="/comparo"
         >Comparateur</UButton
       >
       <UButton
@@ -111,7 +111,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         color="neutral"
         variant="ghost"
         style="justify-content: center"
-        to="/"
+        to="/knowUs"
         >Nous connaitre</UButton
       >
       <UButton
