@@ -69,7 +69,7 @@ async function fetchMotocycles() {
     `${apiBase}motorcycles`,
     {
       params: {
-        project: 'name,horsePower,torque,price'
+        project: 'name,horsePower,torque,price,imageUrl'
       }
     }
   )

@@ -4,7 +4,6 @@ import type { IMotorcycle } from '@/types/motorcycles'
 defineProps<{
   items: IMotorcycle[]
 }>()
-
 const emit = defineEmits<{
   (e: 'selected', _id: string, imgUrl: string): void
 }>()
@@ -29,7 +28,6 @@ const emit = defineEmits<{
       @click="navigateTo(`/motorcycle/${item._id}`)"
     >
       <h5 class="no-select">{{ item.name }}</h5>
-
       <img
         :src="`${item.imageUrl}`"
         width="100"
