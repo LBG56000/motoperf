@@ -237,7 +237,8 @@ watch(
     />
 
     <div class="detail">
-      <p><span>Modèle:</span> {{ m.brand.name }} {{ m.name }}</p>
+      <p><span>Marque:</span> {{ m.brand.name }}</p>
+      <p><span>Modèle:</span> {{ m.name }}</p>
       <p><span>Année:</span> {{ m.year }}</p>
       <p><span>Moteur:</span> {{ m.engine_size }} m3</p>
     </div>

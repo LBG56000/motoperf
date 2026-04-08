@@ -29,11 +29,12 @@ const emit = defineEmits<{
       @click="navigateTo(`/motorcycle/${item._id}`)"
     >
       <h5 class="no-select">{{ item.name }}</h5>
+
       <img
-        src="/images/motorcycles/YZF-R1.png"
+        :src="`${item.imageUrl}`"
         width="100"
         height="100"
-        c
+        :alt="item.name"
         class="rounded-lg"
         loading="lazy"
       />
