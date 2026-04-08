@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Comment from '~/components/forum/Comment.vue'
 import HeaderInfo from '~/components/global/HeaderInfo.vue'
+import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composable/useConnexionModal'
 import type { IMessage } from '~/types/messages'
 import type { IPost } from '~/types/post'
 
@@ -9,8 +11,10 @@ const route = useRoute()
 const post = ref<IPost>()
 const responses = ref<IMessage[]>([])
 const apiBase = useRuntimeConfig().public.apiBase
-
+const { user } = useAuth()
+const { open } = useConnexionModal()
 const newReponseOfPost = ref('')
+const toast = useToast()
 
 const getPost = async () => {
   const data = await $fetch<{ data: IPost }>(`${apiBase}posts`, {
@@ -38,6 +42,38 @@ const getResponsesOfPost = async () => {
   responses.value = res.messages
 }
 
+const handleAddComment = async () => {
+  if (!user.value) {
+    open()
+  } else {
+    const newMessage = await $fetch.raw(`${apiBase}messages`, {
+      method: 'POST',
+      body: {
+        content: newReponseOfPost.value,
+        user: user.value._id,
+        reference: route.params.id,
+        referenceModel: 'Post'
+      }
+    })
+
+    if (newMessage.ok) {
+      toast.add({
+        title: 'Succès',
+        description: 'Votre commentaire a été ajouté.',
+        color: 'success'
+      })
+      newReponseOfPost.value = ''
+      getResponsesOfPost()
+    } else {
+      toast.add({
+        title: 'Erreur',
+        description: 'Votre commentaire n\'a pas pu être ajouté.',
+        color: 'error'
+      })
+    }
+  }
+}
+
 onMounted(async () => {
   await Promise.all([getPost(), getResponsesOfPost()])
   scrollToMap('post')
@@ -63,12 +99,7 @@ onMounted(async () => {
       </div>
       <div>
         <div class="icon-and-text">
-          <UAvatar
-            :src="`/images/users/${post?.user.image}`"
-            size="3xl"
-            loading="lazy"
-            class="margin-2"
-          />
+          <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
           <h2>{{ post?.title }}</h2>
         </div>
         <div>
@@ -90,7 +121,7 @@ onMounted(async () => {
               <p>{{ post?.views }} vues</p>
             </div>
           </div>
-          <div class="icon-and-text margin-bottom-1 margin-top-0_5">
+          <div class="icon-and-text margin-bottom-1 margin-top-0_5 put-in-favorite">
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
@@ -102,18 +133,15 @@ onMounted(async () => {
           />
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
-        <UFormField
-          label="Ecrire une réponse"
-          required
-          :ui="{ container: 'w-5/6' }"
-        >
-          <UTextarea v-model="newReponseOfPost" class="w-5/6" />
-        </UFormField>
-        <UButton class="margin-top-0_5" :disabled="newReponseOfPost === ''"
-          >Ajouter ma réponse</UButton
-        >
+        <div class="add-comment">
+          <UFormField label="Ecrire un commentaire" required :ui="{ container: 'w-5/6' }">
+            <UTextarea v-model="newReponseOfPost" class="w-5/6" />
+          </UFormField>
+          <UButton class="w-1/6" :disabled="newReponseOfPost === ''" size="sm" @click="handleAddComment">Ajouter mon
+            commentaire</UButton>
+        </div>
         <p v-if="responses.length === 0">
-          Aucune réponse à ce post, ajouter la première
+          Aucun commentaire à ce post, ajouter le premier
         </p>
         <div v-else class="margin-bottom-1 w-5/6 comments">
           <div v-for="response in responses" :key="response._id">
@@ -128,6 +156,13 @@ onMounted(async () => {
 <style scoped>
 .margin-2 {
   margin-right: 0.5em;
+}
+
+.put-in-favorite {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5em;
+  align-items: center;
 }
 
 .comments {
@@ -151,11 +186,11 @@ onMounted(async () => {
   margin: 2rem 5rem;
 }
 
-.post-filters > div:first-child {
+.post-filters>div:first-child {
   flex-shrink: 0;
 }
 
-.post-filters > div:nth-child(2) {
+.post-filters>div:nth-child(2) {
   flex: 1;
   min-width: 0;
 }
@@ -192,5 +227,11 @@ onMounted(async () => {
 
 .right {
   justify-self: end;
+}
+
+.add-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
 }
 </style>

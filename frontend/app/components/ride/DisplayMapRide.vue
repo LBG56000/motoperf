@@ -277,7 +277,10 @@ const renderRides = (isZooming = false) => {
   const currentZoom = map.value.getZoom()
 
   // Création des couches de cluster
-  const markersCluster = LDraw.markerClusterGroup()
+  const markersCluster = LDraw.markerClusterGroup({
+    animateAddingMarkers: false,
+    zoomToBoundsOnClick: true
+  })
 
   filteredRides.value.forEach((ride: IRide) => {
     const dynamicIcon = L.divIcon({
@@ -298,12 +301,10 @@ const renderRides = (isZooming = false) => {
         `<div class="ride-detail-container"><b>${ride.title}</b><br>${ride.distance}km - ${hour}h ${minutes}min</div>`
       )
       .on('popupopen', () => {
-        // On retire l'ancien tracé actif s'il existe
         if (activeTraceLayer) {
           map.value.removeLayer(activeTraceLayer)
         }
 
-        // On crée le tracé sur une couche directement rattachée à la carte, pas au cluster
         activeTraceLayer = L.geoJSON(ride.geom as any, {
           style: {
             color: ride.color || '#3B82F6',
@@ -311,13 +312,6 @@ const renderRides = (isZooming = false) => {
             opacity: 1
           }
         }).addTo(map.value)
-      })
-      .on('popupclose', () => {
-        // On retire le tracé quand le popup est fermé manuellement
-        if (activeTraceLayer) {
-          map.value.removeLayer(activeTraceLayer)
-          activeTraceLayer = null
-        }
       })
 
     markersCluster.addLayer(marker)
@@ -355,22 +349,25 @@ onMounted(async () => {
   const L = await import('leaflet')
   await import('leaflet.markercluster')
   await import('leaflet-draw')
-  await import('leaflet/dist/leaflet.css')
-  await import('leaflet-draw/dist/leaflet.draw.css')
-  await import('leaflet.markercluster/dist/MarkerCluster.css')
-  await import('leaflet.markercluster/dist/MarkerCluster.Default.css')
   L_instance.value = L
 
   // Paramétrage de la map
   map.value = L.map('map', {
     zoomControl: false,
-    preferCanvas: true,
+    preferCanvas: false,
     doubleClickZoom: false,
     zoomAnimation: true,
     markerZoomAnimation: true
   }).setView([48.26, -3], 9)
   L.control.zoom({ position: 'bottomleft' }).addTo(map.value)
   L.control.scale({ imperial: false }).addTo(map.value)
+
+  map.value.on('click', () => {
+    if (activeTraceLayer) {
+      map.value.removeLayer(activeTraceLayer)
+      activeTraceLayer = null
+    }
+  })
 
   // Leaflet-Draw s'attache à window.L après son import, on récupère cette instance
   const LDraw = (window as any).L
@@ -783,7 +780,7 @@ watch(
     <UButton
       v-if="props.displayEnlargeButton"
       :icon="isFullScreen ? 'i-lucide-minimize' : 'i-lucide-maximize'"
-      class="button-enlarge cursor-pointer"
+      class="absolute bottom-6 right-4 z-1010 cursor-pointer pointer-events-auto"
       color="neutral"
       variant="subtle"
       @click="toggleFullScreen"
@@ -876,7 +873,9 @@ watch(
   height: 80dvh;
   margin-bottom: 20px;
   overflow: hidden;
-  transition: all 0.3s ease-in-out;
+  transition:
+    width 0.3s ease-in-out,
+    height 0.3s ease-in-out;
   background-color: #f8f9fa;
 }
 
@@ -956,7 +955,7 @@ watch(
 /* Bandeau en bas pour les instructions */
 .draw-instruction-banner {
   position: absolute;
-  width: 70%;
+  width: auto;
   bottom: 15px;
   left: 50%;
   transform: translateX(-50%);
