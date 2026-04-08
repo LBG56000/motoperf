@@ -4,7 +4,7 @@ import type { FormError } from '@nuxt/ui'
 import { useConnexionModal } from '~/composable/useConnexionModal'
 import { useAuth } from '~/composable/useAuth'
 
-const { login, isAuthenticated } = useAuth()
+const { login, isAuthenticated, user } = useAuth()
 const { isOpen, close } = useConnexionModal()
 
 const form = useTemplateRef('form')
@@ -30,6 +30,9 @@ const connexion = async () => {
   try {
     await login(state.value.email, state.value.password)
     if (isAuthenticated.value) {
+      if (user.value?.isAdmin) {
+        navigateTo('/admin')
+      }
       close()
       state.value.email = ''
       state.value.password = ''

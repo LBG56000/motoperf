@@ -48,6 +48,7 @@
   --text-color: #fff;
 
   --background: #000;
+  --background-secondary: #ffffff1b;
   --border-gray: rgba(255, 255, 255, 0.25);
   --overlay-loading-background: rgba(15, 23, 42, 0.7);
   --label-text: rgba(255, 255, 255, 0.49);
@@ -127,6 +128,24 @@ p {
     font-family: 'Poppins', sans-serif;
     font-size: 24px;
     font-weight: 600;
+    text-align: center;
+  }
+  .h3-mobile {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .h4-mobile {
+    font-family: 'Poppins', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .h5-mobile {
+    font-family: 'Krona One', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
     text-align: center;
   }
   .p-mobile {

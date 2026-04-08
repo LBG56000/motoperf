@@ -18,16 +18,16 @@ const emit = defineEmits<{
     :items="items"
     :ui="{
       container: 'flex items-stretch h-full',
-      item: 'basis-1/5 ps-0 self-stretch',
-      prev: 'sm:start-0',
-      next: 'sm:end-0'
+      item: 'basis-1/2 sm:basis-1/3 lg:basis-1/5 ps-0 self-stretch',
+      prev: 'start-0',
+      next: 'end-0'
     }"
   >
     <article
       class="cursor-pointer"
       @click="navigateTo(`/motorcycle/${item._id}`)"
     >
-      <h5 class="no-select">{{ item.name }}</h5>
+      <h5 class="no-select h5-mobile">{{ item.name }}</h5>
       <img
         :src="`${item.imageUrl}`"
         width="100"
@@ -48,6 +48,7 @@ const emit = defineEmits<{
           size="sm"
           color="primary"
           class="rounded-full"
+          cursor-pointer
           style="color: white"
           icon="i-lucide-arrow-left-right"
           @click.stop="
@@ -62,6 +63,7 @@ const emit = defineEmits<{
 
 <style scoped>
 article {
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -104,5 +106,14 @@ hr {
 
 .no-select {
   user-select: none;
+}
+
+@media (max-width: 1024px) {
+  article {
+    width: 180px;
+  }
+  img {
+    width: 70px;
+  }
 }
 </style>

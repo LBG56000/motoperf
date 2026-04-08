@@ -182,7 +182,7 @@ onMounted(() => {
 
 .stats-container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 1.5rem;
   margin: 1.5rem 1rem;
