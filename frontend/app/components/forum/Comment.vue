@@ -3,10 +3,16 @@ import { useAuth } from '~/composable/useAuth';
 import { useConnexionModal } from '~/composable/useConnexionModal';
 import type { IMessage } from '~/types/messages'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   response: IMessage,
-  isAmotoComment?: boolean
-}>()
+  isAmotoComment?: boolean,
+  deep?: number
+}>(), {
+  deep: 0,
+  isAmotoComment: false
+})
+
+const MAX_DEEP = 3
 
 const { user } = useAuth()
 const { open } = useConnexionModal()
@@ -38,7 +44,7 @@ const handleAddLikeOrDislike = async (isLike: boolean, messageId: string) => {
   }
 }
 
-const handleSeeInputToAddResponseOfComment = async () => {
+const handleSeeInputToAddResponseOfComment = () => {
   if (props.isAmotoComment) {
     return navigateTo('/forum')
   } else {
@@ -97,50 +103,54 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="comment">
-    <div class="avatar">
-      <UIcon v-if="responsesOfComment.length !== 0" :name="isOpen ? 'i-lucide-circle-minus' : 'i-lucide-circle-plus'"
-        class="cursor-pointer" @click="isOpen = !isOpen" />
-      <UAvatar :src="`/images/users/${message.user.image}`" :alt="message.user.firstname" size="3xl"
-        :title="message.user.firstname" class="margin-right-0_5" />
-    </div>
-    <div class="comment-content">
-      <div class="comment-header">
-        <p class="bold">{{ message.user.firstname }},&nbsp;</p>
-        <p>{{ formatTimeAgo(message.createdAt) }}</p>
-      </div>
-      <p class="comment-text">{{ message.content }}</p>
-      <div class="comment-actions">
-        <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(true, message._id)">
-          <UIcon :name="isSolidThumbUp ? 'i-heroicons-hand-thumb-up-solid' : 'i-heroicons-hand-thumb-up'"
-            class="size-6" />
-          <p>{{ message.like }}</p>
+  <div class="comment-wrapper">
+    <div class="comment" :class="responsesOfComment.length === 0 ? 'margin_left-0_9' : ''">
+      <div class="avatar">
+        <div>
+          <UIcon v-if="responsesOfComment.length !== 0"
+            :name="isOpen ? 'i-lucide-circle-minus' : 'i-lucide-circle-plus'" class="cursor-pointer"
+            @click="isOpen = !isOpen" />
         </div>
-        <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(false, message._id)">
-          <UIcon :name="isSolidThumbDown ? 'i-heroicons-hand-thumb-down-solid' : 'i-heroicons-hand-thumb-down'"
-            class="size-6" />
-          <p>{{ message.dislike }}</p>
-        </div>
-        <div class="action-button cursor-pointer" @click="handleSeeInputToAddResponseOfComment">
-          <UIcon name="i-lucide-messages-square" class="size-6" />
-          <p>Répondre</p>
-        </div>
+        <UAvatar :src="`/images/users/${message.user.image}`" :alt="message.user.firstname" size="3xl"
+          :title="message.user.firstname" class="margin-right-0_5" />
       </div>
-      <div v-if="isResponseOfAcomment" class="add-reponse-comment w-1/2">
-        <UTextarea v-model="isResponseOfAcommentValue" placeholder="Ecrivez votre réponse">
-        </UTextarea>
-        <UButton label="Envoyer ma réponse" class="w-1/3 cursor-pointer" size="sm"
-          :disabled="isResponseOfAcommentValue.length === 0" @click="handleAddResponseOfComment(message._id)" />
-      </div>
-      <template v-if="responsesOfComment.length !== 0 && isOpen">
-        <div v-for="responseOfComment in responsesOfComment" :key="responseOfComment._id">
-          <div class="responses-container">
-            <Comment :response="responseOfComment" />
+      <div class="comment-content">
+        <div class="comment-header">
+          <p class="bold">{{ message.user.firstname }},&nbsp;</p>
+          <p>{{ formatTimeAgo(message.createdAt) }}</p>
+        </div>
+        <p class="comment-text">{{ message.content }}</p>
+        <div class="comment-actions">
+          <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(true, message._id)">
+            <UIcon :name="isSolidThumbUp ? 'i-heroicons-hand-thumb-up-solid' : 'i-heroicons-hand-thumb-up'"
+              class="size-6" />
+            <p>{{ message.like }}</p>
+          </div>
+          <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(false, message._id)">
+            <UIcon :name="isSolidThumbDown ? 'i-heroicons-hand-thumb-down-solid' : 'i-heroicons-hand-thumb-down'"
+              class="size-6" />
+            <p>{{ message.dislike }}</p>
+          </div>
+          <div class="action-button cursor-pointer" @click="handleSeeInputToAddResponseOfComment">
+            <UIcon name="i-lucide-messages-square" class="size-6" />
+            <p>Répondre</p>
           </div>
         </div>
-      </template>
-
+        <div v-if="isResponseOfAcomment" class="add-reponse-comment w-1/2">
+          <UTextarea v-model="isResponseOfAcommentValue" placeholder="Ecrivez votre réponse">
+          </UTextarea>
+          <UButton label="Envoyer ma réponse" class="w-1/3 cursor-pointer" size="sm"
+            :disabled="isResponseOfAcommentValue.length === 0" @click="handleAddResponseOfComment(message._id)" />
+        </div>
+      </div>
     </div>
+    <template v-if="responsesOfComment.length !== 0 && isOpen">
+      <div v-for="responseOfComment in responsesOfComment" :key="responseOfComment._id">
+        <div :class="props.deep >= MAX_DEEP ? 'responses-container-flat' : 'responses-container'">
+          <Comment :response="responseOfComment" :deep="props.deep >= MAX_DEEP ? props.deep : props.deep + 1" />
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 <style scoped>
@@ -148,12 +158,25 @@ onMounted(async () => {
   cursor: pointer;
 }
 
+.comment-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1em;
+}
+
 .responses-container {
-  margin-left: 0.75rem;
-  border-left: 2px solid var(--border-gray);
-  padding-left: 2em;
-  margin-top: 1rem;
-  transition: border-color 0.2s ease;
+  margin-left: 1em;
+  border-left: 0.15em solid var(--border-gray);
+  padding-left: 1.25em;
+  margin-top: 0.75em;
+}
+
+.responses-container-flat {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+  margin-top: 1em;
+  margin-left: 0.5em;
 }
 
 .add-reponse-comment {
@@ -175,6 +198,7 @@ onMounted(async () => {
   flex-direction: row;
   gap: 1em;
   margin-bottom: 1em;
+  position: relative;
 }
 
 .comment-item {
@@ -222,5 +246,9 @@ onMounted(async () => {
 
 .bold {
   font-weight: bold;
+}
+
+.margin_left-0_9 {
+  margin-left: 0.9em;
 }
 </style>

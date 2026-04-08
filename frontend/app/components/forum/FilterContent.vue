@@ -113,7 +113,7 @@ onMounted(async () => {
       <div v-for="category in categories" v-else :key="category._id" class="icon-and-text sub-filter cursor-pointer"
         :class="{ 'background-selected': filters.categoryIds.includes(category._id) }"
         @click="handlClickOnCategory(category._id)">
-        <UIcon class="size-7 margin-0_5" :name="'i-lucide-' + category.icon" />
+        <UIcon class="size-7 margin-0_5" :name="category.icon" />
         <p>{{ category.name }}</p>
       </div>
     </div>
