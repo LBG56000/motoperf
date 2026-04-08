@@ -411,7 +411,7 @@ onMounted(() => {
                 <USelect v-model="comment.motorcycleId" size="lg" class="w-50" :items="optionMotorcycles"
                   :placeholder="motorcycle1?.name" />
                 <UTextarea v-model="comment.content" size="xl"
-                  placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question" />
+                  placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
               </div>
               <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
             </div>
