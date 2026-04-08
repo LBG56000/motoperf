@@ -37,6 +37,14 @@ const messageSchema = new Schema(
       type: Date,
       default: Date.now,
     },
+    usersLikeId: {
+      type: [String],
+      default: []
+    },
+    usersDislikeId: {
+      type: [String],
+      default: []
+    }
   },
   {
     validateBeforeSave: true,

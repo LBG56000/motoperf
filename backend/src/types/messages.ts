@@ -11,6 +11,8 @@ export interface IMessage {
   referenceModel?: 'Post' | 'Message';
   user: IUser
   createAt: string
+  usersLikeId: Array<string>
+  usersDislikeId: Array<string>
 }
 
 export interface IPublicationResponse extends IMessage {

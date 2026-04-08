@@ -30,9 +30,10 @@ const emit = defineEmits<{
     >
       <h5 class="no-select h5-mobile">{{ item.name }}</h5>
       <img
-        src="/images/motorcycles/YZF-R1.png"
+        :src="`${item.imageUrl}`"
         width="100"
         height="100"
+        :alt="item.name"
         class="rounded-lg"
         loading="lazy"
       />

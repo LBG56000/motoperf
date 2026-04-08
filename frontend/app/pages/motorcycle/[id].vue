@@ -176,7 +176,9 @@ async function postComment() {
         }
       })
 
-      m.value.post = postId
+      if (m.value) {
+        m.value.post = postId
+      }
     } catch (error) {
       console.error('Error creating post:', error)
       return
@@ -213,7 +215,7 @@ watch(
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0]?.isIntersecting) {
           countStarted.value = true
           observer.disconnect()
         }
@@ -237,7 +239,8 @@ watch(
     />
 
     <div class="detail">
-      <p><span>Modèle:</span> {{ m.brand.name }} {{ m.name }}</p>
+      <p><span>Marque:</span> {{ m.brand.name }}</p>
+      <p><span>Modèle:</span> {{ m.name }}</p>
       <p><span>Année:</span> {{ m.year }}</p>
       <p><span>Moteur:</span> {{ m.engine_size }} m3</p>
     </div>
