@@ -63,7 +63,7 @@ const handleAddComment = async () => {
     } else {
       toast.add({
         title: 'Erreur',
-        description: 'Votre commentaire n\'a pas être ajouté.',
+        description: 'Votre commentaire n\'a pas pu être ajouté.',
         color: 'error'
       })
     }
