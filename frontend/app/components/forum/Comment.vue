@@ -3,17 +3,30 @@ import { useAuth } from '~/composable/useAuth';
 import { useConnexionModal } from '~/composable/useConnexionModal';
 import type { IMessage } from '~/types/messages'
 
-const props = defineProps<{
-  response: IMessage
-}>()
+const props = withDefaults(defineProps<{
+  response: IMessage,
+  isAmotoComment?: boolean,
+  deep?: number
+}>(), {
+  deep: 0,
+  isAmotoComment: false
+})
+
+const MAX_DEEP = 3
 
 const { user } = useAuth()
 const { open } = useConnexionModal()
-
+const toast = useToast()
 const apiBase = useRuntimeConfig().public.apiBase
+
+const responsesOfComment = ref<IMessage[]>([])
+const isResponseOfAcomment = ref(false)
+const isResponseOfAcommentValue = ref('')
+
 const message = ref<IMessage>({ ...props.response })
 const isSolidThumbUp = computed(() => user.value && message.value.usersLikeId.includes(user.value._id))
 const isSolidThumbDown = computed(() => user.value && message.value.usersDislikeId.includes(user.value._id))
+const isOpen = ref(false)
 
 const handleAddLikeOrDislike = async (isLike: boolean, messageId: string) => {
   if (!user.value) {
@@ -31,51 +44,161 @@ const handleAddLikeOrDislike = async (isLike: boolean, messageId: string) => {
   }
 }
 
-const handleAddResponse = () => {
-  console.log('Add response')
+const handleSeeInputToAddResponseOfComment = () => {
+  if (props.isAmotoComment) {
+    return navigateTo('/forum')
+  } else {
+    isResponseOfAcomment.value = !isResponseOfAcomment.value
+  }
+}
+
+const handleAddResponseOfComment = async (commentId: string) => {
+  if (!user.value) {
+    open()
+  } else {
+    const newMessage = await $fetch.raw(`${apiBase}messages`, {
+      method: 'POST',
+      body: {
+        content: isResponseOfAcommentValue.value,
+        user: user.value._id,
+        reference: commentId,
+        referenceModel: 'Message'
+      }
+    })
+
+    if (newMessage.ok) {
+      toast.add({
+        title: 'Succès',
+        description: 'Votre commentaire a été ajouté.',
+        color: 'success'
+      })
+      isResponseOfAcommentValue.value = ''
+      getResponseOfComment(commentId)
+      isResponseOfAcomment.value = false
+    } else {
+      toast.add({
+        title: 'Erreur',
+        description: 'Votre commentaire n\'a pas pu être ajouté.',
+        color: 'error'
+      })
+    }
+  }
+}
+
+const getResponseOfComment = async (commentId: string) => {
+  const response = await $fetch<{ messages: IMessage[] }>(`${apiBase}messages/${commentId}/responses`, {
+    method: 'GET',
+  })
+
+  responsesOfComment.value = response.messages
 }
 
 watch(() => props.response, (newVal) => {
   message.value = { ...newVal }
 }, { deep: true })
+
+onMounted(async () => {
+  await getResponseOfComment(message.value._id)
+})
 </script>
 
 <template>
-  <div class="comment">
-    <UAvatar :src="`/images/users/${message.user.image}`" :alt="message.user.firstname" size="3xl"
-      :title="message.user.firstname" class="margin-right-0_5" />
-
-    <div class="comment-content">
-      <div class="comment-header">
-        <p class="bold">{{ message.user.firstname }},&nbsp;</p>
-        <p>{{ formatTimeAgo(message.createdAt) }}</p>
+  <div class="comment-wrapper">
+    <div class="comment" :class="responsesOfComment.length === 0 ? 'margin_left-0_9' : ''">
+      <div class="avatar">
+        <div>
+          <UIcon v-if="responsesOfComment.length !== 0"
+            :name="isOpen ? 'i-lucide-circle-minus' : 'i-lucide-circle-plus'" class="cursor-pointer"
+            @click="isOpen = !isOpen" />
+        </div>
+        <UAvatar :src="`/images/users/${message.user.image}`" :alt="message.user.firstname" size="3xl"
+          :title="message.user.firstname" class="margin-right-0_5" />
       </div>
-      <p class="comment-text">{{ message.content }}</p>
-      <div class="comment-actions">
-        <div class="action-button" @click="handleAddLikeOrDislike(true, message._id)">
-          <UIcon :name="isSolidThumbUp ? 'i-heroicons-hand-thumb-up-solid' : 'i-heroicons-hand-thumb-up'"
-            class="size-6" />
-          <p>{{ message.like }}</p>
+      <div class="comment-content">
+        <div class="comment-header">
+          <p class="bold">{{ message.user.firstname }},&nbsp;</p>
+          <p>{{ formatTimeAgo(message.createdAt) }}</p>
         </div>
-        <div class="action-button" @click="handleAddLikeOrDislike(false, message._id)">
-          <UIcon :name="isSolidThumbDown ? 'i-heroicons-hand-thumb-down-solid' : 'i-heroicons-hand-thumb-down'"
-            class="size-6" />
-          <p>{{ message.dislike }}</p>
+        <p class="comment-text">{{ message.content }}</p>
+        <div class="comment-actions">
+          <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(true, message._id)">
+            <UIcon :name="isSolidThumbUp ? 'i-heroicons-hand-thumb-up-solid' : 'i-heroicons-hand-thumb-up'"
+              class="size-6" />
+            <p>{{ message.like }}</p>
+          </div>
+          <div class="action-button cursor-pointer" @click="handleAddLikeOrDislike(false, message._id)">
+            <UIcon :name="isSolidThumbDown ? 'i-heroicons-hand-thumb-down-solid' : 'i-heroicons-hand-thumb-down'"
+              class="size-6" />
+            <p>{{ message.dislike }}</p>
+          </div>
+          <div class="action-button cursor-pointer" @click="handleSeeInputToAddResponseOfComment">
+            <UIcon name="i-lucide-messages-square" class="size-6" />
+            <p>Répondre</p>
+          </div>
         </div>
-        <div class="action-button" @click="handleAddResponse">
-          <UIcon name="i-lucide-messages-square" class="size-6" />
-          <p>Répondre</p>
+        <div v-if="isResponseOfAcomment" class="add-reponse-comment w-1/2">
+          <UTextarea v-model="isResponseOfAcommentValue" placeholder="Ecrivez votre réponse">
+          </UTextarea>
+          <UButton label="Envoyer ma réponse" class="w-1/3 cursor-pointer" size="sm"
+            :disabled="isResponseOfAcommentValue.length === 0" @click="handleAddResponseOfComment(message._id)" />
         </div>
       </div>
     </div>
+    <template v-if="responsesOfComment.length !== 0 && isOpen">
+      <div v-for="responseOfComment in responsesOfComment" :key="responseOfComment._id">
+        <div :class="props.deep >= MAX_DEEP ? 'responses-container-flat' : 'responses-container'">
+          <Comment :response="responseOfComment" :deep="props.deep >= MAX_DEEP ? props.deep : props.deep + 1" />
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 <style scoped>
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.comment-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1em;
+}
+
+.responses-container {
+  margin-left: 1em;
+  border-left: 0.15em solid var(--border-gray);
+  padding-left: 1.25em;
+  margin-top: 0.75em;
+}
+
+.responses-container-flat {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: none;
+  margin-top: 1em;
+  margin-left: 0.5em;
+}
+
+.add-reponse-comment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.avatar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  height: fit-content;
+}
+
 .comment {
   display: flex;
   flex-direction: row;
   gap: 1em;
   margin-bottom: 1em;
+  position: relative;
 }
 
 .comment-item {
@@ -123,5 +246,9 @@ watch(() => props.response, (newVal) => {
 
 .bold {
   font-weight: bold;
+}
+
+.margin_left-0_9 {
+  margin-left: 0.9em;
 }
 </style>

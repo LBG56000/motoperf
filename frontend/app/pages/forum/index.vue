@@ -63,14 +63,6 @@ const getResponseOfPost = async (postId: string) => {
   return data.messages
 }
 
-// const getResponsesOfResponses = async () => {
-//   posts.value.forEach(async (response: IMessage) => {
-//     const res = await fetch(`${useRuntimeConfig().public.apiBase}messages/${response.id}/responses`)
-//     const data = await res.json()
-//     return posts.value.push(data.messages)
-//   })
-// }
-
 const handleFilter = async (updateFilter: any) => {
   filters.value = {
     ...filters.value,
