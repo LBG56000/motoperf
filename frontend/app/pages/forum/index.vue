@@ -91,13 +91,13 @@ onMounted(async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'forum'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Bienvenue sur le <br />
           <span style="color: red">Forum</span>
         </h1>
       </template>
       <template #subtitle>
-        <p>
+        <p class="p-mobile">
           Échanger librement sur votre sujet favori en lien avec la moto.
         </p>
       </template>

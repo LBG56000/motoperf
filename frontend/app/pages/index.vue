@@ -84,7 +84,7 @@ onMounted(async () => {
 <template>
   <main>
     <section class="hero-header">
-      <h1 class="title">
+      <h1 class="title h1-mobile">
         Trouver <span style="color: var(--ui-primary)">la moto</span>
         <br />
         qui vous convient
@@ -96,6 +96,7 @@ onMounted(async () => {
           color="primary"
           class="rounded-full button"
           style="color: white"
+          to="/comparo"
           >Essayer</UButton
         >
         <UButton
@@ -126,8 +127,8 @@ onMounted(async () => {
     <section>
       <div class="list">
         <article>
-          <h2>Un peu d'histoire</h2>
-          <p>
+          <h2 class="h2-mobile">Un peu d'histoire</h2>
+          <p class="p-mobile">
             Depuis que l'homme a inventé le moteur thermique, il a toujours
             cherché à repousser ses limites : plus de
             <span class="bold">puissance</span>, plus de
@@ -142,7 +143,7 @@ onMounted(async () => {
       </div>
     </section>
     <section class="basic-section">
-      <h2 style="text-align: center">
+      <h2 class="h2-mobile" style="text-align: center">
         <span style="color: var(--ui-primary)">Motocenter</span>
         en quelques chiffres
       </h2>
@@ -166,11 +167,11 @@ onMounted(async () => {
       </article>
     </section>
     <section class="basic-section">
-      <h2 style="text-align: center">Les best-sellers</h2>
+      <h2 class="h2-mobile" style="text-align: center">Les best-sellers</h2>
       <CarrouselMotorcycles :items="itemsCaroussel" />
     </section>
     <section class="invitation justify-content-center basic-section">
-      <h3 style="text-align: center">Tester le comparateur dès maintenant !</h3>
+      <h3 class="h3-mobile" style="text-align: center">Tester le comparateur dès maintenant !</h3>
       <div>
         <UButton
           size="xl"
@@ -183,7 +184,7 @@ onMounted(async () => {
       </div>
     </section>
     <section class="basic-section">
-      <h2 style="text-align: center">Ils nous font confiance</h2>
+      <h2 class="h2-mobile" style="text-align: center">Ils nous font confiance</h2>
       <Sponsor />
     </section>
     <section class="justify-content-center">
@@ -347,6 +348,40 @@ section {
   to {
     transform: translateX(0);
     opacity: 1;
+  }
+}
+
+@media (max-width: 1024px) {
+  .hero-header {
+    height: 60vh;
+    gap: 2rem;
+  }
+
+  :deep(.button) {
+    font-size: small;
+    padding: 10px 30px;
+  }
+
+  .h2-mobile {
+    text-align: start;
+  }
+
+  .row {
+    gap: 1rem;
+  }
+
+  p {
+    font-size: 12px;
+  }
+
+  .invitation {
+    margin: 0 10%;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  section {
+    margin: 0 5%;
   }
 }
 </style>

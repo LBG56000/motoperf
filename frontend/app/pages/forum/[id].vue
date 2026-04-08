@@ -25,12 +25,16 @@ const getPost = async () => {
 }
 
 const getResponsesOfPost = async () => {
-  const res = await $fetch<{ messages: IMessage[] }>(`${apiBase}posts/${route.params.id}/responses`, {
-    params: {
-      project: 'like,dislike,user,content,description,createdAt,usersLikeId,usersDislikeId',
-      deep: true
+  const res = await $fetch<{ messages: IMessage[] }>(
+    `${apiBase}posts/${route.params.id}/responses`,
+    {
+      params: {
+        project:
+          'like,dislike,user,content,description,createdAt,usersLikeId,usersDislikeId',
+        deep: true
+      }
     }
-  })
+  )
   responses.value = res.messages
 }
 
@@ -44,7 +48,7 @@ onMounted(async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'post'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Bienvenue sur le <br />
           <span style="color: red">Forum</span>
         </h1>
@@ -90,8 +94,12 @@ onMounted(async () => {
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
-          <img :src="`${post?.image}`" :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
-            :title="`Image du post ${post?.title} par ${post?.user.firstname}`" class="img margin-1_5 margin-bottom-1">
+          <img
+            :src="`${post?.image}`"
+            :alt="`Image du post ${post?.title} par ${post?.user.firstname}`"
+            :title="`Image du post ${post?.title} par ${post?.user.firstname}`"
+            class="img margin-1_5 margin-bottom-1"
+          />
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
         <UFormField
