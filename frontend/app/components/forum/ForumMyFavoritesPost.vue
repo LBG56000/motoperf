@@ -5,12 +5,10 @@ const apiBase = useRuntimeConfig().public.apiBase
 const { user } = useAuth()
 
 const myFavoritesPosts = ref<IPost[]>([])
-const pending = ref(true)
 const toast = useToast()
 
 const getFavoritesPostsOfUser = async () => {
   try {
-    pending.value = true
     const response = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
       params: {
         project: 'image,content,title,createdAt,views,userFavoritePost,brand,user,brand,category',
@@ -27,8 +25,6 @@ const getFavoritesPostsOfUser = async () => {
       description: 'Les favoris n\'ont pas été chargé.',
       color: 'success'
     })
-  } finally {
-    pending.value = false
   }
 }
 
