@@ -33,10 +33,10 @@ const isOpen = ref(true)
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="w-fit sm:w-10 rounded-4xl m-1 btn-select"
+          class="w-fit  rounded-4xl m-1 btn-select"
           @click="emit('compare')"
         >
-          Sélectionner
+          Comparer
         </UButton>
         <div class="motorcycle-right">
           <img
