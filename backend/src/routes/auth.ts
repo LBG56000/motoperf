@@ -27,7 +27,7 @@ router.post('/', async (req: Request<unknown, unknown>, res: Response) => {
     maxAge: 24 * 60 * 60 * 1000, // 24h en ms
   })
 
-  res.json({ message: 'Connected' })
+  res.status(200).json({ message: 'Connected' })
 })
 
 router.post('/logout', (req: Request, res: Response) => {
