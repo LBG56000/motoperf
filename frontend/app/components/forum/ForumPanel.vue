@@ -10,8 +10,8 @@ const handleFiltersChange = (payload: any) => {
 </script>
 
 <template>
-  <div class="filters">
-    <div id="dekstop-filters" class="filters">
+  <div>
+    <div id="dekstop-filters">
       <UCard class="custom-border filters">
         <FilterContent @change="handleFiltersChange" />
       </UCard>
@@ -37,12 +37,6 @@ const handleFiltersChange = (payload: any) => {
   border: 0.5px solid var(--border-gray);
 }
 
-.filters {
-  position: sticky;
-  top: 0;
-  left: 0;
-}
-
 /** Style version mobile */
 @media (max-width: 1024px) {
   #mobile-filter {
@@ -56,7 +50,7 @@ const handleFiltersChange = (payload: any) => {
   .button-mobile {
     position: fixed;
     left: 0;
-    top: 50%;
+    bottom: 50%;
     transform: translateY(-50%);
   }
 

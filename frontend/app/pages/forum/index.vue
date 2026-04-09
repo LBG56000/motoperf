@@ -95,7 +95,7 @@ onMounted(async () => {
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <div>
+      <div class="panel-filters">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
       <div class="posts">
@@ -125,6 +125,14 @@ onMounted(async () => {
   .panel {
     display: none;
   }
+
+  .forum-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    margin: 2em;
+    gap: 0.5em;
+  }
 }
 
 /** Style version mobile */
@@ -140,9 +148,22 @@ onMounted(async () => {
     gap: 1.5rem;
     width: 300px;
     position: sticky;
-    top: 0;
+    top: 70px;
     right: 0;
   }
+
+  .forum-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    margin: 2em;
+    gap: 2em;
+  }
+}
+
+.panel-filters {
+  position: sticky;
+  top: 70px;
 }
 
 .center {
@@ -173,13 +194,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.forum-filters {
-  display: flex;
-  flex-direction: row;
-  align-items: start;
-  margin: 2em;
-  gap: 2em;
-}
+
 
 .forum-filters>div:nth-child(2) {
   flex: 1;
