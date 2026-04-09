@@ -9,6 +9,7 @@ const { isOpen } = useCreateAccountModal()
 const form = useTemplateRef('form')
 const currentStep = ref(1)
 const formErrors = ref<FormError[]>([])
+const show = ref(false)
 
 const state = reactive({
   firstname: '',
@@ -318,11 +319,22 @@ const handleSubmit = async () => {
               >
                 <UInput
                   v-model="state.password"
-                  type="password"
+                  :type="show ? 'text' : 'password'"
                   placeholder="Mot de passe ..."
                   variant="soft"
                   class="w-full"
-                />
+                  ><template #trailing>
+                    <UButton
+                      color="neutral"
+                      variant="link"
+                      size="sm"
+                      :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                      :aria-label="show ? 'Hide password' : 'Show password'"
+                      :aria-pressed="show"
+                      aria-controls="password"
+                      @click="show = !show"
+                    /> </template
+                ></UInput>
               </UFormField>
               <UFormField
                 label="Confirmer le mot de passe"
@@ -332,11 +344,22 @@ const handleSubmit = async () => {
               >
                 <UInput
                   v-model="state.confirmPassword"
-                  type="password"
+                  :type="show ? 'text' : 'password'"
                   placeholder="Confirmation mot de passe ..."
                   variant="soft"
                   class="w-full"
-                />
+                  ><template #trailing>
+                    <UButton
+                      color="neutral"
+                      variant="link"
+                      size="sm"
+                      :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                      :aria-label="show ? 'Hide password' : 'Show password'"
+                      :aria-pressed="show"
+                      aria-controls="password"
+                      @click="show = !show"
+                    /> </template
+                ></UInput>
               </UFormField>
             </div>
           </div>

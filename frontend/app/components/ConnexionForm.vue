@@ -14,6 +14,7 @@ const state = ref({
   password: ''
 })
 const error = ref('')
+const show = ref(false)
 
 type Schema = typeof state.value
 
@@ -73,11 +74,25 @@ watch(
           @submit.prevent="connexion"
         >
           <UFormField label="E-mail" name="email" type="email" required>
-            <UInput v-model="state.email" />
+            <UInput v-model="state.email"
+              ><template #trailing></template
+            ></UInput>
           </UFormField>
 
           <UFormField label="Mot de passe" name="password" required>
-            <UInput v-model="state.password" type="password" />
+            <UInput v-model="state.password" :type="show ? 'text' : 'password'"
+              ><template #trailing>
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  :aria-label="show ? 'Hide password' : 'Show password'"
+                  :aria-pressed="show"
+                  aria-controls="password"
+                  @click="show = !show"
+                /> </template
+            ></UInput>
           </UFormField>
           <UButton
             type="submit"
