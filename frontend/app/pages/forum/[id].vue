@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Comment from '~/components/forum/Comment.vue'
 import HeaderInfo from '~/components/global/HeaderInfo.vue'
-import { useAuth } from '~/composable/useAuth'
-import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
 import type { IMessage } from '~/types/messages'
 import type { IPost } from '~/types/post'
 
@@ -68,7 +68,7 @@ const handleAddComment = async () => {
     } else {
       toast.add({
         title: 'Erreur',
-        description: 'Votre commentaire n\'a pas pu être ajouté.',
+        description: "Votre commentaire n'a pas pu être ajouté.",
         color: 'error'
       })
     }
@@ -102,7 +102,12 @@ onMounted(async () => {
       <USkeleton v-if="isLoading === false" class="size-20 rounded-full" />
       <div v-else>
         <div class="icon-and-text title-mobile-version">
-          <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
+          <UAvatar
+            :src="`/images/users/${post?.user.image}`"
+            size="3xl"
+            loading="lazy"
+            class="margin-2"
+          />
           <h2>{{ post?.title }}</h2>
         </div>
         <div>
@@ -113,7 +118,10 @@ onMounted(async () => {
             </div>
             <div class="icon-and-text right">
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
-              <p>{{ responses.length || 0 }} {{ responses.length > 1 ? 'réponses' : 'réponse' }}</p>
+              <p>
+                {{ responses.length || 0 }}
+                {{ responses.length > 1 ? 'réponses' : 'réponse' }}
+              </p>
             </div>
             <p>
               Par {{ post?.user.firstname }},
@@ -124,7 +132,9 @@ onMounted(async () => {
               <p>{{ post?.views }} vues</p>
             </div>
           </div>
-          <div class="icon-and-text margin-bottom-1 margin-top-0_5 put-in-favorite">
+          <div
+            class="icon-and-text margin-bottom-1 margin-top-0_5 put-in-favorite"
+          >
             <UIcon name="i-lucide-star" class="size-7" />
             <p>Mettre ce post en favori</p>
           </div>
@@ -140,8 +150,14 @@ onMounted(async () => {
           <UFormField label="Ecrire un commentaire" required>
             <UTextarea v-model="newReponseOfPost" />
           </UFormField>
-          <UButton :disabled="newReponseOfPost === ''" size="sm" class="button-comment" @click="handleAddComment">
-            Ajouter mon commentaire</UButton>
+          <UButton
+            :disabled="newReponseOfPost === ''"
+            size="sm"
+            class="button-comment"
+            @click="handleAddComment"
+          >
+            Ajouter mon commentaire</UButton
+          >
         </div>
         <p v-if="responses.length === 0">
           Aucun commentaire à ce post, ajouter le premier
@@ -222,11 +238,11 @@ onMounted(async () => {
   margin: 2rem 5rem;
 }
 
-.post-filters>div:first-child {
+.post-filters > div:first-child {
   flex-shrink: 0;
 }
 
-.post-filters>div:nth-child(2) {
+.post-filters > div:nth-child(2) {
   flex: 1;
   min-width: 0;
 }

@@ -5,7 +5,7 @@ import { useConnexionModal } from '~/composables/useConnexionModal'
 import { useAuth } from '~/composables/useAuth'
 
 const { login, isAuthenticated, user } = useAuth()
-const { isOpen, close } = useConnexionModal()
+const { isOpen, close, openCreateAccountModal } = useConnexionModal()
 
 const form = useTemplateRef('form')
 
@@ -64,6 +64,7 @@ watch(
     <template #content>
       <div class="content">
         <h3>Se connecter</h3>
+
         <UForm
           ref="form"
           :state="state"
@@ -85,6 +86,12 @@ watch(
             style="width: 100%; justify-content: center; color: white"
           />
         </UForm>
+        <p style="font-size: small">
+          Nouveau sur ce site ?
+          <span class="new-account" @click="openCreateAccountModal"
+            >S'inscrire</span
+          >
+        </p>
         <p class="error-message">{{ error }}</p>
       </div>
     </template>
@@ -105,5 +112,10 @@ watch(
   color: red;
   font-size: 0.8em;
   margin: 1rem;
+}
+
+.new-account {
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>

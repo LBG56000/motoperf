@@ -4,8 +4,8 @@ import type { IMotorcycle } from '~/types/motorcycles'
 import CountUp from 'vue-countup-v3'
 import type { IMessage } from '~/types/messages'
 import Comment from '~/components/forum/Comment.vue'
-import { useAuth } from '~/composable/useAuth'
-import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
@@ -235,7 +235,11 @@ watch(
 <template>
   <div v-if="m" class="main-content">
     <h1 class="title">{{ m.name }}</h1>
-    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left" />
+    <img
+      :src="m.imageUrl"
+      :alt="`Image de la moto ${m.name}`"
+      class="img-cover moto-left"
+    />
 
     <div class="detail">
       <p><span>Marque:</span> {{ m.brand.name }}</p>
@@ -249,8 +253,14 @@ watch(
       <div class="stats-grid">
         <div v-for="stat in statsNumbers" :key="stat.label" class="stat-card">
           <span class="stat-label">{{ stat.label }}</span>
-          <CountUp :key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
-            :options="getCountUpOptions(stat.key)" :autoplay="true" />
+          <CountUp
+            :key="countStarted ? stat.label : ''"
+            class="stat-value"
+            :end-val="Number(stat.value)"
+            :duration="2"
+            :options="getCountUpOptions(stat.key)"
+            :autoplay="true"
+          />
           <div class="bar-outer">
             <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
           </div>
@@ -275,19 +285,36 @@ watch(
           Rejoignez la communauté pour débattre et partager vos avis sur ces
           motos !
         </h3>
-        <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl" @click="open()">Se connecter
+        <UButton
+          color="neutral"
+          class="rounded-4xl self-end text-xs p-2"
+          size="xl"
+          @click="open()"
+          >Se connecter
         </UButton>
       </div>
-      <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
+      <div
+        v-if="!messagePosted"
+        class="input-comment-container"
+        :class="{ blurred: !isAuthenticated }"
+      >
         <h4>
           Déjà roulé sur cette moto ?<br />
           Faite le savoir à la communauté !
         </h4>
         <div class="comment-input">
-          <UTextarea v-model="comment.content" size="xl"
-            placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
+          <UTextarea
+            v-model="comment.content"
+            size="xl"
+            placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question"
+          />
         </div>
-        <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
+        <UButton
+          class="rounded-4xl self-end text-xs m-1"
+          size="xl"
+          @click="postComment"
+          >Poster</UButton
+        >
       </div>
       <div v-else class="input-posted-container">
         <h4>Merci pour votre contribution !</h4>

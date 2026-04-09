@@ -13,7 +13,6 @@ const connexionModal = useConnexionModal()
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>
-  <ConnexionForm v-model="connexionModal.isOpen" />
 </template>
 
 <style></style>

@@ -45,8 +45,7 @@ const userSchema = new Schema(
     },
     image: {
       type: String,
-      default: 'default.svg'
-    }
+    },
   },
   { timestamps: true },
 )
