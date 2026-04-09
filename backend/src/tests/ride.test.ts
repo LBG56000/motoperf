@@ -13,6 +13,8 @@ describe('Ride Routes - /api/v1/rides', () => {
     start_town: 'Vannes',
     end_town: 'Quiberon',
     ride_type: 'coastal',
+    user_id: '507f1f77bcf86cd799439011',
+    image_link: 'https://example.com/ride.jpg',
     geom: {
       type: 'FeatureCollection',
       features: [
@@ -75,6 +77,8 @@ describe('Ride Routes - /api/v1/rides', () => {
           startTown: { value: 'Rennes' },
           endTown: { value: 'Nantes' },
           rideType: 'highway',
+          userId: '507f1f77bcf86cd799439011',
+          imageLink: 'https://example.com/ride.jpg',
           geom: rideData.geom,
         })
 
