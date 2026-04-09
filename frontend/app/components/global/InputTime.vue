@@ -28,10 +28,7 @@ const selectTime = (h: number) => {
     size="xl"
   >
     <template #trailing>
-      <UPopover
-        :reference="inputRef?.inputsRef[0]?.$el"
-        :popper="{ placement: 'bottom-end', offset: [0, 8] }"
-      >
+      <UPopover :reference="inputRef?.inputsRef[0]?.$el">
         <UButton
           color="neutral"
           variant="link"
@@ -62,7 +59,6 @@ const selectTime = (h: number) => {
   padding: 0.5rem;
   height: 12rem;
   overflow-y: auto;
-  width: 8rem;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;

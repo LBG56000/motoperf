@@ -727,7 +727,7 @@ const seedRide = async () => {
       ride_type: 'Grandes routes',
       like: 0,
       liked_id: [],
-      image_link: '/images/rides/quimper_quimperlé-1775568566758.jpeg',
+      image_link: '/images/rides/image.jpg',
       user_id: user2Id,
       is_event: true,
       date_event: '2026-04-18',

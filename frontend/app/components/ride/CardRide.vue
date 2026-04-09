@@ -17,6 +17,20 @@ const isLikedCurrent = ref<boolean>(
 const { open } = useConnexionModal()
 const creator = ref<any>(null)
 
+const dateEvent = computed(() => {
+  if (!props.ride?.date_event || !props.ride?.hour_event) return new Date()
+
+  try {
+    const [hours, minutes] = props.ride.hour_event.split(':').map(Number)
+    const d = new Date(props.ride.date_event)
+    d.setHours(hours || 0, minutes || 0, 0, 0)
+    return d
+  } catch (e) {
+    console.error('Erreur formatage date:', e)
+    return new Date()
+  }
+})
+
 const isParticipating = computed(() =>
   user.value
     ? props.ride.participating_user?.some(
@@ -182,7 +196,14 @@ onMounted(async () => {
             icon="i-lucide-calendar-days"
             class="event-badge-header"
           >
-            {{ props.ride.date_event }} • {{ props.ride.hour_event }}
+            {{ dateEvent.toLocaleDateString('fr-FR') }}
+            •
+            {{
+              dateEvent.toLocaleTimeString('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            }}
           </UBadge>
         </div>
 
