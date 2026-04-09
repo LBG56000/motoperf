@@ -87,11 +87,21 @@ router.get('/count', async (req, res) => {
   try {
     const now = new Date()
     const start = new Date(now.getFullYear(), now.getMonth() - 2, 1)
-
-    const count = await Ride.countDocuments({
-      createdAt: { $gte: start, $lt: now },
+    const intermediate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const end = new Date()
+    const countFirstPeriod = await Ride.countDocuments({
+      createdAt: { $gte: start, $lt: intermediate },
     })
-    res.status(200).json({ count })
+    const countSecondPeriod = await Ride.countDocuments({
+      createdAt: { $gte: intermediate, $lt: end },
+    })
+
+    const percent =
+      countFirstPeriod === 0
+        ? countSecondPeriod * 100
+        : ((countSecondPeriod - countFirstPeriod) / countFirstPeriod) * 100
+
+    res.status(200).json({ count: countSecondPeriod, percent })
   } catch (error) {
     console.error('Error counting rides:', error)
     res.status(500).json({ error: 'Internal server error' })
