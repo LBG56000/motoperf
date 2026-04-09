@@ -50,10 +50,10 @@ const getBrands = async () => {
 }
 
 const schema = v.object({
-  title: v.pipe(v.string(), v.minLength(1, 'Le titre est requis')),
+  title: v.pipe(v.string(), v.minLength(1, 'Le titre est requis'), v.check(val => val.trim().length > 0, 'Le titre ne peut pas contenir uniquement des espaces')),
   category: v.pipe(v.string(), v.minLength(1, 'La catégorie est requise')),
   brand: v.pipe(v.string(), v.minLength(1, 'La marque est requise')),
-  description: v.pipe(v.string(), v.minLength(1, 'La description est requise')),
+  description: v.pipe(v.string(), v.minLength(1, 'La description est requise'), v.check(val => val.trim().length > 0, 'La description ne peut pas contenir uniquement des espaces')),
   file: v.optional(
     v.union([
       v.pipe(
@@ -205,57 +205,28 @@ onMounted(async () => {
 <template>
   <div>
     <UModal v-model:open="displayModal" :close="true">
-      <UIcon
-        v-if="isSameUser && isNewPost === false"
-        class="size-6"
-        name="i-lucide-square-pen"
-        @click.stop
-      />
-      <UButton
-        v-if="isNewPost === true"
-        icon="i-lucide-plus"
-        size="sm"
-        color="primary"
-        variant="solid"
-        class="cursor-pointer"
-      />
+      <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
+      <UButton v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
+        class="cursor-pointer" />
       <template #header>
         <div class="modal-header">
           <h3>{{ modalTitle() }}</h3>
-          <UButton
-            color="primary"
-            variant="outline"
-            icon="i-lucide-x"
-            class="rounded-full cursor-pointer"
-            @click="handleCloseModal"
-          />
+          <UButton color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
+            @click="handleCloseModal" />
         </div>
       </template>
       <template #body>
         <div>
           <UForm :schema :state="state" @submit="onSubmit" class="form">
             <UFormField label="Titre du post" required name="title">
-              <UInput
-                v-model="state.title"
-                placeholder="Titre du post"
-                size="md"
-                class="w-full"
-              />
+              <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
             </UFormField>
             <UFormField label="Catégorie" required name="category">
-              <USelectMenu
-                v-model="state.category"
-                placeholder="Sélectionnez la catégorie du post"
-                :items="categories"
-                value-key="name"
-                label-key="name"
-                :search-input="{
+              <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
+                value-key="name" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
-                }"
-                size="md"
-                class="w-full"
-              >
+                }" size="md" class="w-full">
                 <template #empty>
                   <span class="text-gray-500 text-sm p-2">
                     Aucune catégorie trouvée
@@ -264,19 +235,11 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Marque" required name="brand">
-              <USelectMenu
-                v-model="state.brand"
-                placeholder="Sélectionnez la marque du post"
-                :items="brands"
-                value-key="name"
-                label-key="name"
-                :search-input="{
+              <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
+                value-key="name" label-key="name" :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
-                }"
-                size="md"
-                class="w-full"
-              >
+                }" size="md" class="w-full">
                 <template #empty>
                   <span class="text-gray-500 text-sm p-2">
                     Aucune marque trouvée
@@ -285,46 +248,22 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Description" required name="description">
-              <UTextarea
-                size="md"
-                v-model="state.description"
-                placeholder="Ecrivez votre description"
-                class="w-full"
-              />
+              <UTextarea size="md" v-model="state.description" placeholder="Ecrivez votre description" class="w-full" />
             </UFormField>
             <UFormField required :label="onImageTitle()" name="file">
-              <UFileUpload
-                v-model="state.file"
-                accept="image/*"
-                label="Déposez votre image"
-                description="PNG ou JPG"
-              >
+              <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
                 <template #default="{ open }">
-                  <div
-                    @click="open"
-                    @mouseover="isHover = true"
-                    @mouseleave="isHover = false"
-                  >
-                    <div
-                      class="cursor-pointer"
-                      :class="isHover ? 'blur-4' : ''"
-                    >
+                  <div @click="open" @mouseover="isHover = true" @mouseleave="isHover = false">
+                    <div class="cursor-pointer" :class="isHover ? 'blur-4' : ''">
                       <img :src="getPreviewUrl()" />
                     </div>
-                    <div
-                      v-if="props.isNewPost && getPreviewUrl() === ''"
-                      class="border cursor-pointer"
-                    >
+                    <div v-if="props.isNewPost && getPreviewUrl() === ''" class="border cursor-pointer">
                       <div class="helper-upload">
                         <UIcon name="i-lucide-cloud-upload" class="size-10" />
                         <p class="text-sm">Sélectionner votre fichier</p>
                       </div>
                     </div>
-                    <div
-                      v-if="isHover && getPreviewUrl() !== ''"
-                      class="helper-upload cursor-pointer"
-                      @click="open"
-                    >
+                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload cursor-pointer" @click="open">
                       <h4>Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
@@ -335,19 +274,10 @@ onMounted(async () => {
               <UButton v-if="isNewPost" class="cursor-pointer" type="submit">
                 Ajouter
               </UButton>
-              <UButton
-                v-else
-                class="cursor-pointer"
-                type="submit"
-                :disabled="!isSameValues"
-              >
+              <UButton v-else class="cursor-pointer" type="submit" :disabled="!isSameValues">
                 Modifier
               </UButton>
-              <UButton
-                class="cursor-pointer"
-                variant="outline"
-                @click="resetForm"
-              >
+              <UButton class="cursor-pointer" variant="outline" @click="resetForm">
                 Réinitialiser
               </UButton>
             </div>
