@@ -1,7 +1,11 @@
 import User from '../models/User'
+import { IUser } from '../types/user'
 import { authenticateToken } from '../utils/auth'
-import { type Request, Response, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
+import { argon2PasswordHasher } from '../utils/hash'
+import { type Request, Response, Router } from 'express'
+
+const { hash } = argon2PasswordHasher
 
 const router = Router()
 router.get(
@@ -42,9 +46,9 @@ router.post('/account', async (req: Request, res: Response) => {
   }
 
   try {
-    const newUser: any = {
+    const newUser: IUser = {
       email,
-      password,
+      password: await hash(password),
       firstname,
       lastname,
       pseudo,
@@ -52,6 +56,8 @@ router.post('/account', async (req: Request, res: Response) => {
       image,
       ridingStartYear,
       createdAt: new Date(),
+      isAdmin: false,
+      idMoto: '',
     }
 
     const users = await User.insertOne(newUser)
