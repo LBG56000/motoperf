@@ -39,6 +39,10 @@ const postSchema = new Schema({
   isNewMotoComment: {
     type: Boolean,
     required: false
+  },
+  userFavoritePost: {
+    type: [String],
+    default: []
   }
 })
 

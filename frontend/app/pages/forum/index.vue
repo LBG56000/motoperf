@@ -51,7 +51,6 @@ const getPosts = async () => {
   posts.value = await Promise.all(
     res.posts.map(async (post: IPost) => {
       post.responses = await getResponseOfPost(post._id)
-      // await getResponsesOfResponses()
       return post
     })
   )
