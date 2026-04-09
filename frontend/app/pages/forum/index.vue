@@ -125,6 +125,14 @@ onMounted(async () => {
   .panel {
     display: none;
   }
+
+  .forum-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    margin: 2em;
+    gap: 0.5em;
+  }
 }
 
 /** Style version mobile */
@@ -142,6 +150,14 @@ onMounted(async () => {
     position: sticky;
     top: 70px;
     right: 0;
+  }
+
+  .forum-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    margin: 2em;
+    gap: 2em;
   }
 }
 
@@ -178,13 +194,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.forum-filters {
-  display: flex;
-  flex-direction: row;
-  align-items: start;
-  margin: 2em;
-  gap: 2em;
-}
+
 
 .forum-filters>div:nth-child(2) {
   flex: 1;

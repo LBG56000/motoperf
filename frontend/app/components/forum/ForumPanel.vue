@@ -50,7 +50,7 @@ const handleFiltersChange = (payload: any) => {
   .button-mobile {
     position: fixed;
     left: 0;
-    top: 50%;
+    bottom: 50%;
     transform: translateY(-50%);
   }
 
