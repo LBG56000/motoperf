@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import request from 'supertest'
 import app from '../app'
 import User from '../models/User'
+import { argon2PasswordHasher } from '../utils/hash'
 
 describe('Auth Routes - /api/v1/auth', () => {
   const userData = {
@@ -10,10 +11,12 @@ describe('Auth Routes - /api/v1/auth', () => {
     pseudo: 'johnd',
     email: 'john@test.com',
     password: 'password123',
+    isAdmin: false,
   }
 
   beforeEach(async () => {
-    await User.create(userData)
+    const hashedPassword = await argon2PasswordHasher.hash(userData.password)
+    await User.create({ ...userData, password: hashedPassword })
   })
 
   describe('POST /api/v1/auth', () => {
