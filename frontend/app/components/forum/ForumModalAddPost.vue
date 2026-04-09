@@ -92,7 +92,7 @@ const uploadImage = async (file: File, name: string): Promise<string> => {
 const onSubmit = async () => {
   const payload = {
     brand: state.brand,
-    title: state.title.trim(),
+    title: state.title,
     category: state.category,
     content: state.description,
     url: currentImageUrl.value,
