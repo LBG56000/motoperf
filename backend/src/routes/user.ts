@@ -185,4 +185,44 @@ router.get('/count', async (req: Request, res: Response) => {
   }
 })
 
+router.get('/stats/monthly', async (req: Request, res: Response) => {
+  try {
+    const currentYear = new Date().getFullYear()
+
+    const baseCount = await User.countDocuments({
+      createdAt: { $lt: new Date(currentYear, 0, 1) },
+    })
+
+    const monthly = await User.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: new Date(currentYear, 0, 1),
+            $lt: new Date(currentYear + 1, 0, 1),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$createdAt' },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ])
+
+    let cumulative = baseCount
+    const stats = Array.from({ length: 12 }, (_, i) => {
+      const found = monthly.find((m) => m._id === i + 1)
+      cumulative += found?.count ?? 0
+      return { month: i + 1, total: cumulative }
+    })
+
+    res.status(200).json({ stats })
+  } catch (error) {
+    console.error('Error accessing user route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 export default router

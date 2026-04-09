@@ -54,7 +54,8 @@ const handlePostChange = () => {
           <div class="statsContainer">
             <div class="stats">
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
-              <p>{{ props.post.responses.length || 0 }} réponses</p>
+              <p>{{ props.post.responses.length || 0 }} {{ props.post.responses.length > 1 ? 'réponses' : 'réponse' }}
+              </p>
             </div>
             <div class="stats">
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
@@ -70,7 +71,6 @@ const handlePostChange = () => {
 .card-forum {
   width: 100%;
   max-width: 1100px;
-  /* margin: 0.5rem auto; */
 }
 
 .main {

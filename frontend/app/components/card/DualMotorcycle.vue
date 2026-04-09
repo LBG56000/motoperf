@@ -23,13 +23,17 @@ const isOpen = ref(true)
             :src="props.leftMotorcycleUrl"
             alt="Left Motorcycle"
           />
-          <img src="/svg/motorcycleIcon.svg" class="size-20" />
+          <img
+            v-if="!props.leftMotorcycleUrl"
+            src="/svg/motorcycleIcon.svg"
+            class="size-20"
+          />
 
           <p>{{ props.leftName }}</p>
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="w-fit rounded-4xl m-1"
+          class="w-fit sm:w-10 rounded-4xl m-1 btn-select"
           @click="emit('compare')"
         >
           Sélectionner
@@ -39,8 +43,10 @@ const isOpen = ref(true)
             v-if="props.rightMotorcycleUrl"
             :src="props.rightMotorcycleUrl"
             alt="Right Motorcycle"
+            style="transform: scaleX(-1)"
           />
           <img
+            v-if="!props.rightMotorcycleUrl"
             src="/svg/motorcycleIcon.svg"
             class="size-20"
             style="transform: scaleX(-1)"
@@ -141,5 +147,31 @@ const isOpen = ref(true)
   border-radius: 8px 8px 0 0;
   color: var(--background);
   background-color: var(--text-color);
+}
+
+@media (max-width: 1024px) {
+  .wrapper {
+    width: 90vw;
+  }
+
+  .dual-motorcycle {
+    width: 100%;
+  }
+
+  .footer-open,
+  .footer-closed {
+    width: 94%;
+  }
+
+  .btn-select {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
+  .motorcycle-left,
+  .motorcycle-right {
+    height: 100px;
+    padding: 5px;
+  }
 }
 </style>

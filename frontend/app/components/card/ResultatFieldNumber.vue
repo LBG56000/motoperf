@@ -114,7 +114,7 @@ function tradFieldName(fieldName: string) {
 
 <template>
   <div class="resultat">
-    <p>{{ tradFieldName(props.fieldName) }}</p>
+    <p class="p-mobile">{{ tradFieldName(props.fieldName) }}</p>
     <div class="container-row">
       <div class="left">
         <count-up
@@ -169,7 +169,7 @@ h3 {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
+  width: 90%;
 }
 
 .bar-container {
@@ -210,6 +210,34 @@ h3 {
 @keyframes slide-in {
   from {
     width: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container-row {
+    flex-direction: column;
+    width: 95%;
+    gap: 8px;
+  }
+
+  .left {
+    flex-direction: row-reverse;
+    gap: 10px;
+  }
+
+  .right {
+    gap: 10px;
+  }
+
+  .left .bar-value {
+    right: auto;
+    left: 0;
+    transform: rotateY(180deg);
+  }
+
+  .bar-container {
+    height: 10px;
+    width: 70%;
   }
 }
 </style>

@@ -63,14 +63,6 @@ const getResponseOfPost = async (postId: string) => {
   return data.messages
 }
 
-// const getResponsesOfResponses = async () => {
-//   posts.value.forEach(async (response: IMessage) => {
-//     const res = await fetch(`${useRuntimeConfig().public.apiBase}messages/${response.id}/responses`)
-//     const data = await res.json()
-//     return posts.value.push(data.messages)
-//   })
-// }
-
 const handleFilter = async (updateFilter: any) => {
   filters.value = {
     ...filters.value,
@@ -91,13 +83,13 @@ onMounted(async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'forum'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Bienvenue sur le <br />
           <span style="color: red">Forum</span>
         </h1>
       </template>
       <template #subtitle>
-        <p>
+        <p class="p-mobile">
           Échanger librement sur votre sujet favori en lien avec la moto.
         </p>
       </template>

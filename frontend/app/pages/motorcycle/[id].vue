@@ -4,13 +4,15 @@ import type { IMotorcycle } from '~/types/motorcycles'
 import CountUp from 'vue-countup-v3'
 import type { IMessage } from '~/types/messages'
 import Comment from '~/components/forum/Comment.vue'
+import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composable/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
   motorcycleName: string
   brand: string
   content: string
-  user: string // TODO: update quand l'auth sera en place
+  user: string
 }
 
 interface IMaxStats {
@@ -35,10 +37,11 @@ const comment = ref<ICommentInput>({
   motorcycleName: '',
   brand: '',
   content: '',
-  user: '69cbe6342e0cabab3167824a' // TODO: update quand l'auth sera en place
+  user: ''
 })
 const messagePosted = ref<boolean>(false)
-const isConnected = ref<boolean>(false) // Simule l'état de connexion de l'utilisateur
+const { isAuthenticated } = useAuth()
+const { open } = useConnexionModal()
 
 const statsRef = ref<HTMLElement | null>(null)
 const countStarted = ref(false)
@@ -176,7 +179,9 @@ async function postComment() {
         }
       })
 
-      m.value.post = postId
+      if (m.value) {
+        m.value.post = postId
+      }
     } catch (error) {
       console.error('Error creating post:', error)
       return
@@ -213,7 +218,7 @@ watch(
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0]?.isIntersecting) {
           countStarted.value = true
           observer.disconnect()
         }
@@ -230,14 +235,11 @@ watch(
 <template>
   <div v-if="m" class="main-content">
     <h1 class="title">{{ m.name }}</h1>
-    <img
-      :src="m.imageUrl"
-      :alt="`Image de la moto ${m.name}`"
-      class="img-cover moto-left"
-    />
+    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left" />
 
     <div class="detail">
-      <p><span>Modèle:</span> {{ m.brand.name }} {{ m.name }}</p>
+      <p><span>Marque:</span> {{ m.brand.name }}</p>
+      <p><span>Modèle:</span> {{ m.name }}</p>
       <p><span>Année:</span> {{ m.year }}</p>
       <p><span>Moteur:</span> {{ m.engine_size }} m3</p>
     </div>
@@ -247,14 +249,8 @@ watch(
       <div class="stats-grid">
         <div v-for="stat in statsNumbers" :key="stat.label" class="stat-card">
           <span class="stat-label">{{ stat.label }}</span>
-          <CountUp
-            :key="countStarted ? stat.label : ''"
-            class="stat-value"
-            :end-val="Number(stat.value)"
-            :duration="2"
-            :options="getCountUpOptions(stat.key)"
-            :autoplay="true"
-          />
+          <CountUp :key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
+            :options="getCountUpOptions(stat.key)" :autoplay="true" />
           <div class="bar-outer">
             <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
           </div>
@@ -268,44 +264,30 @@ watch(
     </div>
 
     <div v-if="commentsMotorcycle.length > 0" class="display-comment">
-      <Comment :responses="commentsMotorcycle" />
+      <div v-for="comment in commentsMotorcycle" :key="comment._id">
+        <Comment :response="comment" />
+      </div>
     </div>
 
     <div class="input-comment-box">
-      <div v-if="!isConnected" class="need-connection">
+      <div v-if="!isAuthenticated" class="need-connection">
         <h3>
           Rejoignez la communauté pour débattre et partager vos avis sur ces
           motos !
         </h3>
-        <UButton
-          color="neutral"
-          class="rounded-4xl self-end text-xs p-2"
-          size="xl"
-          >Se connecter</UButton
-        >
+        <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl" @click="open()">Se connecter
+        </UButton>
       </div>
-      <div
-        v-if="!messagePosted"
-        class="input-comment-container"
-        :class="{ blurred: !isConnected }"
-      >
+      <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
         <h4>
           Déjà roulé sur cette moto ?<br />
           Faite le savoir à la communauté !
         </h4>
         <div class="comment-input">
-          <UTextarea
-            v-model="comment.content"
-            size="xl"
-            placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
-          />
+          <UTextarea v-model="comment.content" size="xl"
+            placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
         </div>
-        <UButton
-          class="rounded-4xl self-end text-xs m-1"
-          size="xl"
-          @click="postComment"
-          >Poster</UButton
-        >
+        <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
       </div>
       <div v-else class="input-posted-container">
         <h4>Merci pour votre contribution !</h4>
@@ -325,6 +307,7 @@ watch(
   justify-content: center;
   margin-top: 1em;
 }
+
 .main-content {
   display: flex;
   flex-direction: column;
@@ -332,6 +315,7 @@ watch(
   gap: 2em;
   padding-bottom: 4em;
 }
+
 .detail {
   display: flex;
   flex-direction: column;
@@ -341,21 +325,26 @@ watch(
   padding: 1em;
   width: 50%;
 }
+
 span {
   font-weight: bold;
 }
+
 .stats-section {
   width: 60%;
 }
+
 .stats-section h3 {
   text-align: center;
   margin-bottom: 1em;
 }
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1em;
 }
+
 .stat-card {
   display: flex;
   flex-direction: column;
@@ -365,15 +354,18 @@ span {
   border-radius: 8px;
   gap: 0.5em;
 }
+
 .stat-label {
   font-size: 0.85em;
   color: #666;
   text-align: center;
 }
+
 .stat-value {
   font-size: 1.4em;
   font-weight: bold;
 }
+
 .sound-section {
   margin-top: 2em;
   display: flex;
@@ -484,7 +476,7 @@ span {
 }
 
 .img-cover {
-  flex: 1; /* = flex-grow: 1; flex-shrink: 1; flex-basis: 0%; */
+  flex: 1;
 
   width: 50%;
   min-width: 38%;

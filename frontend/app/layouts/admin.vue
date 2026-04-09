@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
+import Header from '~/components/admin/Header.vue'
 
 function getItems() {
   return [
@@ -16,7 +17,7 @@ function getItems() {
     {
       label: 'Statistiques',
       icon: 'i-lucide-chart-pie',
-      to: '/admin/statistiques'
+      to: '/admin/analytics'
     }
   ] satisfies NavigationMenuItem[]
 }
@@ -27,7 +28,7 @@ function getItems() {
     <UDashboardSidebar
       :collapsible="true"
       :ui="{
-        root: 'bg-[var(--ui-primary)]',
+        root: 'bg-[var(--ui-primary)] h-screen sticky top-0',
         body: 'py-0'
       }"
     >
@@ -41,13 +42,17 @@ function getItems() {
           :items="getItems()"
           orientation="vertical"
           :ui="{
-            link: 'text-white'
+            linkLeadingIcon:
+              'text-white group-data-[active]:text-[var(--ui-primary)]',
+            link: 'text-white data-[active]:text-[var(--ui-primary)]'
           }"
         />
       </template>
     </UDashboardSidebar>
 
     <div class="flex-1">
+      <Header />
+      <hr />
       <slot />
       <UToaster />
     </div>

@@ -4,21 +4,23 @@ import { h, resolveComponent } from 'vue'
 import CardMoto from '../../components/admin/CardMoto.vue'
 import type { IMotorcycle } from '~/types/motorcycles'
 import { getPaginationRowModel } from '@tanstack/vue-table'
+import type { ColumnDef } from '@tanstack/vue-table'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 })
 const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')
 const apiBase = useRuntimeConfig().public.apiBase
 const motos = ref<IMotorcycle[]>([])
 const selectedMoto = ref<IMotorcycle | null>(null)
-const search = ref<string>()
-const panelOpen = ref(false)
-const refreshing = ref(false)
+const search = ref<string>('')
+const panelOpen = ref<boolean>(false)
+const refreshing = ref<boolean>(false)
 const UButton = resolveComponent('UButton')
 
-const columns = [
+const columns: ColumnDef<IMotorcycle>[] = [
   {
     accessorKey: 'brand',
     header: ({ column }) =>
@@ -204,9 +206,6 @@ watch(
 
 <template>
   <div>
-    <Header />
-    <hr />
-
     <main>
       <div class="header-page">
         <UInput
@@ -269,8 +268,8 @@ watch(
             :key="selectedMoto?._id ?? 'create'"
             :mode="selectedMoto ? 'edit' : 'create'"
             :moto="selectedMoto"
-            :onClosePanel="closePanel"
-            :onRefresh="refreshAll"
+            :on-close-panel="closePanel"
+            :on-refresh="refreshAll"
           />
         </div>
       </div>

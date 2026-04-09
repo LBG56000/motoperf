@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
-import { useAuth } from '~/composable/useAuth'
-import { useConnexionModal } from '~/composable/useConnexionModal'
-import { useProfileModal } from '~/composable/useProfileModal'
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
+import { useProfileModal } from '~/composables/useProfileModal'
 
 const { isAuthenticated, user } = useAuth()
 
@@ -89,7 +89,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         color="neutral"
         variant="ghost"
         style="justify-content: center"
-        to="/"
+        to="/comparo"
         >Comparateur</UButton
       >
       <UButton
@@ -113,7 +113,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         color="neutral"
         variant="ghost"
         style="justify-content: center"
-        to="/"
+        to="/knowUs"
         >Nous connaitre</UButton
       >
       <UButton

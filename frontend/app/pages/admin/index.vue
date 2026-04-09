@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { IUser } from '@/types/users'
-import CardStats from '~/components/admin/CardStats.vue'
-import Header from '~/components/admin/Header.vue'
+import StatsAnalytics from '~/components/admin/StatsAnalytics.vue'
 
 interface Stat {
   title: string
@@ -9,7 +8,8 @@ interface Stat {
 }
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 })
 
 const userName: string = 'Admin'
@@ -61,18 +61,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <Header />
-    <hr />
-    <main>
-      <h3>Bienvenue {{ userName }}</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-40 pr-40">
-        <div v-for="stat in stats" :key="stat.title" class="card">
-          <CardStats :title="stat.title" :value="stat.value" />
-        </div>
+  <main>
+    <h3>Bienvenue {{ userName }}</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-40 pr-40">
+      <div v-for="stat in stats" :key="stat.title" class="card">
+        <StatsAnalytics :title="stat.title" :value="stat.value" />
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
 </template>
 
 <style scoped>
@@ -86,7 +82,6 @@ main {
 }
 
 .card {
-  border: 3px solid black;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 </style>

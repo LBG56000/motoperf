@@ -1,4 +1,4 @@
-import { useProfileModal } from '~/composable/useProfileModal'
+import { useProfileModal } from '~/composables/useProfileModal'
 
 export const useProfileEditModal = () => {
   const isOpen = useState('profileEditModal.isOpen', () => false)

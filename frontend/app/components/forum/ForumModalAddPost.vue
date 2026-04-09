@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import * as v from 'valibot'
-import { useAuth } from '~/composable/useAuth';
-import type { IBrand } from '~/types/brand';
-import type { ICategory } from '~/types/category';
-import type { IPost } from '~/types/post';
+import { useAuth } from '~/composables/useAuth'
+import type { IBrand } from '~/types/brand'
+import type { ICategory } from '~/types/category'
+import type { IPost } from '~/types/post'
 
 const props = defineProps<{
   isNewPost: boolean
@@ -27,21 +27,25 @@ const initialState = ref({
 
 const getCategories = async () => {
   const res = await $fetch<{ categories: ICategory[] }>(
-    `${useRuntimeConfig().public.apiBase}categories`, {
-    params: {
-      project: 'name,_id'
+    `${useRuntimeConfig().public.apiBase}categories`,
+    {
+      params: {
+        project: 'name,_id'
+      }
     }
-  })
+  )
   categories.value = res.categories
 }
 
 const getBrands = async () => {
   const res = await $fetch<{ brands: IBrand[] }>(
-    `${useRuntimeConfig().public.apiBase}brand`, {
-    params: {
-      project: 'name,_id'
+    `${useRuntimeConfig().public.apiBase}brand`,
+    {
+      params: {
+        project: 'name,_id'
+      }
     }
-  })
+  )
   brands.value = res.brands
 }
 
@@ -52,7 +56,10 @@ const schema = v.object({
   description: v.pipe(v.string(), v.minLength(1, 'La description est requise')),
   file: v.optional(
     v.union([
-      v.pipe(v.instance(File, 'Image requise'), v.mimeType(['image/jpeg', 'image/png'], 'Format invalide')),
+      v.pipe(
+        v.instance(File, 'Image requise'),
+        v.mimeType(['image/jpeg', 'image/png'], 'Format invalide')
+      ),
       v.pipe(v.string(), v.minLength(1))
     ])
   )
@@ -103,23 +110,40 @@ const onSubmit = async () => {
 
     try {
       const method = props.isNewPost ? 'POST' : 'PUT'
-      const response = await $fetch.raw(`${useRuntimeConfig().public.apiBase}posts`, {
-        method,
-        body: payload,
-        ...(!props.isNewPost && { params: { filter: JSON.stringify({ id: props.post?._id }) } })
-      })
+      const response = await $fetch.raw(
+        `${useRuntimeConfig().public.apiBase}posts`,
+        {
+          method,
+          body: payload,
+          ...(!props.isNewPost && {
+            params: { filter: JSON.stringify({ id: props.post?._id }) }
+          })
+        }
+      )
 
       if (response.ok) {
-        toast.add({ title: 'Succès', description: `Votre post a été ${props.isNewPost ? 'ajouté' : 'modifié'}.`, color: 'success' })
+        toast.add({
+          title: 'Succès',
+          description: `Votre post a été ${props.isNewPost ? 'ajouté' : 'modifié'}.`,
+          color: 'success'
+        })
         resetForm()
         displayModal.value = false
         emit('added-post')
       }
     } catch {
-      toast.add({ title: 'Erreur', description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`, color: 'error' })
+      toast.add({
+        title: 'Erreur',
+        description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`,
+        color: 'error'
+      })
     }
   } catch {
-    toast.add({ title: 'Erreur', description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`, color: 'error' })
+    toast.add({
+      title: 'Erreur',
+      description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`,
+      color: 'error'
+    })
   }
 }
 
@@ -156,7 +180,7 @@ const setInitialState = () => {
     title: props.post?.title || '',
     category: props.post?.category.name || '',
     brand: props.post?.brand.name || '',
-    description: props.post?.content || '',
+    description: props.post?.content || ''
   }
 }
 
@@ -173,9 +197,7 @@ const isSameValues = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([
-    getCategories(), getBrands()
-  ])
+  await Promise.all([getCategories(), getBrands()])
   setInitialState()
 })
 </script>
@@ -183,28 +205,57 @@ onMounted(async () => {
 <template>
   <div>
     <UModal v-model:open="displayModal" :close="true">
-      <UIcon v-if="isSameUser && isNewPost === false" class="size-6" name="i-lucide-square-pen" @click.stop />
-      <UButton v-if="isNewPost === true" icon="i-lucide-plus" size="sm" color="primary" variant="solid"
-        class="cursor-pointer" />
+      <UIcon
+        v-if="isSameUser && isNewPost === false"
+        class="size-6"
+        name="i-lucide-square-pen"
+        @click.stop
+      />
+      <UButton
+        v-if="isNewPost === true"
+        icon="i-lucide-plus"
+        size="sm"
+        color="primary"
+        variant="solid"
+        class="cursor-pointer"
+      />
       <template #header>
         <div class="modal-header">
           <h3>{{ modalTitle() }}</h3>
-          <UButton color="primary" variant="outline" icon="i-lucide-x" class="rounded-full cursor-pointer"
-            @click="handleCloseModal" />
+          <UButton
+            color="primary"
+            variant="outline"
+            icon="i-lucide-x"
+            class="rounded-full cursor-pointer"
+            @click="handleCloseModal"
+          />
         </div>
       </template>
       <template #body>
         <div>
           <UForm :schema :state="state" @submit="onSubmit" class="form">
             <UFormField label="Titre du post" required name="title">
-              <UInput v-model="state.title" placeholder="Titre du post" size="md" class="w-full" />
+              <UInput
+                v-model="state.title"
+                placeholder="Titre du post"
+                size="md"
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="Catégorie" required name="category">
-              <USelectMenu v-model="state.category" placeholder="Sélectionnez la catégorie du post" :items="categories"
-                value-key="name" label-key="name" :search-input="{
+              <USelectMenu
+                v-model="state.category"
+                placeholder="Sélectionnez la catégorie du post"
+                :items="categories"
+                value-key="name"
+                label-key="name"
+                :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
-                }" size="md" class="w-full">
+                }"
+                size="md"
+                class="w-full"
+              >
                 <template #empty>
                   <span class="text-gray-500 text-sm p-2">
                     Aucune catégorie trouvée
@@ -213,11 +264,19 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Marque" required name="brand">
-              <USelectMenu v-model="state.brand" placeholder="Sélectionnez la marque du post" :items="brands"
-                value-key="name" label-key="name" :search-input="{
+              <USelectMenu
+                v-model="state.brand"
+                placeholder="Sélectionnez la marque du post"
+                :items="brands"
+                value-key="name"
+                label-key="name"
+                :search-input="{
                   placeholder: 'Rechercher',
                   icon: 'i-lucide-search'
-                }" size="md" class="w-full">
+                }"
+                size="md"
+                class="w-full"
+              >
                 <template #empty>
                   <span class="text-gray-500 text-sm p-2">
                     Aucune marque trouvée
@@ -226,22 +285,46 @@ onMounted(async () => {
               </USelectMenu>
             </UFormField>
             <UFormField label="Description" required name="description">
-              <UTextarea size="md" v-model="state.description" placeholder="Ecrivez votre description" class="w-full" />
+              <UTextarea
+                size="md"
+                v-model="state.description"
+                placeholder="Ecrivez votre description"
+                class="w-full"
+              />
             </UFormField>
             <UFormField required :label="onImageTitle()" name="file">
-              <UFileUpload v-model="state.file" accept="image/*" label="Déposez votre image" description="PNG ou JPG">
+              <UFileUpload
+                v-model="state.file"
+                accept="image/*"
+                label="Déposez votre image"
+                description="PNG ou JPG"
+              >
                 <template #default="{ open }">
-                  <div @click="open" @mouseover="isHover = true" @mouseleave="isHover = false">
-                    <div class="cursor-pointer" :class="isHover ? 'blur-4' : ''">
+                  <div
+                    @click="open"
+                    @mouseover="isHover = true"
+                    @mouseleave="isHover = false"
+                  >
+                    <div
+                      class="cursor-pointer"
+                      :class="isHover ? 'blur-4' : ''"
+                    >
                       <img :src="getPreviewUrl()" />
                     </div>
-                    <div v-if="props.isNewPost && getPreviewUrl() === ''" class="border cursor-pointer">
+                    <div
+                      v-if="props.isNewPost && getPreviewUrl() === ''"
+                      class="border cursor-pointer"
+                    >
                       <div class="helper-upload">
                         <UIcon name="i-lucide-cloud-upload" class="size-10" />
                         <p class="text-sm">Sélectionner votre fichier</p>
                       </div>
                     </div>
-                    <div v-if="isHover && getPreviewUrl() !== ''" class="helper-upload cursor-pointer" @click="open">
+                    <div
+                      v-if="isHover && getPreviewUrl() !== ''"
+                      class="helper-upload cursor-pointer"
+                      @click="open"
+                    >
                       <h4>Cliquer pour modifier la photo</h4>
                     </div>
                   </div>
@@ -252,10 +335,19 @@ onMounted(async () => {
               <UButton v-if="isNewPost" class="cursor-pointer" type="submit">
                 Ajouter
               </UButton>
-              <UButton v-else class="cursor-pointer" type="submit" :disabled="!isSameValues">
+              <UButton
+                v-else
+                class="cursor-pointer"
+                type="submit"
+                :disabled="!isSameValues"
+              >
                 Modifier
               </UButton>
-              <UButton class="cursor-pointer" variant="outline" @click="resetForm">
+              <UButton
+                class="cursor-pointer"
+                variant="outline"
+                @click="resetForm"
+              >
                 Réinitialiser
               </UButton>
             </div>

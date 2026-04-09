@@ -141,7 +141,7 @@ onMounted(() => {
         :avatar="selectedBrand?.avatar"
         label-key="name"
         clear
-        class="w-75"
+        class="w-full"
       >
         <template #empty> Aucune marque trouvée </template>
       </UInputMenu>
@@ -153,7 +153,7 @@ onMounted(() => {
         :placeholder="placeholderMotorcycle.name"
         :items="motorcycleFilteredList"
         clear
-        class="w-75"
+        class="w-full"
         @update:open="fetchMotorcyclesByBrand"
       >
         <template #empty> Aucun modèle trouvé </template>
@@ -166,7 +166,7 @@ onMounted(() => {
         :placeholder="String(placeholderMotorcycle.year)"
         :items="yearFilteredList"
         clear
-        class="w-75"
+        class="w-full"
         @update:open="fetchMotorcyclesByBrand"
       >
         <template #empty> Aucune année trouvée </template>
@@ -182,8 +182,9 @@ onMounted(() => {
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  width: fit-content;
-  border-radius: 13px;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
   background-color: var(--background);
   box-shadow: 20px 20px 5em var(--border-gray);
 }
@@ -194,5 +195,11 @@ h3 {
 
 :deep(input) {
   background-color: #f4f4f4;
+}
+
+@media (max-width: 1024px) {
+  .form {
+    max-width: 300px;
+  }
 }
 </style>

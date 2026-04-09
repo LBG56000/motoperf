@@ -22,10 +22,26 @@ const props = defineProps<{
 
   gap: 1rem;
 
-  border: solid 3px var(--background-secondary);
+  border: solid 2px var(--border-gray);
   border-radius: 10px;
 
   width: 100%;
   aspect-ratio: 1 / 1;
+}
+
+@media (max-width: 1024px) {
+  .box {
+    min-width: 105px;
+    border: 1px solid var(--background-secondary);
+  }
+
+  img {
+    width: 40px;
+    height: auto;
+  }
+
+  p {
+    font-size: 10px;
+  }
 }
 </style>
