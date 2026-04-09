@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { reactive, computed } from 'vue'
 import { useProfileModal } from '~/composable/useProfileModal'
+import { useProfileEditModal } from '~/composable/useProfileEditModal'
 import { useAuth } from '~/composable/useAuth'
 
 const { user, logout } = useAuth()
@@ -81,6 +82,13 @@ watch(
             <span class="value">{{ state.email }}</span>
           </div>
         </div>
+        <UButton
+          label="Modifier mon profil"
+          class="rounded-full mt-6"
+          color="neutral"
+          style="width: 100%; justify-content: center; color: white"
+          @click="useProfileEditModal().open"
+        />
         <UButton
           label="Se déconnecter"
           class="rounded-full mt-6"

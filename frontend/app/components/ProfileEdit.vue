@@ -20,7 +20,7 @@ const state = reactive({
 })
 
 const imagePreview = ref<string>('')
-const experienceOptions = ['Débutant', 'Intermédiaire', 'Confirmé', 'Expert']
+const experienceOptions = ['Débutant', 'Confirmé', 'Expert', 'Autre']
 
 const isValidEmail = (email: string) => {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -98,7 +98,15 @@ const handleSave = async () => {
     formData.append('firstname', state.firstname)
     formData.append('lastname', state.lastname)
     formData.append('pseudo', state.pseudo)
-    formData.append('experience', state.experience)
+    formData.append(
+      'experience',
+      {
+        Débutant: 'beginner',
+        Confirmé: 'confirmed',
+        Expert: 'expert',
+        Autre: 'other'
+      }[state.experience] as 'beginner' | 'confirmed' | 'expert' | 'other'
+    )
     formData.append('ridingStartYear', state.ridingStartYear.toString())
     formData.append('email', state.email)
 
@@ -127,6 +135,7 @@ watch(
   () => isOpen.value,
   (newVal) => {
     if (newVal) {
+      formErrors.value = []
       fillProfil()
     }
   }

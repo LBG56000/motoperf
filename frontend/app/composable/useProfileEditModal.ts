@@ -1,7 +1,10 @@
+import { useProfileModal } from '~/composable/useProfileModal'
+
 export const useProfileEditModal = () => {
-  const isOpen = useState('profileEditModal.isOpen', () => true)
+  const isOpen = useState('profileEditModal.isOpen', () => false)
 
   const open = () => {
+    useProfileModal().close()
     isOpen.value = true
   }
   const close = () => {
