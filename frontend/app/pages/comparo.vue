@@ -8,8 +8,8 @@ import CarrouselMotorcycles from '~/components/CarrouselMotorcycles.vue'
 import Comment from '~/components/forum/Comment.vue'
 import type { IMessage } from '~/types/messages'
 import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
-import { useAuth } from '~/composable/useAuth'
-import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
@@ -301,6 +301,9 @@ async function postComment() {
 }
 
 function handleCaroussel(_id: string, imgUrl: string) {
+  if (motorcycle1Id.value && motorcycle2Id.value) {
+    handleDelete()
+  }
   if (!motorcycle1Id.value) {
     motorcycle1Id.value = _id
     motorcycle1PreviewUrl.value = imgUrl
@@ -310,13 +313,17 @@ function handleCaroussel(_id: string, imgUrl: string) {
   }
 }
 
-function handleDelete() {
-  motorcycle1Id.value = ''
-  motorcycle2Id.value = ''
-  motorcycle1.value = undefined
-  motorcycle2.value = undefined
-  motorcycle1PreviewUrl.value = ''
-  motorcycle2PreviewUrl.value = ''
+function handleDelete(side?: 'left' | 'right') {
+  if (side === 'left' || !side) {
+    motorcycle1Id.value = ''
+    motorcycle1.value = undefined
+    motorcycle1PreviewUrl.value = ''
+  }
+  if (side === 'right' || !side) {
+    motorcycle2Id.value = ''
+    motorcycle2.value = undefined
+    motorcycle2PreviewUrl.value = ''
+  }
   showResultat.value = false
 }
 
@@ -391,24 +398,32 @@ onMounted(() => {
           <div class="display-comment-container">
             <div class="left-display-comment">
               <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
-              <Comment
-                v-if="commentsMotorcycle1.length > 0"
-                :responses="commentsMotorcycle1"
-              />
+              <template v-if="commentsMotorcycle1.length > 0">
+                <div
+                  v-for="comment1 in commentsMotorcycle1"
+                  :key="comment1._id"
+                >
+                  <Comment :response="comment1" />
+                </div>
+              </template>
               <p v-else>Postez le premier commentaire !</p>
             </div>
             <div class="right-display-comment">
               <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
-              <Comment
-                v-if="commentsMotorcycle2.length > 0"
-                :responses="commentsMotorcycle2"
-              />
+              <template v-if="commentsMotorcycle2.length > 0">
+                <div
+                  v-for="comment2 in commentsMotorcycle2"
+                  :key="comment2._id"
+                >
+                  <Comment :response="comment2" />
+                </div>
+              </template>
               <p v-else>Postez le premier commentaire !</p>
             </div>
           </div>
           <div class="input-comment-box">
-            <div v-if="!isConnected" class="need-connection">
-              <h3>
+            <div v-if="!isAuthenticated" class="need-connection">
+              <h3 class="h3-mobile">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -416,13 +431,14 @@ onMounted(() => {
                 color="neutral"
                 class="rounded-4xl self-end text-xs p-2"
                 size="xl"
-                >Se connecter</UButton
-              >
+                @click="open()"
+                >Se connecter
+              </UButton>
             </div>
             <div
               v-if="!messagePosted"
               class="input-comment-container"
-              :class="{ blurred: !isConnected }"
+              :class="{ blurred: !isAuthenticated }"
             >
               <h4>
                 Déjà roulé une de ces motos ?<br />
@@ -465,21 +481,21 @@ onMounted(() => {
       </Transition>
       <div class="caroussel-container">
         <div>
-          <h3>Pour la performance</h3>
+          <h3 class="h3-mobile">Pour la performance</h3>
           <CarrouselMotorcycles
             :items="carousselSportBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3>Pour le A2</h3>
+          <h3 class="h3-mobile">Pour le A2</h3>
           <CarrouselMotorcycles
             :items="carousselBeginnerBikes"
             @selected="handleCaroussel"
           />
         </div>
         <div>
-          <h3>Pour l'aventure</h3>
+          <h3 class="h3-mobile">Pour l'aventure</h3>
           <CarrouselMotorcycles
             :items="carousselAdventureBikes"
             @selected="handleCaroussel"

@@ -77,26 +77,6 @@ describe('Message Routes - /api/v1/messages', () => {
     })
   })
 
-  describe('GET /api/v1/messages/:id/responses', () => {
-    // NOTE: la route utilise `findOne({ id })` au lieu de `findOne({ _id })`
-    // ce qui fait qu'elle ne trouve jamais le message parent -> 404
-    // Ce test documente le bug actuel
-    it('should return 404 due to query bug (uses id instead of _id)', async () => {
-      const parent = await Message.create({ content: 'Parent', user: userId })
-      await Message.create({
-        content: 'Reply',
-        reference: parent._id,
-        referenceModel: 'Message',
-        user: userId,
-      })
-
-      const res = await request(app)
-        .get(`/api/v1/messages/${parent._id}/responses`)
-
-      expect(res.status).toBe(404)
-    })
-  })
-
   describe('PATCH /api/v1/messages', () => {
     it('should like a message', async () => {
       const msg = await Message.create({ content: 'Likeable', user: userId })

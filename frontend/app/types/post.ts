@@ -13,5 +13,6 @@ export interface IPost {
     createdAt: string,
     views: string,
     responses: IMessage[],
-    image?: string
+    image?: string,
+    userFavoritePost?: Array<string>
 }

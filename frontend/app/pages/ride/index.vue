@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useAuth } from '~/composable/useAuth.js'
+import { useAuth } from '~/composables/useAuth.js'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
 import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
-import { useConnexionModal } from '~/composable/useConnexionModal.js'
+import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 const { user } = useAuth()
 const { open } = useConnexionModal()
@@ -23,13 +23,13 @@ const goToForm = async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'map'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Trouver de nouveaux chemins à <br />
           <span style="color: red">Explorer</span>
         </h1>
       </template>
       <template #subtitle>
-        <p>
+        <p class="p-mobile">
           Trouver facilement des nouveaux lieux, des nouvelles balades et des
           nouvelles personnes pour les réaliser avec vous.
         </p>
@@ -45,7 +45,9 @@ const goToForm = async () => {
     />
 
     <div class="add-container">
-      <p>Vous ne trouvez pas votre balade, vous pouvez l’ajouter :</p>
+      <p class="p-mobile">
+        Vous ne trouvez pas votre balade, vous pouvez l’ajouter :
+      </p>
       <UButton
         color="primary"
         icon="i-lucide-map-pinned"

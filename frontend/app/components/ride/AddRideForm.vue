@@ -7,7 +7,7 @@ import {
 } from '~/types/ride'
 import DisplayMapRide from './DisplayMapRide.vue'
 import * as turf from '@turf/turf'
-import { useAuth } from '~/composable/useAuth.js'
+import { useAuth } from '~/composables/useAuth.js'
 import { Time, CalendarDate } from '@internationalized/date'
 import InputDate from '~/components/global/InputDate.vue'
 import InputTime from '~/components/global/InputTime.vue'

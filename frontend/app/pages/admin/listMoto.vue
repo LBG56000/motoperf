@@ -7,7 +7,8 @@ import { getPaginationRowModel } from '@tanstack/vue-table'
 import type { ColumnDef } from '@tanstack/vue-table'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 })
 const table = useTemplateRef('table')
 const UBadge = resolveComponent('UBadge')

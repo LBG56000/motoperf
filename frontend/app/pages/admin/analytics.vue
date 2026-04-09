@@ -4,7 +4,8 @@ import type { IPost } from '~/types/post'
 import type { IMotorcycle } from '~/types/motorcycles'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 })
 
 interface RideStats {
@@ -41,7 +42,10 @@ const xFormatter = (tick: number, _i?: number, _ticks?: number[]): string => {
 }
 
 async function fetchStats() {
-  const rideCount = await $fetch<{ count: number }>(`${apiBase}rides/count`)
+  const rideCount = await $fetch<{ count: number; percent: number }>(
+    `${apiBase}rides/count`
+  )
+
   const activePosts = await $fetch<{ count: number; percent: number }>(
     `${apiBase}posts/count`
   )
@@ -49,7 +53,7 @@ async function fetchStats() {
   stats.value.push({
     title: 'Balades',
     value: rideCount.count,
-    percent: 0
+    percent: rideCount.percent
   })
 
   stats.value.push({
@@ -125,7 +129,7 @@ onMounted(() => {
             <p>Nombre de vues : {{ bestTopic?.views }}</p>
             <img
               class="card-img"
-              :src="`/images/posts/${bestTopic?.image}`"
+              :src="`${bestTopic?.image}`"
               :alt="bestTopic?.title"
             />
           </div>
@@ -142,7 +146,7 @@ onMounted(() => {
             </p>
             <img
               class="card-img"
-              :src="`/images/motorcycles/${bestMotorcycle?.imageUrl}`"
+              :src="`${bestMotorcycle?.imageUrl}`"
               :alt="bestMotorcycle?.name"
             />
           </div>

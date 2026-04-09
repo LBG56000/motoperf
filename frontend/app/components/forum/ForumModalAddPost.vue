@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import * as v from 'valibot'
-import { useAuth } from '~/composable/useAuth';
-import type { IBrand } from '~/types/brand';
-import type { ICategory } from '~/types/category';
-import type { IPost } from '~/types/post';
+import { useAuth } from '~/composables/useAuth'
+import type { IBrand } from '~/types/brand'
+import type { ICategory } from '~/types/category'
+import type { IPost } from '~/types/post'
 
 const props = defineProps<{
   isNewPost: boolean
@@ -27,32 +27,39 @@ const initialState = ref({
 
 const getCategories = async () => {
   const res = await $fetch<{ categories: ICategory[] }>(
-    `${useRuntimeConfig().public.apiBase}categories`, {
-    params: {
-      project: 'name,_id'
+    `${useRuntimeConfig().public.apiBase}categories`,
+    {
+      params: {
+        project: 'name,_id'
+      }
     }
-  })
+  )
   categories.value = res.categories
 }
 
 const getBrands = async () => {
   const res = await $fetch<{ brands: IBrand[] }>(
-    `${useRuntimeConfig().public.apiBase}brand`, {
-    params: {
-      project: 'name,_id'
+    `${useRuntimeConfig().public.apiBase}brand`,
+    {
+      params: {
+        project: 'name,_id'
+      }
     }
-  })
+  )
   brands.value = res.brands
 }
 
 const schema = v.object({
-  title: v.pipe(v.string(), v.minLength(1, 'Le titre est requis')),
+  title: v.pipe(v.string(), v.minLength(1, 'Le titre est requis'), v.check(val => val.trim().length > 0, 'Le titre ne peut pas contenir uniquement des espaces')),
   category: v.pipe(v.string(), v.minLength(1, 'La catégorie est requise')),
   brand: v.pipe(v.string(), v.minLength(1, 'La marque est requise')),
-  description: v.pipe(v.string(), v.minLength(1, 'La description est requise')),
+  description: v.pipe(v.string(), v.minLength(1, 'La description est requise'), v.check(val => val.trim().length > 0, 'La description ne peut pas contenir uniquement des espaces')),
   file: v.optional(
     v.union([
-      v.pipe(v.instance(File, 'Image requise'), v.mimeType(['image/jpeg', 'image/png'], 'Format invalide')),
+      v.pipe(
+        v.instance(File, 'Image requise'),
+        v.mimeType(['image/jpeg', 'image/png'], 'Format invalide')
+      ),
       v.pipe(v.string(), v.minLength(1))
     ])
   )
@@ -103,23 +110,40 @@ const onSubmit = async () => {
 
     try {
       const method = props.isNewPost ? 'POST' : 'PUT'
-      const response = await $fetch.raw(`${useRuntimeConfig().public.apiBase}posts`, {
-        method,
-        body: payload,
-        ...(!props.isNewPost && { params: { filter: JSON.stringify({ id: props.post?._id }) } })
-      })
+      const response = await $fetch.raw(
+        `${useRuntimeConfig().public.apiBase}posts`,
+        {
+          method,
+          body: payload,
+          ...(!props.isNewPost && {
+            params: { filter: JSON.stringify({ id: props.post?._id }) }
+          })
+        }
+      )
 
       if (response.ok) {
-        toast.add({ title: 'Succès', description: `Votre post a été ${props.isNewPost ? 'ajouté' : 'modifié'}.`, color: 'success' })
+        toast.add({
+          title: 'Succès',
+          description: `Votre post a été ${props.isNewPost ? 'ajouté' : 'modifié'}.`,
+          color: 'success'
+        })
         resetForm()
         displayModal.value = false
         emit('added-post')
       }
     } catch {
-      toast.add({ title: 'Erreur', description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`, color: 'error' })
+      toast.add({
+        title: 'Erreur',
+        description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`,
+        color: 'error'
+      })
     }
   } catch {
-    toast.add({ title: 'Erreur', description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`, color: 'error' })
+    toast.add({
+      title: 'Erreur',
+      description: `Votre post n'a pas pu être ${props.isNewPost ? 'ajouté' : 'modifié'}`,
+      color: 'error'
+    })
   }
 }
 
@@ -156,7 +180,7 @@ const setInitialState = () => {
     title: props.post?.title || '',
     category: props.post?.category.name || '',
     brand: props.post?.brand.name || '',
-    description: props.post?.content || '',
+    description: props.post?.content || ''
   }
 }
 
@@ -173,9 +197,7 @@ const isSameValues = computed(() => {
 })
 
 onMounted(async () => {
-  await Promise.all([
-    getCategories(), getBrands()
-  ])
+  await Promise.all([getCategories(), getBrands()])
   setInitialState()
 })
 </script>

@@ -114,7 +114,7 @@ function tradFieldName(fieldName: string) {
 
 <template>
   <div class="resultat">
-    <p>{{ tradFieldName(props.fieldName) }}</p>
+    <p class="p-mobile">{{ tradFieldName(props.fieldName) }}</p>
     <div class="container-row">
       <div class="left">
         <count-up

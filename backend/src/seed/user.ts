@@ -11,7 +11,8 @@ const seedUser = async () => {
       lastname: 'Dupont',
       pseudo: 'AliceD',
       email: 'alice.dupont@motocenter.com',
-      password: 'hashed_password_1',
+      password:
+        '$argon2id$v=19$m=4096,t=3,p=1$z4FduP43K48SD5qOJU1tTw$KBr3Rbi8qRjENqcWZ6EIkFjMKr5W+z07MYoC1rJuIeo', // hashed version of 'hashed_password_1'
       isAdmin: true,
       userType: 'expert',
       ridingStartYear: 2005,
@@ -23,7 +24,8 @@ const seedUser = async () => {
       lastname: 'Martin',
       pseudo: 'BobM',
       email: 'bob.martin@motocenter.com',
-      password: 'hashed_password_2',
+      password:
+        '$argon2id$v=19$m=4096,t=3,p=1$jZUYZPRQKGGp2fP2Y0nJ3w$lx7CpCsmY2+zZwMkYLZjvDsujnNZDbm/pFgTZV8m3Iw', // hashed version of 'hashed_password_2'
       userType: 'confirmed',
       ridingStartYear: 2015,
       createdAt: new Date(),
@@ -34,7 +36,8 @@ const seedUser = async () => {
       lastname: 'Bernard',
       pseudo: 'ClaraB',
       email: 'clara.bernard@motocenter.com',
-      password: 'hashed_password_3',
+      password:
+        '$argon2id$v=19$m=4096,t=3,p=1$ayB/QgFGv6HAQwhCqvRsEA$44E8CUE6AoWcUlCmLzxS8UjOhH/gmPzkVsv2MK3h5No', // hashed version of 'hashed_password_3'
       userType: 'beginner',
       ridingStartYear: 2023,
       createdAt: new Date(),
@@ -45,7 +48,8 @@ const seedUser = async () => {
       lastname: 'Leroy',
       pseudo: 'DavidL',
       email: 'david.leroy@motocenter.com',
-      password: 'hashed_password_4',
+      password:
+        '$argon2id$v=19$m=4096,t=3,p=1$gumINsYZGVJFSBtPpV6cuQ$NsI/eio5w0XfLsJ625gBlf6OxZ4f3+1BWZsoyz+xQ+c', // hashed version of 'hashed_password_4'
       userType: 'confirmed',
       ridingStartYear: 2018,
       createdAt: new Date(),
@@ -56,7 +60,8 @@ const seedUser = async () => {
       lastname: 'Petit',
       pseudo: 'EmmaP',
       email: 'emma.petit@motocenter.com',
-      password: 'hashed_password_5',
+      password:
+        '$argon2id$v=19$m=4096,t=3,p=1$mhldbmqlRl6JIp/SALIe8g$nQYvpc29eDxCBgauvxFkn4+fnfMVEp8Tr+qDm6z7Kks', // hashed version of 'hashed_password_5'
       userType: 'other',
       createdAt: new Date(),
       image: 'test4.png',
@@ -66,10 +71,11 @@ const seedUser = async () => {
       lastname: 'MotoCenter',
       pseudo: 'MotoCenter',
       email: 'motocenter@motocenter.com',
-      password: 'hashed_password_6',
+      password:
+        '$argon2id$v=19$m=4096,t=3,p=1$v8bn6+ztl4x3+udQCSExIg$yH66yo4pbCtk/dm9hP1xLXMo04lPpWeeeKTk5QsV1wk', // hashed version of 'hashed_password_6'
       userType: 'confirmed',
-      image: 'motocenter.png'
-    }
+      image: 'motocenter.png',
+    },
   ])
 
   console.log('User seeding')

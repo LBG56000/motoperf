@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
 
-import { useConnexionModal } from '~/composable/useConnexionModal'
-import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
 
-const { login, isAuthenticated } = useAuth()
-const { isOpen, close } = useConnexionModal()
+const { login, isAuthenticated, user } = useAuth()
+const { isOpen, close, openCreateAccountModal } = useConnexionModal()
 
 const form = useTemplateRef('form')
 
@@ -14,6 +14,7 @@ const state = ref({
   password: ''
 })
 const error = ref('')
+const show = ref(false)
 
 type Schema = typeof state.value
 
@@ -30,6 +31,9 @@ const connexion = async () => {
   try {
     await login(state.value.email, state.value.password)
     if (isAuthenticated.value) {
+      if (user.value?.isAdmin) {
+        navigateTo('/admin')
+      }
       close()
       state.value.email = ''
       state.value.password = ''
@@ -61,6 +65,7 @@ watch(
     <template #content>
       <div class="content">
         <h3>Se connecter</h3>
+
         <UForm
           ref="form"
           :state="state"
@@ -69,11 +74,25 @@ watch(
           @submit.prevent="connexion"
         >
           <UFormField label="E-mail" name="email" type="email" required>
-            <UInput v-model="state.email" />
+            <UInput v-model="state.email"
+              ><template #trailing></template
+            ></UInput>
           </UFormField>
 
           <UFormField label="Mot de passe" name="password" required>
-            <UInput v-model="state.password" type="password" />
+            <UInput v-model="state.password" :type="show ? 'text' : 'password'"
+              ><template #trailing>
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  :aria-label="show ? 'Hide password' : 'Show password'"
+                  :aria-pressed="show"
+                  aria-controls="password"
+                  @click="show = !show"
+                /> </template
+            ></UInput>
           </UFormField>
           <UButton
             type="submit"
@@ -82,6 +101,12 @@ watch(
             style="width: 100%; justify-content: center; color: white"
           />
         </UForm>
+        <p style="font-size: small">
+          Nouveau sur ce site ?
+          <span class="new-account" @click="openCreateAccountModal"
+            >S'inscrire</span
+          >
+        </p>
         <p class="error-message">{{ error }}</p>
       </div>
     </template>
@@ -102,5 +127,10 @@ watch(
   color: red;
   font-size: 0.8em;
   margin: 1rem;
+}
+
+.new-account {
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>

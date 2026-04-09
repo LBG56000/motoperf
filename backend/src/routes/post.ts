@@ -31,7 +31,7 @@ router.get('/count', async (req, res) => {
     const now = new Date()
     const start = new Date(now.getFullYear(), now.getMonth() - 2, 1)
     const intermediate = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-    const end = new Date(now.getFullYear(), now.getMonth(), 1)
+    const end = new Date()
     const countFirstPeriod = await Post.countDocuments({
       createdAt: { $gte: start, $lt: intermediate },
     })
@@ -39,8 +39,11 @@ router.get('/count', async (req, res) => {
       createdAt: { $gte: intermediate, $lt: end },
     })
 
-    const percent = countFirstPeriod === 0 ? countSecondPeriod * 100 : ((countSecondPeriod - countFirstPeriod) / countFirstPeriod) * 100
-    
+    const percent =
+      countFirstPeriod === 0
+        ? countSecondPeriod * 100
+        : ((countSecondPeriod - countFirstPeriod) / countFirstPeriod) * 100
+
     res.status(200).json({ count: countSecondPeriod, percent })
   } catch (error) {
     console.error('Error counting posts:', error)
@@ -48,20 +51,23 @@ router.get('/count', async (req, res) => {
   }
 })
 
-router.get('/:id/responses', async (req: Request<{ id: string }, unknown, unknown, ReqQuery>, res) => {
-  const { project, sort, deep, limit } = prepareQuery(req.query)
-  try {
-    const post = await Post.findOne({ _id: req.params.id })
-    if (!post) {
-      return res.status(404).json({ error: 'Post not found' })
-    }
-    let query = Message.find({ // TODO: mettre filter
-      reference: post._id,
-      referenceModel: 'Post'
-    })
-      .select(project)
-      .sort(sort)
-      .limit(limit)
+router.get(
+  '/:id/responses',
+  async (req: Request<{ id: string }, unknown, unknown, ReqQuery>, res) => {
+    const { project, sort, deep, limit } = prepareQuery(req.query)
+    try {
+      const post = await Post.findOne({ _id: req.params.id })
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' })
+      }
+      let query = Message.find({
+        // TODO: mettre filter
+        reference: post._id,
+        referenceModel: 'Post',
+      })
+        .select(project)
+        .sort(sort)
+        .limit(limit)
 
       if (deep) {
         query = query.populate('user')
@@ -80,11 +86,34 @@ router.get('/:id/responses', async (req: Request<{ id: string }, unknown, unknow
 router.post('/add-view', async (req, res) => {
   const { filter } = prepareQuery(req.query)
   try {
-    await Post.updateOne(
-      { _id: filter.id },
-      { $inc: { views: 1 } }
-    );
+    await Post.updateOne({ _id: filter.id }, { $inc: { views: 1 } })
     res.status(204).json()
+  } catch (error) {
+    console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.post('/add-favorite', async (req, res) => {
+  const { filter } = prepareQuery(req.query)
+  const { userId } = req.body
+  try {
+    const post = await Post.findById(filter._id)
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' })
+    }
+
+    const favorites = post.userFavoritePost || []
+    const isFavorited = favorites.includes(userId)
+
+    const update = isFavorited
+      ? { $pull: { userFavoritePost: userId } }
+      : { $addToSet: { userFavoritePost: userId } }
+
+    await Post.updateOne({ _id: filter._id }, update)
+
+    res.status(200).json({ isAdded: !isFavorited })
   } catch (error) {
     console.error('Error accessing message route:', error)
     res.status(500).json({ error: 'Internal server error' })
@@ -110,7 +139,7 @@ router.post('/', async (req, res) => {
       user: user,
       brand: brand,
       category: category,
-      image: body.url
+      image: body.url,
     })
     res.status(201).json({ _id: postCreated._id })
   } catch (error) {
@@ -131,17 +160,14 @@ router.put('/', async (req, res) => {
       return res.status(500).json({ error: 'Internal server error' })
     }
 
-    const updatePost = await Post.findByIdAndUpdate(
-      filter.id,
-      {
-        title: body.title,
-        content: body.content,
-        category: category._id,
-        user: user._id,
-        brand: brand._id,
-        url: body.url,
-      },
-    )
+    const updatePost = await Post.findByIdAndUpdate(filter.id, {
+      title: body.title,
+      content: body.content,
+      category: category._id,
+      user: user._id,
+      brand: brand._id,
+      url: body.url,
+    })
     if (!updatePost) {
       return res.status(500).json()
     }

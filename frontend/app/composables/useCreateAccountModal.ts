@@ -1,5 +1,5 @@
-export const useConnexionModal = () => {
-  const isOpen = useState('connexionModal.isOpen', () => false)
+export const useCreateAccountModal = () => {
+  const isOpen = useState('CreateAccountModal.isOpen', () => false)
 
   const open = () => {
     isOpen.value = true

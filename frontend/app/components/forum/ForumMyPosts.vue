@@ -1,23 +1,47 @@
 <script setup lang="ts">
-import { useAuth } from '~/composable/useAuth';
-import { useConnexionModal } from '~/composable/useConnexionModal';
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
+import type { IPost } from '~/types/post'
 
-
-const { isAuthenticated } = useAuth()
+const { isAuthenticated, user } = useAuth()
 const { open } = useConnexionModal()
 const emits = defineEmits(['new-post'])
 const openAddPost = ref(false)
+const apiBase = useRuntimeConfig().public.apiBase
+const postOfUser = ref<IPost[]>([])
+
+const getMyPost = async () => {
+  if (user.value) {
+    const response = await $fetch<{ posts: IPost[] }>(`${apiBase}posts`, {
+      params: {
+        project: 'title,user',
+        deep: true
+      }
+    })
+
+    postOfUser.value = response.posts.filter(post => post.user._id === user.value?._id)
+  }
+}
 
 const handleAddPost = () => {
   open()
-  if (isAuthenticated) {
+  if (isAuthenticated.value) {
     openAddPost.value = true
   }
 }
 
-const handleHaveANewPost = () => {
+const handleHaveANewPost = async () => {
+  await getMyPost()
   emits('new-post')
 }
+
+watch(user, async (newUser) => {
+  if (newUser?._id) {
+    await getMyPost()
+  } else {
+    postOfUser.value = []
+  }
+}, { immediate: true })
 </script>
 
 <template>
@@ -33,7 +57,13 @@ const handleHaveANewPost = () => {
         </div>
       </template>
       <template #default>
-        <p>Aucun post ajouté, vous pouvez ajouter le premier</p>
+        <div v-if="postOfUser.length">
+          <div v-for="post in postOfUser" :key="post._id" class="cursor-pointer border-bottom"
+            @click="navigateTo(`/forum/${post._id}`)">
+            {{ post.title }}
+          </div>
+        </div>
+        <p v-else>Aucun post ajouté, vous pouvez ajouter le premier</p>
       </template>
     </UCard>
   </div>
@@ -54,5 +84,14 @@ const handleHaveANewPost = () => {
   align-items: center;
   justify-content: space-between;
   gap: 0.5em;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.border-bottom {
+  margin-bottom: 1em;
+  border-bottom: 1px solid var(--border-gray);
 }
 </style>

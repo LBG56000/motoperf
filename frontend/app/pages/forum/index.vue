@@ -51,7 +51,6 @@ const getPosts = async () => {
   posts.value = await Promise.all(
     res.posts.map(async (post: IPost) => {
       post.responses = await getResponseOfPost(post._id)
-      // await getResponsesOfResponses()
       return post
     })
   )
@@ -62,14 +61,6 @@ const getResponseOfPost = async (postId: string) => {
   const data = await res.json()
   return data.messages
 }
-
-// const getResponsesOfResponses = async () => {
-//   posts.value.forEach(async (response: IMessage) => {
-//     const res = await fetch(`${useRuntimeConfig().public.apiBase}messages/${response.id}/responses`)
-//     const data = await res.json()
-//     return posts.value.push(data.messages)
-//   })
-// }
 
 const handleFilter = async (updateFilter: any) => {
   filters.value = {
@@ -91,19 +82,19 @@ onMounted(async () => {
   <div>
     <HeaderInfo :scroll-to-element-id="'forum'">
       <template #title>
-        <h1>
+        <h1 class="h1-mobile">
           Bienvenue sur le <br />
           <span style="color: red">Forum</span>
         </h1>
       </template>
       <template #subtitle>
-        <p>
+        <p class="p-mobile">
           Échanger librement sur votre sujet favori en lien avec la moto.
         </p>
       </template>
     </HeaderInfo>
     <div id="forum" class="forum-filters">
-      <div>
+      <div class="panel-filters">
         <ForumPanel :loading :active-filter="filters" @filters="handleFilter" />
       </div>
       <div class="posts">
@@ -133,6 +124,14 @@ onMounted(async () => {
   .panel {
     display: none;
   }
+
+  .forum-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    margin: 2em;
+    gap: 0.5em;
+  }
 }
 
 /** Style version mobile */
@@ -148,9 +147,22 @@ onMounted(async () => {
     gap: 1.5rem;
     width: 300px;
     position: sticky;
-    top: 0;
+    top: 70px;
     right: 0;
   }
+
+  .forum-filters {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    margin: 2em;
+    gap: 2em;
+  }
+}
+
+.panel-filters {
+  position: sticky;
+  top: 70px;
 }
 
 .center {
@@ -181,13 +193,7 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.forum-filters {
-  display: flex;
-  flex-direction: row;
-  align-items: start;
-  margin: 2em;
-  gap: 2em;
-}
+
 
 .forum-filters>div:nth-child(2) {
   flex: 1;

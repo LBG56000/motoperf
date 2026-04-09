@@ -54,11 +54,17 @@ const handlePostChange = () => {
           <div class="statsContainer">
             <div class="stats">
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
-              <p>{{ props.post.responses.length || 0 }} réponses</p>
+              <div class="responses">
+                <p>{{ props.post.responses.length || 0 }}&nbsp;</p>
+                <p class="number">{{ props.post.responses.length > 1 ? ' réponses' : ' réponse' }}</p>
+              </div>
             </div>
             <div class="stats">
               <UIcon class="size-7 margin-2" name="i-lucide-eye" />
-              <p>{{ props.post.views }} vues</p>
+              <div class="responses">
+                <p>{{ props.post.views }}&nbsp;</p>
+                <p class="number">{{ props.post.views.length > 1 ? 'vues' : ' vue' }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -67,10 +73,41 @@ const handlePostChange = () => {
   </UCard>
 </template>
 <style scoped>
+/** Style version mobile */
+@media (max-width: 1024px) {
+  .number {
+    display: none;
+  }
+
+  .statsContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5em;
+  }
+
+  .grid {
+    flex-wrap: wrap;
+  }
+}
+
+/** Style version PC */
+@media (min-width: 1024px) {
+  .statsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+}
+
 .card-forum {
   width: 100%;
   max-width: 1100px;
-  /* margin: 0.5rem auto; */
+}
+
+.responses {
+  display: flex;
+  flex-direction: row;
 }
 
 .main {
@@ -78,13 +115,6 @@ const handlePostChange = () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.statsContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-end;
 }
 
 .postCard {

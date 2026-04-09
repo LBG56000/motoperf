@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
-import { useAuth } from '~/composable/useAuth'
-import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
+import { useProfileModal } from '~/composables/useProfileModal'
 
-const { isAuthenticated, logout, user } = useAuth()
+const { isAuthenticated, user } = useAuth()
 
 const isOpen = ref(false)
 const mode = ref(false)
 const colorMode = useColorMode()
 
 const connexionModal = useConnexionModal()
+const profileModal = useProfileModal()
 
 function toggle_open() {
   isOpen.value = !isOpen.value
@@ -64,7 +66,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
           :src="'/images/users/' + user?.image"
           size="xl"
           loading="lazy"
-          @click="logout"
+          @click="profileModal.open()"
         />
       </div>
     </div>
@@ -87,7 +89,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         color="neutral"
         variant="ghost"
         style="justify-content: center"
-        to="/"
+        to="/comparo"
         >Comparateur</UButton
       >
       <UButton
@@ -111,7 +113,7 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         color="neutral"
         variant="ghost"
         style="justify-content: center"
-        to="/"
+        to="/knowUs"
         >Nous connaitre</UButton
       >
       <UButton

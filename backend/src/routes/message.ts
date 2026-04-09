@@ -26,7 +26,7 @@ router.get(
 
 router.get('/:id/responses', async (req, res) => {
   try {
-    const message = await Message.findOne({ id: req.params.id })
+    const message = await Message.findOne({ _id: req.params.id })
     if (!message) {
       return res.status(404).json({ error: 'Message not found' })
     }

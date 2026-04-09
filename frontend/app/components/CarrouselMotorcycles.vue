@@ -4,7 +4,6 @@ import type { IMotorcycle } from '@/types/motorcycles'
 defineProps<{
   items: IMotorcycle[]
 }>()
-
 const emit = defineEmits<{
   (e: 'selected', _id: string, imgUrl: string): void
 }>()
@@ -102,13 +101,12 @@ hr {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: -5px
+  gap: -5px;
 }
 
 .no-select {
   user-select: none;
 }
-
 
 @media (max-width: 1024px) {
   article {
