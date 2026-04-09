@@ -23,7 +23,6 @@ const motorcycle = ref<{
   year: undefined
 })
 
-// Full Brands list
 const apiBase = useRuntimeConfig().public.apiBase
 const brandsList = ref<IBrand[]>([])
 const motorcyclesList = ref<IMotorcycle[]>([])
@@ -37,7 +36,7 @@ type BrandItem = IBrand & {
   } 
 }
 
-// Items avec avatar pour afficher les icônes dans le dropdown
+// Brand list with avatar for the dropdown
 const brandItems = computed(() =>
   brandsList.value.map(({ icon, ...brand }) => ({
     ...brand,
@@ -46,8 +45,6 @@ const brandItems = computed(() =>
   }))
 )
 
-
-// Model list filtered by user input
 const modelInput = computed({
   get: () => motorcycle.value.model?.name ?? '',
   set: (name: string) => {
@@ -131,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="form">
+  <div class="form-container min-w-0">
     <h3>{{ props.formTitle }}</h3>
     <UFormField label="Marque" name="brand">
       <UInputMenu
@@ -176,14 +173,14 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.form {
+.form-container {
   border: 1px solid #dddddd;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   border-radius: 10px;
   background-color: var(--background);
   box-shadow: 20px 20px 5em var(--border-gray);
@@ -193,12 +190,19 @@ h3 {
   text-align: center;
 }
 
-:deep(input) {
+:deep(input),
+:deep(button[id]) {
   background-color: #f4f4f4;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+:deep(.relative) {
+  width: 100%;
 }
 
 @media (max-width: 1024px) {
-  .form {
+  .form-container {
     max-width: 300px;
   }
 }
