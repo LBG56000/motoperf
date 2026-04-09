@@ -209,7 +209,7 @@ onMounted(async () => {
 main {
   display: flex;
   flex-direction: column;
-  gap: 5rem;
+  gap: 10rem;
 }
 
 section {
