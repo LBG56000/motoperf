@@ -301,6 +301,9 @@ async function postComment() {
 }
 
 function handleCaroussel(_id: string, imgUrl: string) {
+  if (motorcycle1Id.value && motorcycle2Id.value) {
+    handleDelete()
+  }
   if (!motorcycle1Id.value) {
     motorcycle1Id.value = _id
     motorcycle1PreviewUrl.value = imgUrl
@@ -310,13 +313,17 @@ function handleCaroussel(_id: string, imgUrl: string) {
   }
 }
 
-function handleDelete() {
-  motorcycle1Id.value = ''
-  motorcycle2Id.value = ''
-  motorcycle1.value = undefined
-  motorcycle2.value = undefined
-  motorcycle1PreviewUrl.value = ''
-  motorcycle2PreviewUrl.value = ''
+function handleDelete(side?: 'left' | 'right') {
+  if (side === 'left' || !side) {
+    motorcycle1Id.value = ''
+    motorcycle1.value = undefined
+    motorcycle1PreviewUrl.value = ''
+  }
+  if (side === 'right' || !side) {
+    motorcycle2Id.value = ''
+    motorcycle2.value = undefined
+    motorcycle2PreviewUrl.value = ''
+  }
   showResultat.value = false
 }
 
