@@ -15,6 +15,7 @@ const { user } = useAuth()
 const { open } = useConnexionModal()
 const newReponseOfPost = ref('')
 const toast = useToast()
+const isLoading = ref(false)
 
 const getPost = async () => {
   const data = await $fetch<{ data: IPost }>(`${apiBase}posts`, {
@@ -76,6 +77,7 @@ const handleAddComment = async () => {
 
 onMounted(async () => {
   await Promise.all([getPost(), getResponsesOfPost()])
+  isLoading.value = true
   scrollToMap('post')
 })
 </script>
@@ -97,8 +99,9 @@ onMounted(async () => {
       <div>
         <ForumPanel />
       </div>
-      <div>
-        <div class="icon-and-text">
+      <USkeleton v-if="isLoading === false" class="size-20 rounded-full" />
+      <div v-else>
+        <div class="icon-and-text title-mobile-version">
           <UAvatar :src="`/images/users/${post?.user.image}`" size="3xl" loading="lazy" class="margin-2" />
           <h2>{{ post?.title }}</h2>
         </div>
@@ -110,7 +113,7 @@ onMounted(async () => {
             </div>
             <div class="icon-and-text right">
               <UIcon class="size-7 margin-2" name="i-lucide-messages-square" />
-              <p>{{ responses.length || 0 }} réponses</p>
+              <p>{{ responses.length || 0 }} {{ responses.length > 1 ? 'réponses' : 'réponse' }}</p>
             </div>
             <p>
               Par {{ post?.user.firstname }},
@@ -134,11 +137,11 @@ onMounted(async () => {
         </div>
         <h4 class="margin-bottom-1">{{ post?.content }}</h4>
         <div class="add-comment">
-          <UFormField label="Ecrire un commentaire" required :ui="{ container: 'w-5/6' }">
-            <UTextarea v-model="newReponseOfPost" class="w-5/6" />
+          <UFormField label="Ecrire un commentaire" required>
+            <UTextarea v-model="newReponseOfPost" />
           </UFormField>
-          <UButton class="w-1/6" :disabled="newReponseOfPost === ''" size="sm" @click="handleAddComment">Ajouter mon
-            commentaire</UButton>
+          <UButton :disabled="newReponseOfPost === ''" size="sm" class="button-comment" @click="handleAddComment">
+            Ajouter mon commentaire</UButton>
         </div>
         <p v-if="responses.length === 0">
           Aucun commentaire à ce post, ajouter le premier
@@ -154,6 +157,39 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/** Style version mobile */
+@media (max-width: 1024px) {
+  #post {
+    margin: 0.5em;
+    gap: 0;
+  }
+
+  .title-mobile-version {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .img {
+    width: 100%;
+  }
+
+  .button-comment {
+    width: 75%;
+  }
+}
+
+/** Style version PC */
+@media (min-width: 1024px) {
+  .img {
+    width: 75%;
+  }
+
+  .button-comment {
+    width: 25%;
+  }
+}
+
 .margin-2 {
   margin-right: 0.5em;
 }
@@ -203,11 +239,7 @@ onMounted(async () => {
   margin-right: 20em;
 }
 
-.img {
-  width: 75%;
-}
-
-.margin-1_5 {
+w .margin-1_5 {
   margin-top: 1.5em;
 }
 
@@ -233,5 +265,6 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
+  align-items: flex-start;
 }
 </style>
