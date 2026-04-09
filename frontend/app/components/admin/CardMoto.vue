@@ -58,7 +58,6 @@ async function fetchMotoDetails(_id: string) {
   )
 
   const m = data.motorcycles[0]
-  console.log('Moto details:', m)
 
   const brand = brandList.value.find((b) => b._id === m.brand._id)
   state.brand = brand?.name ?? ''
@@ -183,7 +182,6 @@ onMounted(async () => {
 const toast = useToast()
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  console.log('Form data:', event.data) // Log des données du formulaire
   try {
     const selectedBrand = brandList.value.find(
       (b) => b.name === event.data.brand
