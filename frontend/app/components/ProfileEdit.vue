@@ -31,7 +31,13 @@ const fillProfil = () => {
   state.firstname = user.value?.firstname || ''
   state.lastname = user.value?.lastname || ''
   state.pseudo = user.value?.pseudo || ''
-  state.experience = user.value?.userType || 'Confirmé'
+  state.experience =
+    {
+      beginner: 'Débutant',
+      confirmed: 'Confirmé',
+      expert: 'Expert',
+      other: 'Autre'
+    }[user.value?.userType || 'confirmed'] || 'Confirmé'
   state.ridingStartYear =
     user.value?.ridingStartYear || new Date().getFullYear()
   state.email = user.value?.email || ''
