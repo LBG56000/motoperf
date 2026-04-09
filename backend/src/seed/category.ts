@@ -9,23 +9,23 @@ const seedCategory = async () => {
   await Category.insertMany([
     {
       name: 'Réparation',
-      icon: 'wrench'
+      icon: 'i-lucide-wrench'
     },
     {
       name: 'Entretien',
-      icon: 'cog'
+      icon: 'i-lucide-cog'
     },
     {
       name: 'Course',
-      icon: 'motorbike'
+      icon: 'i-lucide-motorbike'
     },
     {
       name: 'Opinion',
-      icon: 'megaphone'
+      icon: 'i-lucide-megaphone'
     },
     {
       name: 'Modèle',
-      icon: 'motorcycle'
+      icon: 'i-lucide-component'
     }
   ])
 

@@ -392,8 +392,11 @@ onMounted(() => {
             <div class="left-display-comment">
               <h4>Commentaires sur la {{ motorcycle1?.name }}</h4>
               <template v-if="commentsMotorcycle1.length > 0">
-                <div v-for="comment in commentsMotorcycle1" :key="comment._id">
-                  <Comment :response="comment" />
+                <div
+                  v-for="comment1 in commentsMotorcycle1"
+                  :key="comment1._id"
+                >
+                  <Comment :response="comment1" />
                 </div>
               </template>
               <p v-else>Postez le premier commentaire !</p>
@@ -401,8 +404,11 @@ onMounted(() => {
             <div class="right-display-comment">
               <h4>Commentaires sur la {{ motorcycle2?.name }}</h4>
               <template v-if="commentsMotorcycle2.length > 0">
-                <div v-for="comment in commentsMotorcycle2" :key="comment._id">
-                  <Comment :response="comment" />
+                <div
+                  v-for="comment2 in commentsMotorcycle2"
+                  :key="comment2._id"
+                >
+                  <Comment :response="comment2" />
                 </div>
               </template>
               <p v-else>Postez le premier commentaire !</p>
@@ -427,7 +433,7 @@ onMounted(() => {
               class="input-comment-container"
               :class="{ blurred: !isAuthenticated }"
             >
-              <h4 class="h4-mobile">
+              <h4>
                 Déjà roulé une de ces motos ?<br />
                 Faite le savoir à la communauté !
               </h4>

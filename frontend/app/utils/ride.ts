@@ -1,5 +1,6 @@
 import type { IRide } from '~/types/ride.js'
 import { scrollToMap } from '~/utils/global'
+import { simplify } from '@turf/simplify'
 
 export const getUniqueValues = (rides: IRide[], key: keyof IRide): string[] => {
   const values = rides.map((r) => r[key]?.toString()).filter(Boolean) // On enlève les valeurs nulles ou undefined au cas où
@@ -155,4 +156,71 @@ export function convertToFrench(LDraw: any) {
       }
     }
   }
+}
+
+/**
+ * Réduit le nombre de points d'une GeoJSON FeatureCollection
+ * @param geojson La donnée brute
+ * @param tolerance Précision (plus c'est haut, plus on supprime de points).
+ * 0.001 est un bon compromis pour une balade.
+ */
+export const simplifyGeometry = (geojson: any, tolerance = 0.001) => {
+  if (!geojson || geojson.type !== 'FeatureCollection') return geojson
+
+  try {
+    const simplified = simplify(geojson, {
+      tolerance: tolerance,
+      highQuality: false,
+      mutate: false
+    })
+    return simplified
+  } catch (e) {
+    console.error('Erreur simplification:', e)
+    return geojson
+  }
+}
+
+// Fonction pour transformer une ville (nom) en coordonnées [long, lat]
+export const getCoordsFromCity = async (
+  cityName: string
+): Promise<number[] | null> => {
+  try {
+    const res = await fetch(
+      `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(cityName)}&limit=1`
+    )
+    const data = await res.json()
+    if (data.features && data.features.length > 0) {
+      return data.features[0].geometry.coordinates
+    }
+  } catch (e) {
+    console.error('Erreur de géocodage:', e)
+  }
+  return null
+}
+
+export const getEstimatedDuration = async (
+  geom: any
+): Promise<number | undefined> => {
+  try {
+    const feature = geom.features[0]
+    const coords = feature.geometry.coordinates
+
+    // OSRM demande les coordonnées sous forme long,lat;long,lat...
+    const polyline = coords.map((c: any) => `${c[0]},${c[1]}`).join(';')
+
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${polyline}?overview=false`
+    )
+    const data = await res.json()
+
+    if (data.routes && data.routes.length > 0) {
+      // La durée est en secondes, on la convertit en heures
+      const durationSeconds = data.routes[0].duration
+      const durationHours = durationSeconds / 3600
+      return parseFloat(durationHours.toFixed(2))
+    }
+  } catch (e) {
+    console.error('Erreur calcul durée OSRM:', e)
+  }
+  return undefined
 }

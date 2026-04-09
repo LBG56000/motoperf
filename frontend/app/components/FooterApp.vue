@@ -3,7 +3,7 @@ import LogoApp from '~/components/LogoApp.vue'
 
 const guides = [
   { label: 'Accueil', to: '/' },
-  { label: 'Comparateur', to: '/comparator' },
+  { label: 'Comparateur', to: '/comparo' },
   { label: 'Forum', to: '/forum' },
   { label: 'Balades', to: '/ride' },
   { label: 'Nous connaitre', to: '/knowUs' }
@@ -54,7 +54,9 @@ const contactEmail = 'contact@mgtsoftware.com'
             :key="`guide-${idx}`"
             class="footer-list-item"
           >
-            <NuxtLink :to="item.to" class="footer-link">{{ item.label }}</NuxtLink>
+            <NuxtLink :to="item.to" class="footer-link">{{
+              item.label
+            }}</NuxtLink>
           </li>
         </ul>
       </nav>
@@ -62,10 +64,7 @@ const contactEmail = 'contact@mgtsoftware.com'
       <div class="footer-col">
         <h5 class="footer-heading text-hidden">Réseaux sociaux</h5>
         <ul class="footer-list footer-socials-list">
-          <li
-            v-for="(item, idx) in socials"
-            :key="`social-${idx}`"
-          >
+          <li v-for="(item, idx) in socials" :key="`social-${idx}`">
             <a
               :href="item.href"
               target="_blank"
@@ -84,7 +83,9 @@ const contactEmail = 'contact@mgtsoftware.com'
         <h5 class="footer-heading">Contact</h5>
         <ul class="footer-list">
           <li class="footer-list-item">
-            <a class="footer-link" :href="`mailto:${contactEmail}`">{{ contactEmail }}</a>
+            <a class="footer-link" :href="`mailto:${contactEmail}`">{{
+              contactEmail
+            }}</a>
           </li>
         </ul>
       </div>
@@ -93,11 +94,13 @@ const contactEmail = 'contact@mgtsoftware.com'
     <div class="footer-separator" />
 
     <div class="footer-bottom">
-      <p class="footer-bottom-text">&copy; 2026 MotoCenter &mdash; Tout droit réservé</p>
+      <p class="footer-bottom-text">
+        &copy; 2026 MotoCenter &mdash; Tout droit réservé
+      </p>
       <div class="footer-bottom-links">
-        <NuxtLink class="footer-bottom-link" to="/legal">Mentions légales</NuxtLink>
+        <NuxtLink class="footer-bottom-link" to="/">Mentions légales</NuxtLink>
         <span class="footer-bottom-dot">&middot;</span>
-        <NuxtLink class="footer-bottom-link" to="/terms">Confidentialité</NuxtLink>
+        <NuxtLink class="footer-bottom-link" to="/">Confidentialité</NuxtLink>
       </div>
     </div>
   </footer>
@@ -111,7 +114,12 @@ const contactEmail = 'contact@mgtsoftware.com'
 
 .footer-top-border {
   height: 3px;
-  background: linear-gradient(90deg, transparent, var(--ui-primary), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ui-primary),
+    transparent
+  );
 }
 
 /* ── Main grid ── */
