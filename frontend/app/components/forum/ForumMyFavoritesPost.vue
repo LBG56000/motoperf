@@ -32,6 +32,14 @@ const getFavoritesPostsOfUser = async () => {
   }
 }
 
+watch(user, async (newUser) => {
+  if (newUser?._id) {
+    await getFavoritesPostsOfUser()
+  } else {
+    myFavoritesPosts.value = []
+  }
+}, { immediate: true })
+
 onMounted(async () => {
   if (user.value) {
     await getFavoritesPostsOfUser()
