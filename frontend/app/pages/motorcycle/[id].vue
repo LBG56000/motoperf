@@ -33,14 +33,14 @@ const apiBase = useRuntimeConfig().public.apiBase
 const m = ref<IMotorcycle | null>(null)
 const commentsMotorcycle = ref<IMessage[]>([])
 const comment = ref<ICommentInput>({
-  motorcycleId: '',
+  motorcycleId: id,
   motorcycleName: '',
   brand: '',
   content: '',
   user: ''
 })
 const messagePosted = ref<boolean>(false)
-const { isAuthenticated } = useAuth()
+const { isAuthenticated, user } = useAuth()
 const { open } = useConnexionModal()
 
 const statsRef = ref<HTMLElement | null>(null)
@@ -144,7 +144,7 @@ async function fetchMessages() {
       `${apiBase}posts/${post1}/responses`,
       {
         params: {
-          project: 'content, user, createdAt',
+          project: 'content, user, createdAt, like, dislike,usersLikeId,usersDislikeId',
           deep: true,
           limit: 5
         }
@@ -158,16 +158,16 @@ async function postComment() {
   if (!comment.value.content || !comment.value.motorcycleId) return
 
   let postId = m.value?.post
-  if (!postId) {
+  if (!postId && user.value) {
     try {
       const newPost = await $fetch<{ _id: string }>(`${apiBase}posts`, {
         method: 'POST',
         body: {
           title: m.value?.name,
-          brand: m.value?.brand._id,
+          brand: m.value?.brand.name,
           category: 'Modèle',
-          user: comment.value.user,
-          content: `Discussion autour de la ${m.value?.brand.name} ${m.value?.name}`
+          content: `Discussion autour de la ${m.value?.brand.name} ${m.value?.name}`,
+          isNewMotoComment: true
         }
       })
 
@@ -193,7 +193,7 @@ async function postComment() {
       method: 'POST',
       body: {
         content: comment.value.content,
-        user: comment.value.user,
+        user: user.value?._id,
         reference: postId,
         referenceModel: 'Post'
       }
@@ -235,11 +235,7 @@ watch(
 <template>
   <div v-if="m" class="main-content">
     <h1 class="title">{{ m.name }}</h1>
-    <img
-      :src="m.imageUrl"
-      :alt="`Image de la moto ${m.name}`"
-      class="img-cover moto-left"
-    />
+    <img :src="m.imageUrl" :alt="`Image de la moto ${m.name}`" class="img-cover moto-left" />
 
     <div class="detail">
       <p><span>Marque:</span> {{ m.brand.name }}</p>
@@ -253,14 +249,8 @@ watch(
       <div class="stats-grid">
         <div v-for="stat in statsNumbers" :key="stat.label" class="stat-card">
           <span class="stat-label">{{ stat.label }}</span>
-          <CountUp
-            :key="countStarted ? stat.label : ''"
-            class="stat-value"
-            :end-val="Number(stat.value)"
-            :duration="2"
-            :options="getCountUpOptions(stat.key)"
-            :autoplay="true"
-          />
+          <CountUp :key="countStarted ? stat.label : ''" class="stat-value" :end-val="Number(stat.value)" :duration="2"
+            :options="getCountUpOptions(stat.key)" :autoplay="true" />
           <div class="bar-outer">
             <div class="bar-fill" :style="{ width: stat.percent + '%' }"></div>
           </div>
@@ -273,11 +263,13 @@ watch(
       <p v-else>Pas d'audio</p>
     </div>
 
+    <h4>Commentaires présents sur la moto</h4>
     <div v-if="commentsMotorcycle.length > 0" class="display-comment">
       <div v-for="comment in commentsMotorcycle" :key="comment._id">
         <Comment :response="comment" />
       </div>
     </div>
+    <p v-else>Aucun commentaire sur la moto, ajouter le premier.</p>
 
     <div class="input-comment-box">
       <div v-if="!isAuthenticated" class="need-connection">
@@ -285,36 +277,19 @@ watch(
           Rejoignez la communauté pour débattre et partager vos avis sur ces
           motos !
         </h3>
-        <UButton
-          color="neutral"
-          class="rounded-4xl self-end text-xs p-2"
-          size="xl"
-          @click="open()"
-          >Se connecter
+        <UButton color="neutral" class="rounded-4xl self-end text-xs p-2" size="xl" @click="open()">Se connecter
         </UButton>
       </div>
-      <div
-        v-if="!messagePosted"
-        class="input-comment-container"
-        :class="{ blurred: !isAuthenticated }"
-      >
+      <div v-if="!messagePosted" class="input-comment-container" :class="{ blurred: !isAuthenticated }">
         <h4>
           Déjà roulé sur cette moto ?<br />
           Faite le savoir à la communauté !
         </h4>
         <div class="comment-input">
-          <UTextarea
-            v-model="comment.content"
-            size="xl"
-            placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question"
-          />
+          <UTextarea v-model="comment.content" size="xl"
+            placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question" />
         </div>
-        <UButton
-          class="rounded-4xl self-end text-xs m-1"
-          size="xl"
-          @click="postComment"
-          >Poster</UButton
-        >
+        <UButton class="rounded-4xl self-end text-xs m-1" size="xl" @click="postComment">Poster</UButton>
       </div>
       <div v-else class="input-posted-container">
         <h4>Merci pour votre contribution !</h4>
