@@ -43,6 +43,5 @@ const props = defineProps<{
   p {
     font-size: 10px;
   }
-
 }
 </style>

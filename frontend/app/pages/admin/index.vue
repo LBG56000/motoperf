@@ -8,7 +8,8 @@ interface Stat {
 }
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 })
 
 const userName: string = 'Admin'

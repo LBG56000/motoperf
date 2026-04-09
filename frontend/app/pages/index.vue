@@ -3,8 +3,8 @@ import Sponsor from '@/components/Sponsor.vue'
 import type { IMotorcycle } from '@/types/motorcycles'
 import StatsHome from '~/components/card/StatsHome.vue'
 
-import { useConnexionModal } from '~/composable/useConnexionModal'
-import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
 
 const { isAuthenticated } = useAuth()
 
@@ -69,7 +69,7 @@ async function fetchMotocycles() {
     `${apiBase}motorcycles`,
     {
       params: {
-        project: 'name,horsePower,torque,price,imageUrl',
+        project: 'name,horsePower,torque,price,imageUrl'
       }
     }
   )
@@ -173,7 +173,9 @@ onMounted(async () => {
       </ClientOnly>
     </section>
     <section class="invitation justify-content-center basic-section">
-      <h3 class="h3-mobile" style="text-align: center">Tester le comparateur dès maintenant !</h3>
+      <h3 class="h3-mobile" style="text-align: center">
+        Tester le comparateur dès maintenant !
+      </h3>
       <div>
         <UButton
           size="xl"
@@ -186,7 +188,9 @@ onMounted(async () => {
       </div>
     </section>
     <section class="basic-section">
-      <h2 class="h2-mobile" style="text-align: center">Ils nous font confiance</h2>
+      <h2 class="h2-mobile" style="text-align: center">
+        Ils nous font confiance
+      </h2>
       <Sponsor />
     </section>
     <section class="justify-content-center">
@@ -291,7 +295,6 @@ section {
   font-weight: bold;
 }
 
-
 .invitation {
   display: flex;
   flex-direction: column;
@@ -299,6 +302,7 @@ section {
 
   border-radius: 40px;
   background-color: var(--background-secondary);
+  border: solid 2px var(--border-gray);
   border: solid 2px var(--border-gray);
 
   margin: 0 20%;

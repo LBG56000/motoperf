@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import ToggleSwitch from './ToggleSwitch.vue'
 import LogoApp from './LogoApp.vue'
-import { useAuth } from '~/composable/useAuth'
-import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
 
 const { isAuthenticated, logout, user } = useAuth()
 

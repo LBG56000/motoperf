@@ -8,8 +8,8 @@ import CarrouselMotorcycles from '~/components/CarrouselMotorcycles.vue'
 import Comment from '~/components/forum/Comment.vue'
 import type { IMessage } from '~/types/messages'
 import DualMotorcycle from '~/components/card/DualMotorcycle.vue'
-import { useAuth } from '~/composable/useAuth'
-import { useConnexionModal } from '~/composable/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
 
 interface ICommentInput {
   motorcycleId: string
@@ -416,7 +416,7 @@ onMounted(() => {
           </div>
           <div class="input-comment-box">
             <div v-if="!isAuthenticated" class="need-connection">
-              <h3>
+              <h3 class="h3-mobile">
                 Rejoignez la communauté pour débattre et partager vos avis sur
                 ces motos !
               </h3>
@@ -448,7 +448,7 @@ onMounted(() => {
                 <UTextarea
                   v-model="comment.content"
                   size="xl"
-                  placeholder="Un retour d'expérience, un conseil d'entretien ou encore une question"
+                  placeholder="Un retour d'expérience, un conseil d'entretient ou encore une question"
                 />
               </div>
               <UButton
