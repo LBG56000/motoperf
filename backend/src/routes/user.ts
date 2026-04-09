@@ -89,7 +89,7 @@ router.get('/stats/monthly', async (req: Request, res: Response) => {
 
     let cumulative = baseCount
     const stats = Array.from({ length: 12 }, (_, i) => {
-      const found = monthly.find(m => m._id === i + 1)
+      const found = monthly.find((m) => m._id === i + 1)
       cumulative += found?.count ?? 0
       return { month: i + 1, total: cumulative }
     })

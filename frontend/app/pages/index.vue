@@ -3,8 +3,8 @@ import Sponsor from '@/components/Sponsor.vue'
 import type { IMotorcycle } from '@/types/motorcycles'
 import StatsHome from '~/components/card/StatsHome.vue'
 
-import { useConnexionModal } from '~/composable/useConnexionModal'
-import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
 
 const { isAuthenticated } = useAuth()
 
@@ -287,7 +287,6 @@ section {
 .bold {
   font-weight: bold;
 }
-
 
 .invitation {
   display: flex;

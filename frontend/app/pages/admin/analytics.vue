@@ -4,7 +4,8 @@ import type { IPost } from '~/types/post'
 import type { IMotorcycle } from '~/types/motorcycles'
 
 definePageMeta({
-  layout: 'admin'
+  layout: 'admin',
+  middleware: 'auth'
 })
 
 interface RideStats {

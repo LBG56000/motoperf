@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useAuth } from '~/composable/useAuth';
-import type { IPost } from '~/types/post';
+import { useAuth } from '~/composables/useAuth'
+import type { IPost } from '~/types/post'
 
 const props = defineProps<{
   isNewPost: boolean
@@ -25,7 +25,12 @@ const handleEditPost = () => {
 
 <template>
   <div>
-    <LazyForumModalAddPost :is-new-post :post :is-same-user="isOwner" @added-post="handleEditPost" />
+    <LazyForumModalAddPost
+      :is-new-post
+      :post
+      :is-same-user="isOwner"
+      @added-post="handleEditPost"
+    />
   </div>
 </template>
 <style scoped></style>

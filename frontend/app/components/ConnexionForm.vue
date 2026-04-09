@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
 
-import { useConnexionModal } from '~/composable/useConnexionModal'
-import { useAuth } from '~/composable/useAuth'
+import { useConnexionModal } from '~/composables/useConnexionModal'
+import { useAuth } from '~/composables/useAuth'
 
 const { login, isAuthenticated, user } = useAuth()
 const { isOpen, close } = useConnexionModal()
