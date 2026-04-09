@@ -9,5 +9,6 @@ export interface IPost {
     user: IUser,
     brand: IBrand,
     views: number,
-    image?: string
+    image?: string,
+    userFavoritePost?: Array<string>
 }

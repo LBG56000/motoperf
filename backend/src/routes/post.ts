@@ -40,7 +40,7 @@ router.get('/count', async (req, res) => {
     })
 
     const percent = countFirstPeriod === 0 ? countSecondPeriod * 100 : ((countSecondPeriod - countFirstPeriod) / countFirstPeriod) * 100
-    
+
     res.status(200).json({ count: countSecondPeriod, percent })
   } catch (error) {
     console.error('Error counting posts:', error)
@@ -63,18 +63,18 @@ router.get('/:id/responses', async (req: Request<{ id: string }, unknown, unknow
       .sort(sort)
       .limit(limit)
 
-      if (deep) {
-        query = query.populate('user')
-      }
-
-      const messages = await query
-
-      res.json({ messages })
-    } catch (error) {
-      console.error('Error accessing message route:', error)
-      res.status(500).json({ error: 'Internal server error' })
+    if (deep) {
+      query = query.populate('user')
     }
-  },
+
+    const messages = await query
+
+    res.json({ messages })
+  } catch (error) {
+    console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+},
 )
 
 router.post('/add-view', async (req, res) => {
@@ -85,6 +85,32 @@ router.post('/add-view', async (req, res) => {
       { $inc: { views: 1 } }
     );
     res.status(204).json()
+  } catch (error) {
+    console.error('Error accessing message route:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+router.post('/add-favorite', async (req, res) => {
+  const { filter } = prepareQuery(req.query)
+  const { userId } = req.body
+  try {
+    const post = await Post.findById(filter._id)
+
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" })
+    }
+
+    const favorites = post.userFavoritePost || []
+    const isFavorited = favorites.includes(userId)
+
+    const update = isFavorited
+      ? { $pull: { userFavoritePost: userId } }
+      : { $addToSet: { userFavoritePost: userId } }
+
+    await Post.updateOne({ _id: filter._id }, update)
+
+    res.status(200).json({ isAdded: !isFavorited })
   } catch (error) {
     console.error('Error accessing message route:', error)
     res.status(500).json({ error: 'Internal server error' })

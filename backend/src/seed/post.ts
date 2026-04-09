@@ -34,7 +34,8 @@ const seedPost = async () => {
       user: user._id,
       brand: brandHonda._id,
       views: 12,
-      image: "/images/posts/test1.png"
+      image: "/images/posts/test1.png",
+      userFavoritePost: []
     },
     {
       title: "Quelle est la meilleure marque de moto ?",
@@ -42,7 +43,8 @@ const seedPost = async () => {
       category: category2._id,
       user: user._id,
       brand: brandHonda._id,
-      image: "/images/posts/test2.png"
+      image: "/images/posts/test2.png",
+      userFavoritePost: []
     },
   ])
 
