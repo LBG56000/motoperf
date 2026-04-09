@@ -32,12 +32,8 @@ router.get(
               const [hours, minutes] = ride.hour_event.split(':').map(Number)
               eventDate.setHours(hours, minutes, 0, 0)
             }
-
-            console.log('eventDate : ', eventDate)
-            console.log('now : ', now)
             // Si la date de l'événement est passé
             if (eventDate < now) {
-              console.log('On désactive la balade ', ride.title)
               ride.is_event = false
               await ride.save()
             }
