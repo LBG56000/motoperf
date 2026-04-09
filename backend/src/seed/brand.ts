@@ -24,11 +24,11 @@ const seedBrand = async () => {
     },
     {
       name: 'BMW',
-      icon: 'https://www.super-fabrique.fr/2174-large_default/sticker-bmw-retro-eclairant.jpg',
+      icon: 'https://logos-marques.com/wp-content/uploads/2021/02/BMW-Logo-1996.png',
     },
     {
       name: 'Ducati',
-      icon: 'https://upload.wikimedia.org/wikipedia/fr/a/ae/Ducati_logo.png',
+      icon: 'https://assets.prd.site.awsducati.com/dist/0.39.4/assets/img/ducati_id.png',
     },
   ])
   console.log('Brand seeding')
