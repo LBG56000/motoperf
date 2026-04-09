@@ -87,7 +87,7 @@ export interface IValueForm {
 
 export enum RideType {
   MIXTE = 'Mixte',
-  SINUEUSE = 'Sinueuse',
+  SINUEUX = 'Sinueux',
   GRANDES_ROUTES = 'Grandes routes',
   LIGNES_DROITES = 'Lignes droites',
   BORD_DE_MER = 'Bord de mer',

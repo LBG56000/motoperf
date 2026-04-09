@@ -669,7 +669,6 @@ watch(
         >
           <UFormField label="Date" required>
             <InputDate
-              v-if="stateForm.dateEvent"
               v-model="stateForm.dateEvent"
               :min-value="
                 new CalendarDate(
@@ -682,10 +681,7 @@ watch(
           </UFormField>
 
           <UFormField label="Heure" required>
-            <InputTime
-              v-if="stateForm.hourEvent"
-              v-model="stateForm.hourEvent"
-            />
+            <InputTime v-model="stateForm.hourEvent" />
           </UFormField>
         </div>
 

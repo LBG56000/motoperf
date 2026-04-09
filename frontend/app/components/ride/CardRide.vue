@@ -160,16 +160,12 @@ onMounted(async () => {
   await fetchCreatorInfos()
 
   const runtimeConfig = useRuntimeConfig()
-  try {
-    const currentUser: any = await $fetch(
-      `${runtimeConfig.public.apiBase}users/account`,
-      { credentials: 'include' }
-    )
-    if (currentUser && props.ride.liked_id) {
-      isLikedCurrent.value = props.ride.liked_id.includes(currentUser.users._id)
-    }
-  } catch (e: any) {
-    console.error('Non connecté', e)
+  const currentUser: any = await $fetch(
+    `${runtimeConfig.public.apiBase}users/account`,
+    { credentials: 'include' }
+  )
+  if (currentUser.users && props.ride.liked_id) {
+    isLikedCurrent.value = props.ride.liked_id.includes(currentUser.users._id)
   }
 })
 </script>
@@ -256,7 +252,7 @@ onMounted(async () => {
             icon="i-lucide-route"
             class="invisible-background"
           >
-            Sinueux
+            {{ props.ride.ride_type }}
           </UBadge>
         </div>
 
@@ -301,7 +297,7 @@ onMounted(async () => {
               </span>
             </div>
 
-            <span v-else class="no-participants"> Aucun participant </span>
+            <span v-else class="no-participants">Aucun participant </span>
           </div>
         </div>
       </footer>

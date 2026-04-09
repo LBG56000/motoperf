@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, computed, onMounted, inject, watch } from 'vue'
+import { computed, onMounted, inject, watch } from 'vue'
 import type { IFilterObject } from '~/types/ride.js'
 import { CalendarDate, Time } from '@internationalized/date'
 
@@ -23,7 +23,7 @@ const maxRoundedDistance = computed(
   () => Math.round(props.maxDistanceSlider || 0) + 1
 )
 
-const filters = reactive<IFilterObject>({
+const filters = shallowReactive<IFilterObject>({
   title: '',
   type: [],
   startTown: [],
@@ -31,7 +31,7 @@ const filters = reactive<IFilterObject>({
   distance: [0, 9999],
   duration: [0, 99],
   date: null,
-  hour: null
+  time: null
 })
 
 const STORAGE_KEY_FILTER = inject<string>('STORAGE_KEY_FILTER')
@@ -148,22 +148,13 @@ const resetFilter = () => {
       </UFormField>
 
       <UFormField label="Date de la balade">
-        <InputDate
-          v-model="filters.date"
-          trailing-icon="i-lucide-calendar"
-          class="w-80"
-          locale="fr-FR"
-        />
+        <InputDate v-model="filters.date" locale="fr-FR" />
       </UFormField>
 
       <UFormField label="Date de la balade">
-        <InputTime
-          v-model="filters.time"
-          :hour-cycle="24"
-          trailing-icon="i-lucide-clock"
-          class="w-80"
-          locale="fr-FR"
-        />
+        <UFormField label="Heure de la balade">
+          <InputTime v-model="filters.time" :hour-cycle="24" locale="fr-FR" />
+        </UFormField>
       </UFormField>
 
       <UFormField label="Distance (km)">

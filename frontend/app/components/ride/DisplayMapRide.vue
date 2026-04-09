@@ -366,7 +366,6 @@ const renderRides = (isZooming = false) => {
 
 const onApplyFilters = (payload: IFilterObject) => {
   activeFilters.value = payload
-  console.log(activeFilters)
 }
 
 // Affichage ou non du panel de filtre
