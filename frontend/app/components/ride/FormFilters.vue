@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { reactive, computed, onMounted, inject, watch } from 'vue'
+import { computed, onMounted, inject, watch } from 'vue'
 import type { IFilterObject } from '~/types/ride.js'
+import { CalendarDate, Time } from '@internationalized/date'
 
 const emit = defineEmits(['apply'])
 
@@ -22,15 +23,15 @@ const maxRoundedDistance = computed(
   () => Math.round(props.maxDistanceSlider || 0) + 1
 )
 
-const filters = reactive<IFilterObject>({
+const filters = shallowReactive<IFilterObject>({
   title: '',
   type: [],
   startTown: [],
   endTown: [],
   distance: [0, 9999],
   duration: [0, 99],
-  date: '',
-  time: ''
+  date: null,
+  time: null
 })
 
 const STORAGE_KEY_FILTER = inject<string>('STORAGE_KEY_FILTER')
@@ -38,24 +39,30 @@ const STORAGE_KEY_FILTER = inject<string>('STORAGE_KEY_FILTER')
 // Initialisation des valeurs par défaut ou depuis le Storage
 onMounted(() => {
   if (!STORAGE_KEY_FILTER) return
-  let savedFilters: IFilterObject | null = null
-
-  try {
-    const item = STORAGE_KEY_FILTER
-      ? localStorage.getItem(STORAGE_KEY_FILTER)
-      : null
-    savedFilters = item ? JSON.parse(item) : null
-  } catch (e) {
-    console.error('Erreur lors de la récupération du localStorage', e)
-  }
-
-  if (savedFilters) {
-    // On fusionne les filtres sauvegardés
-    Object.assign(filters, savedFilters)
-  } else {
-    // Sinon on met les valeurs max par défaut
+  const item = localStorage.getItem(STORAGE_KEY_FILTER)
+  if (!item) {
     filters.distance = [0, maxRoundedDistance.value]
     filters.duration = [0, maxRoundedDuration.value]
+    return
+  }
+
+  try {
+    const saved = JSON.parse(item)
+
+    if (saved.date) {
+      saved.date = new CalendarDate(
+        saved.date.year,
+        saved.date.month,
+        saved.date.day
+      )
+    }
+    if (saved.time) {
+      saved.time = new Time(saved.time.hour, saved.time.minute)
+    }
+
+    Object.assign(filters, saved)
+  } catch (e) {
+    console.error('Erreur localStorage', e)
   }
 })
 
@@ -84,8 +91,9 @@ const resetFilter = () => {
   filters.endTown = []
   filters.distance = [0, maxRoundedDistance.value]
   filters.duration = [0, maxRoundedDuration.value]
-  filters.date = ''
-  filters.time = ''
+
+  filters.date = null
+  filters.time = null
 
   if (STORAGE_KEY_FILTER) {
     localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(filters))
@@ -140,22 +148,13 @@ const resetFilter = () => {
       </UFormField>
 
       <UFormField label="Date de la balade">
-        <UInputDate
-          v-model="filters.date"
-          trailing-icon="i-lucide-calendar"
-          class="w-80"
-          locale="fr-FR"
-        />
+        <InputDate v-model="filters.date" locale="fr-FR" />
       </UFormField>
 
       <UFormField label="Date de la balade">
-        <UInputTime
-          v-model="filters.time"
-          :hour-cycle="24"
-          trailing-icon="i-lucide-clock"
-          class="w-80"
-          locale="fr-FR"
-        />
+        <UFormField label="Heure de la balade">
+          <InputTime v-model="filters.time" :hour-cycle="24" locale="fr-FR" />
+        </UFormField>
       </UFormField>
 
       <UFormField label="Distance (km)">

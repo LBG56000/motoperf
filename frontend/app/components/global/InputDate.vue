@@ -1,24 +1,30 @@
 <script setup lang="ts">
-import type { CalendarDate } from '@internationalized/date'
+import { CalendarDate } from '@internationalized/date'
 
 const props = defineProps<{
-  modelValue: CalendarDate
+  modelValue: CalendarDate | null
 }>()
-
-const emit = defineEmits(['update:modelValue'])
-
+const emit = defineEmits<{
+  'update:modelValue': [value: CalendarDate | null]
+}>()
 const inputRef = useTemplateRef('inputRef')
 
 const value = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: (val: any) => {
+    if (!val || !val.year || !val.month || !val.day) {
+      return emit('update:modelValue', null)
+    }
+    // Reconstruction = vraie instance CalendarDate avec #private
+    emit('update:modelValue', new CalendarDate(val.year, val.month, val.day))
+  }
 })
 </script>
 
 <template>
   <UInputDate
     ref="inputRef"
-    v-model="value"
+    v-model="value as any"
     class="w-full"
     size="xl"
     locale="fr-FR"
@@ -30,10 +36,13 @@ const value = computed({
           variant="link"
           size="sm"
           icon="i-lucide-calendar"
-          class="px-0"
+          class="px-0 cursor-pointer"
         />
         <template #content>
-          <UCalendar v-model="value" class="p-2" />
+          <UCalendar
+            :model-value="value"
+            @update:model-value="(val: any) => (value = val)"
+          />
         </template>
       </UPopover>
     </template>

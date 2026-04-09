@@ -2,16 +2,21 @@
 import { Time } from '@internationalized/date'
 
 const props = defineProps<{
-  modelValue: Time
+  modelValue: Time | null
 }>()
-
-const emit = defineEmits(['update:modelValue'])
-
+const emit = defineEmits<{
+  'update:modelValue': [value: Time | null]
+}>()
 const inputRef = useTemplateRef('inputRef')
 
 const value = computed({
   get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
+  set: (val: any) => {
+    if (!val || val.hour === undefined || val.minute === undefined) {
+      return emit('update:modelValue', null)
+    }
+    emit('update:modelValue', new Time(val.hour, val.minute))
+  }
 })
 
 const selectTime = (h: number) => {
@@ -22,7 +27,7 @@ const selectTime = (h: number) => {
 <template>
   <UInputTime
     ref="inputRef"
-    v-model="value"
+    v-model="value as any"
     :hour-cycle="24"
     class="w-full"
     size="xl"
@@ -34,7 +39,7 @@ const selectTime = (h: number) => {
           variant="link"
           size="sm"
           icon="i-lucide-clock"
-          class="px-0"
+          class="px-0 cursor-pointer"
         />
         <template #content>
           <div class="hours-popover-container">

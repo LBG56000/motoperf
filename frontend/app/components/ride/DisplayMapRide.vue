@@ -10,6 +10,7 @@ import type {
 import PanelRides from './PanelRides.vue'
 import FormFilters from './FormFilters.vue'
 import { getWeightByZoom, getMapPinSvg } from '~/utils/ride'
+import { CalendarDate, Time } from '@internationalized/date'
 
 interface IProps {
   displayFilters?: boolean
@@ -116,8 +117,8 @@ const defaultFilters: IFilterObject = {
   type: [],
   startTown: [],
   endTown: [],
-  date: '',
-  time: ''
+  date: null,
+  time: null
 }
 
 const activeFilters = ref<IFilterObject>(defaultFilters) // État de tous les fitres courants
@@ -182,6 +183,41 @@ const filteredRides = computed<IRide[]>(() => {
       matchesRecent = new Date(ride.createdAt) >= sevenDaysAgo
     }
 
+    // --- FILTRE DATE ---
+    let matchesDate = true
+    if (activeFilters.value.date) {
+      if (ride.date_event) {
+        const rideDate = new Date(ride.date_event)
+        matchesDate =
+          rideDate.getFullYear() === activeFilters.value.date.year &&
+          rideDate.getMonth() + 1 === activeFilters.value.date.month &&
+          rideDate.getDate() === activeFilters.value.date.day
+      } else {
+        matchesDate = false
+      }
+    }
+
+    // --- FILTRE HEURE ---
+    let matchesTime = true
+    if (activeFilters.value.time) {
+      if (ride.hour_event) {
+        const [h, m] = ride.hour_event.split(':')
+        const rideHour = h ? parseInt(h, 10) : 0
+        const rideMinute = m ? parseInt(m, 10) : 0
+
+        if (isNaN(rideHour) || isNaN(rideMinute)) {
+          matchesTime = false
+        } else {
+          const rideTotalMinutes = rideHour * 60 + rideMinute
+          const filterTotalMinutes =
+            activeFilters.value.time.hour * 60 + activeFilters.value.time.minute
+          matchesTime = rideTotalMinutes === filterTotalMinutes
+        }
+      } else {
+        matchesTime = false
+      }
+    }
+
     return (
       matchesSearch &&
       matchesSliderDistance &&
@@ -192,7 +228,9 @@ const filteredRides = computed<IRide[]>(() => {
       matchesEndTown &&
       matchesType &&
       matchesRecent &&
-      matchesIsEvent
+      matchesIsEvent &&
+      matchesDate &&
+      matchesTime
     )
   })
 
@@ -635,13 +673,44 @@ onMounted(async () => {
   // Gestion de l'affichage et l'état des filtres
   if (props.displayFilters) {
     const saved = localStorage.getItem(STORAGE_KEY_FILTER)
-    if (saved) activeFilters.value = JSON.parse(saved)
+    if (saved) {
+      const parsed = JSON.parse(saved)
+
+      if (parsed.date) {
+        parsed.date = new CalendarDate(
+          parsed.date.year,
+          parsed.date.month,
+          parsed.date.day
+        )
+      }
+      if (parsed.time) {
+        parsed.time = new Time(parsed.time.hour, parsed.time.minute)
+      }
+
+      activeFilters.value = parsed
+    }
 
     // Persiste les filtres dans le localStorage
     watch(
-      activeFilters,
+      () => activeFilters.value as IFilterObject,
       (newVal: IFilterObject) => {
-        localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(newVal))
+        const filtersToSave = {
+          ...newVal,
+          date: newVal.date
+            ? {
+                year: newVal.date.year,
+                month: newVal.date.month,
+                day: newVal.date.day
+              }
+            : null,
+          time: newVal.time
+            ? {
+                hour: newVal.time.hour,
+                minute: newVal.time.minute
+              }
+            : null
+        }
+        localStorage.setItem(STORAGE_KEY_FILTER, JSON.stringify(filtersToSave))
       },
       { deep: true }
     )

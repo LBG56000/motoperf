@@ -1,3 +1,5 @@
+import type { Time, CalendarDate } from '@internationalized/date'
+
 export interface IRide {
   _id: string
   title: string
@@ -39,8 +41,8 @@ export interface IFilterObject {
   type: string[]
   startTown: string[]
   endTown: string[]
-  date: string
-  time: string
+  date: CalendarDate | null
+  time: Time | null
 }
 
 export type MapItem = {
@@ -85,7 +87,7 @@ export interface IValueForm {
 
 export enum RideType {
   MIXTE = 'Mixte',
-  SINUEUSE = 'Sinueuse',
+  SINUEUX = 'Sinueux',
   GRANDES_ROUTES = 'Grandes routes',
   LIGNES_DROITES = 'Lignes droites',
   BORD_DE_MER = 'Bord de mer',
