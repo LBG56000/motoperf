@@ -2,7 +2,7 @@
 import { Time } from '@internationalized/date'
 
 const props = defineProps<{
-  modelValue: Time
+  modelValue: Time | null
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -22,7 +22,7 @@ const selectTime = (h: number) => {
 <template>
   <UInputTime
     ref="inputRef"
-    v-model="value"
+    v-model="value as any"
     :hour-cycle="24"
     class="w-full"
     size="xl"

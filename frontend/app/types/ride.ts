@@ -1,3 +1,5 @@
+import type { Time, CalendarDate } from '@internationalized/date'
+
 export interface IRide {
   _id: string
   title: string
@@ -39,8 +41,8 @@ export interface IFilterObject {
   type: string[]
   startTown: string[]
   endTown: string[]
-  date: string
-  time: string
+  date: CalendarDate | null
+  time: Time | null
 }
 
 export type MapItem = {

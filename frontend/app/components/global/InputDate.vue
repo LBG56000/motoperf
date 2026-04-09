@@ -2,7 +2,7 @@
 import type { CalendarDate } from '@internationalized/date'
 
 const props = defineProps<{
-  modelValue: CalendarDate
+  modelValue: CalendarDate | null
 }>()
 
 const emit = defineEmits(['update:modelValue'])
@@ -18,7 +18,7 @@ const value = computed({
 <template>
   <UInputDate
     ref="inputRef"
-    v-model="value"
+    v-model="value as any"
     class="w-full"
     size="xl"
     locale="fr-FR"
