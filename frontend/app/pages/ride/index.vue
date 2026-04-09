@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useAuth } from '~/composable/useAuth.js'
+import { useAuth } from '~/composables/useAuth.js'
 import HeaderInfo from '../../components/global/HeaderInfo.vue'
 import DisplayMapRide from '../../components/ride/DisplayMapRide.vue'
-import { useConnexionModal } from '~/composable/useConnexionModal.js'
+import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 const { user } = useAuth()
 const { open } = useConnexionModal()
@@ -45,7 +45,9 @@ const goToForm = async () => {
     />
 
     <div class="add-container">
-      <p class="p-mobile">Vous ne trouvez pas votre balade, vous pouvez l’ajouter :</p>
+      <p class="p-mobile">
+        Vous ne trouvez pas votre balade, vous pouvez l’ajouter :
+      </p>
       <UButton
         color="primary"
         icon="i-lucide-map-pinned"

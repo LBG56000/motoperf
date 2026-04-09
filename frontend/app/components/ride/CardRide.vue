@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { IRide } from '~/types/ride'
 import { computed } from 'vue'
-import { useAuth } from '~/composable/useAuth'
+import { useAuth } from '~/composables/useAuth'
 import type { IUser } from '~/types/users.js'
-import { useConnexionModal } from '~/composable/useConnexionModal.js'
+import { useConnexionModal } from '~/composables/useConnexionModal.js'
 
 interface IProps {
   ride: IRide

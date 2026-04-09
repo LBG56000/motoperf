@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
 import { ref, reactive } from 'vue'
-import { useCreateAccountModal } from '~/composable/useCreateAccountModal'
-import { useAuth } from '~/composable/useAuth'
+import { useCreateAccountModal } from '~/composables/useCreateAccountModal'
+import { useAuth } from '~/composables/useAuth'
 
 const { register } = useAuth()
 const { isOpen } = useCreateAccountModal()

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { FormError } from '@nuxt/ui'
 import { reactive, ref, watch } from 'vue'
-import { useProfileEditModal } from '~/composable/useProfileEditModal'
-import { useAuth } from '~/composable/useAuth'
+import { useProfileEditModal } from '~/composables/useProfileEditModal'
+import { useAuth } from '~/composables/useAuth'
 
 const { user, updateProfile } = useAuth()
 const { isOpen, close } = useProfileEditModal()

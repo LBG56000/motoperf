@@ -1,5 +1,5 @@
 <script setup>
-import { useAuth } from '@/composable/useAuth'
+import { useAuth } from '@/composables/useAuth'
 
 const { fetchUser } = useAuth()
 onMounted(fetchUser)

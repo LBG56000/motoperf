@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { reactive, computed } from 'vue'
-import { useProfileModal } from '~/composable/useProfileModal'
-import { useProfileEditModal } from '~/composable/useProfileEditModal'
-import { useAuth } from '~/composable/useAuth'
+import { useProfileModal } from '~/composables/useProfileModal'
+import { useProfileEditModal } from '~/composables/useProfileEditModal'
+import { useAuth } from '~/composables/useAuth'
 
 const { user, logout } = useAuth()
 const { isOpen, close } = useProfileModal()
