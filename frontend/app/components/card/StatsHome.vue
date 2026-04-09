@@ -25,7 +25,7 @@ const props = defineProps<{
   border: solid 2px var(--border-gray);
   border-radius: 10px;
 
-  width: 100%;
+  width: 20%;
   aspect-ratio: 1 / 1;
 }
 

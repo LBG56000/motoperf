@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'compare' | 'delete'): void
+  (e: 'compare' | 'delete', side?: 'left' | 'right'): void
 }>()
 
 const isOpen = ref(true)
@@ -18,6 +18,11 @@ const isOpen = ref(true)
     <div v-if="isOpen" class="dual-motorcycle">
       <div class="slot-container">
         <div class="motorcycle-left">
+          <UIcon 
+            name="i-lucide-circle-x"
+            class="absolute top-2 right-2 size-5 self-end cursor-pointer"
+            @click="emit('delete', 'left')"
+          />
           <img
             v-if="props.leftMotorcycleUrl"
             :src="props.leftMotorcycleUrl"
@@ -28,17 +33,21 @@ const isOpen = ref(true)
             src="/svg/motorcycleIcon.svg"
             class="size-20"
           />
-
           <p>{{ props.leftName }}</p>
         </div>
         <UButton
           icon="i-lucide-arrow-left-right"
-          class="w-fit sm:w-10 rounded-4xl m-1 btn-select"
+          class="w-fit  rounded-4xl m-1 btn-select"
           @click="emit('compare')"
         >
-          Sélectionner
+          Comparer
         </UButton>
         <div class="motorcycle-right">
+          <UIcon 
+            name="i-lucide-circle-x"
+            class="absolute top-2 right-2 size-5 self-end cursor-pointer"
+            @click="emit('delete', 'right')"
+          />
           <img
             v-if="props.rightMotorcycleUrl"
             :src="props.rightMotorcycleUrl"
@@ -51,7 +60,6 @@ const isOpen = ref(true)
             class="size-20"
             style="transform: scaleX(-1)"
           />
-
           <p>{{ props.rightName }}</p>
         </div>
       </div>
@@ -102,7 +110,7 @@ const isOpen = ref(true)
   padding: 1rem;
   border-radius: 8px;
   background-color: var(--background);
-  z-index: -5;
+  z-index: 1;
 }
 
 .motorcycle-left p,
@@ -128,6 +136,7 @@ const isOpen = ref(true)
   border-radius: 0 0 8px 8px;
   color: var(--background);
   background-color: var(--text-color);
+  z-index: 5;
 }
 
 .wrapper {
