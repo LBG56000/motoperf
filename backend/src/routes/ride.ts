@@ -1,7 +1,7 @@
 import Ride from '../models/Ride'
 import { type Request, Router } from 'express'
 import { prepareQuery, type ReqQuery } from '../utils/find'
-import { RideColor, ICreateRideBody } from '../types/ride'
+import { RideColor, ICreateRideBody, IRide } from '../types/ride'
 import { Types } from 'mongoose'
 
 const router = Router()
@@ -18,6 +18,28 @@ router.get(
       }
 
       const rides = await query
+      const now = new Date(
+        new Date().toLocaleString('en-US', { timeZone: 'Europe/Paris' }),
+      )
+
+      // Promise pour être sûr que toutes les modif sont faites avant de renvoyer les données
+      await Promise.all(
+        rides.map(async (ride) => {
+          if (ride.is_event && ride.date_event) {
+            const eventDate = new Date(ride.date_event)
+
+            if (ride.hour_event) {
+              const [hours, minutes] = ride.hour_event.split(':').map(Number)
+              eventDate.setHours(hours, minutes, 0, 0)
+            }
+            // Si la date de l'événement est passé
+            if (eventDate < now) {
+              ride.is_event = false
+              await ride.save()
+            }
+          }
+        }),
+      )
 
       res.status(200).json({ rides })
     } catch (error) {

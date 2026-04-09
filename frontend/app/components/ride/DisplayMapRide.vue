@@ -127,6 +127,7 @@ const filterTime = ref<boolean>(false)
 const filterDistance = ref<boolean>(false)
 const filterLike = ref<boolean>(false) // Bouton les coups de coeur
 const filterRecent = ref<boolean>(false) // Bouton les plus récnetes
+const filterEvent = ref<boolean>(false) // Bouton pour filtrer sur les événements
 
 const distanceMax = ref<number>(1) // Borner le slider de distance à la balade la plus longue+1
 const durationMax = ref<number>(1) // Borner le slider de duration à la balade la plus longue+1
@@ -172,6 +173,7 @@ const filteredRides = computed<IRide[]>(() => {
     // Les boutons rapides en haut de la carte
     const matchesQuickTime = !filterTime.value || ride.duration <= 1.5
     const matchesQuickDistance = !filterDistance.value || ride.distance <= 50
+    const matchesIsEvent = !filterEvent.value || ride.is_event
 
     let matchesRecent = true
     if (filterRecent.value) {
@@ -189,7 +191,8 @@ const filteredRides = computed<IRide[]>(() => {
       matchesStartTown &&
       matchesEndTown &&
       matchesType &&
-      matchesRecent
+      matchesRecent &&
+      matchesIsEvent
     )
   })
 
@@ -768,13 +771,23 @@ watch(
       </UButton>
 
       <UButton
-        icon="i-lucide-calendar-days"
+        icon="i-lucide-history"
         :color="filterRecent ? 'primary' : 'neutral'"
         :variant="filterRecent ? 'solid' : 'subtle'"
         class="cursor-pointer"
         @click="filterRecent = !filterRecent"
       >
         Les plus récentes
+      </UButton>
+
+      <UButton
+        icon="i-lucide-calendar-days"
+        :color="filterEvent ? 'primary' : 'neutral'"
+        :variant="filterEvent ? 'solid' : 'subtle'"
+        class="cursor-pointer"
+        @click="filterEvent = !filterEvent"
+      >
+        Événement
       </UButton>
     </div>
     <UButton

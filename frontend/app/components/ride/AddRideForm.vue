@@ -31,12 +31,6 @@ const durationMinutes = ref<number>(0)
 const mapKey = ref(0) // Permet de recharger la carte quand un tracé GPS est supprimé
 
 const isGpsRoute = ref<boolean>(false)
-const isGeomCreated = computed(() => {
-  if (stateForm.geom) {
-    return true
-  }
-  return false
-}) // Vérifie si une geom est créé
 
 const addressErrors = reactive({
   start: false,
@@ -395,6 +389,32 @@ onMounted(async () => {
 })
 
 watch(
+  () => stateForm.dateEvent,
+  (newDate) => {
+    if (!newDate) return
+
+    const today = new CalendarDate(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      now.getDate()
+    )
+
+    // compare retourne -1 si newDate < today
+    if (newDate.compare(today) < 0) {
+      const toast = useToast()
+      toast.add({
+        title: 'Date invalide',
+        description: 'Vous ne pouvez pas choisir une date passée.',
+        color: 'error'
+      })
+
+      // Réinitialise à aujourd'hui
+      stateForm.dateEvent = today
+    }
+  }
+)
+
+watch(
   () => stateForm.geom,
   async (newGeom) => {
     // Si la geom change (se supprime) on lave tous les champs calculer en fonction
@@ -648,7 +668,16 @@ watch(
           class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           <UFormField label="Date" required>
-            <InputDate v-model="stateForm.dateEvent" />
+            <InputDate
+              v-model="stateForm.dateEvent"
+              :min-value="
+                new CalendarDate(
+                  now.getFullYear(),
+                  now.getMonth() + 1,
+                  now.getDate()
+                )
+              "
+            />
           </UFormField>
           <UFormField label="Heure" required>
             <InputTime v-model="stateForm.hourEvent" />
@@ -676,6 +705,8 @@ watch(
             v-model:is-map-loading="isMapLoading"
             display-enlarge-button
             :display-editor-container="!isGpsRoute && !isMobile"
+            :disable-editing="isGpsRoute"
+            :disable-creating="isGpsRoute"
             class="grow min-h-100 lg:min-h-0"
           />
 
