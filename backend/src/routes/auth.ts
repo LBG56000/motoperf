@@ -36,7 +36,7 @@ router.post('/logout', (req: Request, res: Response) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
   })
-  res.json({ message: 'Disconnected' })
+  res.status(200).json({ message: 'Disconnected' })
 })
 
 export default router
