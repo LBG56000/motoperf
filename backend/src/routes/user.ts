@@ -75,15 +75,6 @@ router.put(
 
   async (req: Request, res: Response) => {
     const { id } = req.user as { id: string }
-    const {
-      firstname,
-      lastname,
-      pseudo,
-      userType,
-      ridingStartYear,
-      image,
-      password,
-    } = req.body
 
     const allowedFields = [
       'firstname',
@@ -110,6 +101,10 @@ router.put(
       if (existingUser) {
         return res.status(409).json({ error: 'Pseudo already taken' })
       }
+    }
+
+    if (updateData.password) {
+      updateData.password = await hash(updateData.password)
     }
 
     if (updateData.ridingStartYear) {

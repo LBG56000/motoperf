@@ -59,6 +59,7 @@ export function useAuth() {
       updateData.ridingStartYear = Number(formData.get('ridingStartYear'))
     if (formData.has('email')) updateData.email = formData.get('email')
     if (formData.has('image')) updateData.image = formData.get('image')
+    if (formData.has('password')) updateData.password = formData.get('password')
 
     await $fetch(`${apiBase}users/account`, {
       method: 'PUT',

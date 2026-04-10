@@ -10,6 +10,7 @@ const form = useTemplateRef('form')
 const currentStep = ref(1)
 const formErrors = ref<FormError[]>([])
 const show = ref(false)
+const isLoading = ref(false)
 
 const state = reactive({
   firstname: '',
@@ -35,7 +36,6 @@ const isValidEmail = (email: string) => {
 
 // Validation par étape
 const validateStep = (step: number): FormError[] => {
-  console.log('Validation par étape')
   const errors: FormError[] = []
 
   if (step === 1 || step === 3) {
@@ -137,6 +137,8 @@ const handleSubmit = async () => {
     validateStep(currentStep.value)
     if (formErrors.value.length > 0) return
 
+    isLoading.value = true
+
     // Calcul de l'année
     const startYear = (
       new Date().getFullYear() - Number(state.yearsExperience)
@@ -170,6 +172,8 @@ const handleSubmit = async () => {
     resetForm()
   } catch (err) {
     console.error('Erreur lors de la soumission:', err)
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
@@ -389,6 +393,8 @@ const handleSubmit = async () => {
               label="Confirmer"
               color="neutral"
               class="font-bold w-1/2 ml-auto"
+              :loading="isLoading"
+              :disabled="isLoading"
             />
           </div>
         </UForm>
