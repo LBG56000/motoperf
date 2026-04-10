@@ -75,15 +75,6 @@ router.put(
 
   async (req: Request, res: Response) => {
     const { id } = req.user as { id: string }
-    const {
-      firstname,
-      lastname,
-      pseudo,
-      userType,
-      ridingStartYear,
-      image,
-      password,
-    } = req.body
 
     const allowedFields = [
       'firstname',
