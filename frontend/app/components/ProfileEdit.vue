@@ -8,6 +8,7 @@ const { user, updateProfile } = useAuth()
 const { isOpen, close } = useProfileEditModal()
 const form = useTemplateRef('form')
 const formErrors = ref<FormError[]>([])
+const show = ref(false)
 
 const state = reactive({
   firstname: '',
@@ -16,6 +17,8 @@ const state = reactive({
   experience: 'Confirmé',
   ridingStartYear: new Date().getFullYear(),
   email: '',
+  password: '',
+  confirmPassword: '',
   file: undefined as File | undefined
 })
 
@@ -41,6 +44,9 @@ const fillProfil = () => {
   state.ridingStartYear =
     user.value?.ridingStartYear || new Date().getFullYear()
   state.email = user.value?.email || ''
+
+  state.password = ''
+  state.confirmPassword = ''
 
   // Prévisualisation de l'image existante
   const existingImage = user.value?.image || ''
@@ -72,6 +78,17 @@ const validate = (): FormError[] => {
       message: `L'année doit être entre 1950 et ${currentYear}`
     })
   }
+
+  if (state.password && state.password.length < 8)
+    errors.push({
+      name: 'password',
+      message: 'Le mot de passe doit contenir au moins 8 caractères'
+    })
+  if (state.password !== state.confirmPassword)
+    errors.push({
+      name: 'confirmPassword',
+      message: 'Les mots de passe ne correspondent pas'
+    })
 
   formErrors.value = errors
   return errors
@@ -115,6 +132,9 @@ const handleSave = async () => {
     )
     formData.append('ridingStartYear', state.ridingStartYear.toString())
     formData.append('email', state.email)
+    if (state.password) {
+      formData.append('password', state.password)
+    }
 
     // Upload de l'image si une nouvelle a été sélectionnée
     if (state.file) {
@@ -161,7 +181,6 @@ watch(
           class="form-container"
           @submit="handleSave"
         >
-          <!-- Avatar Upload -->
           <div class="avatar-section">
             <UFormField name="file" class="avatar-upload">
               <UFileUpload
@@ -173,7 +192,6 @@ watch(
             </UFormField>
           </div>
 
-          <!-- Formulaire -->
           <div class="form-fields">
             <div class="form-row">
               <UFormField
@@ -269,9 +287,59 @@ watch(
                 class="w-full"
               />
             </UFormField>
+
+            <UFormField
+              label="Mot de passe"
+              name="password"
+              :error="getError('password')"
+              required
+            >
+              <UInput
+                v-model="state.password"
+                :type="show ? 'text' : 'password'"
+                placeholder="Mot de passe ..."
+                variant="soft"
+                class="w-full"
+                ><template #trailing>
+                  <UButton
+                    color="neutral"
+                    variant="link"
+                    size="sm"
+                    :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                    :aria-label="show ? 'Hide password' : 'Show password'"
+                    :aria-pressed="show"
+                    aria-controls="password"
+                    @click="show = !show"
+                  /> </template
+              ></UInput>
+            </UFormField>
+            <UFormField
+              label="Confirmer le mot de passe"
+              name="confirmPassword"
+              :error="getError('confirmPassword')"
+              required
+            >
+              <UInput
+                v-model="state.confirmPassword"
+                :type="show ? 'text' : 'password'"
+                placeholder="Confirmation mot de passe ..."
+                variant="soft"
+                class="w-full"
+                ><template #trailing>
+                  <UButton
+                    color="neutral"
+                    variant="link"
+                    size="sm"
+                    :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                    :aria-label="show ? 'Hide password' : 'Show password'"
+                    :aria-pressed="show"
+                    aria-controls="password"
+                    @click="show = !show"
+                  /> </template
+              ></UInput>
+            </UFormField>
           </div>
 
-          <!-- Boutons d'action -->
           <div class="button-group">
             <UButton
               type="button"

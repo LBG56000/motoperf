@@ -21,7 +21,12 @@ const fillProfil = () => {
   state.firstname = user.value?.firstname || '__'
   state.lastname = user.value?.lastname || '__'
   state.pseudo = user.value?.pseudo || '__'
-  state.experience = user.value?.userType || 'Confirmé'
+  state.experience = {
+    beginner: 'Débutant',
+    confirmed: 'Confirmé',
+    expert: 'Expert',
+    other: 'Autre'
+  }[user.value?.userType || 'confirmed'] as string
   state.yearsExperience = user.value?.ridingStartYear || 0
   state.email = user.value?.email || '__.__@__.__'
   state.image = user.value?.image || ''
@@ -85,8 +90,9 @@ watch(
         <UButton
           label="Modifier mon profil"
           class="rounded-full mt-6"
+          variant="soft"
           color="neutral"
-          style="width: 100%; justify-content: center; color: white"
+          style="width: 100%; justify-content: center"
           @click="useProfileEditModal().open"
         />
         <UButton
