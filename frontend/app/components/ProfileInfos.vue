@@ -85,8 +85,9 @@ watch(
         <UButton
           label="Modifier mon profil"
           class="rounded-full mt-6"
+          variant="soft"
           color="neutral"
-          style="width: 100%; justify-content: center; color: white"
+          style="width: 100%; justify-content: center"
           @click="useProfileEditModal().open"
         />
         <UButton
