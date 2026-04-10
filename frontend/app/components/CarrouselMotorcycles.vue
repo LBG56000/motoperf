@@ -7,8 +7,18 @@ defineProps<{
 const emit = defineEmits<{
   (e: 'selected', _id: string, imgUrl: string): void
 }>()
-</script>
 
+const route = useRoute()
+const isOnComparisonPage = computed(() => route.path === '/comparo')
+
+function handleCompareClick(itemId: string, imgUrl: string) {
+  if (isOnComparisonPage.value) {
+    emit('selected', itemId, imgUrl ? imgUrl : '')
+  } else {
+    navigateTo('/comparo')
+  }
+}
+</script>
 <template>
   <UCarousel
     v-slot="{ item }"
@@ -52,7 +62,8 @@ const emit = defineEmits<{
           style="color: white"
           icon="i-lucide-arrow-left-right"
           @click.stop="
-            emit('selected', item._id, item.imageUrl ? item.imageUrl : '')
+            () =>
+              handleCompareClick(item._id, item.imageUrl ? item.imageUrl : '')
           "
           >Comparer</UButton
         >

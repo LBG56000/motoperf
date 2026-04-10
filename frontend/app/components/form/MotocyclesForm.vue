@@ -29,11 +29,11 @@ const motorcyclesList = ref<IMotorcycle[]>([])
 const isMotorcyclesFetched = ref<boolean>(false)
 const selectedBrand = ref<BrandItem | undefined>()
 
-type BrandItem = IBrand & { 
-  label: string; 
-  avatar: { 
-    src: string 
-  } 
+type BrandItem = IBrand & {
+  label: string
+  avatar: {
+    src: string
+  }
 }
 
 // Brand list with avatar for the dropdown
@@ -180,7 +180,7 @@ onMounted(() => {
   gap: 1rem;
   padding: 1rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 340px;
   border-radius: 10px;
   background-color: var(--background);
   box-shadow: 20px 20px 5em var(--border-gray);
