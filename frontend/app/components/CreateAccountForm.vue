@@ -35,7 +35,6 @@ const isValidEmail = (email: string) => {
 
 // Validation par étape
 const validateStep = (step: number): FormError[] => {
-  console.log('Validation par étape')
   const errors: FormError[] = []
 
   if (step === 1 || step === 3) {
