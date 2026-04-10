@@ -9,6 +9,7 @@ const { isOpen, close } = useProfileEditModal()
 const form = useTemplateRef('form')
 const formErrors = ref<FormError[]>([])
 const show = ref(false)
+const isLoading = ref(false)
 
 const state = reactive({
   firstname: '',
@@ -117,6 +118,8 @@ const handleSave = async () => {
     validate()
     if (formErrors.value.length > 0) return
 
+    isLoading.value = true
+
     const formData = new FormData()
     formData.append('firstname', state.firstname)
     formData.append('lastname', state.lastname)
@@ -147,6 +150,8 @@ const handleSave = async () => {
     close()
   } catch (error) {
     console.error('Erreur lors de la sauvegarde:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -354,6 +359,8 @@ watch(
               label="Sauvegarder"
               color="neutral"
               class="font-bold w-1/2"
+              :loading="isLoading"
+              :disabled="isLoading"
             />
           </div>
         </UForm>
