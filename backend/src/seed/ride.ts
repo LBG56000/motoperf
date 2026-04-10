@@ -17,7 +17,7 @@ const seedRide = async () => {
       title: 'La Côte de Granit Rose',
       description:
         'Un itinéraire spectaculaire longeant le littoral entre falaises de granit et plages de sable fin. Idéal pour une sortie photo.',
-      color: '#7EDE6B',
+      color: '#0072B2',
       geom: {
         type: 'FeatureCollection',
         features: [

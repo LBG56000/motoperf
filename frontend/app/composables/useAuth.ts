@@ -2,11 +2,13 @@ import type { IUser } from '@/types/users'
 
 const user = ref<IUser | null>(null)
 const isAuthenticated = computed(() => !!user.value)
+const isLoading = ref(true)
 
 export function useAuth() {
   const apiBase = useRuntimeConfig().public.apiBase
 
   async function fetchUser(projects: string = 'all') {
+    isLoading.value = true
     try {
       const data = await $fetch<{ users: IUser }>(`${apiBase}users/account`, {
         credentials: 'include',
@@ -15,6 +17,8 @@ export function useAuth() {
       user.value = data.users
     } catch {
       user.value = null
+    } finally {
+      isLoading.value = false
     }
   }
 
@@ -90,6 +94,7 @@ export function useAuth() {
   return {
     user: readonly(user),
     isAuthenticated,
+    isLoading: readonly(isLoading),
     register,
     updateProfile,
     fetchUser,

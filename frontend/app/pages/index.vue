@@ -103,7 +103,7 @@ onMounted(async () => {
           v-if="!isAuthenticated"
           size="xl"
           color="neutral"
-          class="rounded-full button"
+          class="rounded-full button cursor-pointer"
           trailing-icon="i-lucide-arrow-right"
           variant="outline"
           @click="connexionModal.open()"
@@ -247,25 +247,24 @@ section {
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   gap: 1rem;
   position: relative;
 }
 
 .img-cover {
   flex: 1; /* = flex-grow: 1; flex-shrink: 1; flex-basis: 0%; */
-
   width: 100%;
   min-width: 38%;
-  height: 100%;
-
-  object-fit: cover;
-
-  object-position: center;
+  height: auto;
+  max-height: 80vh;
+  object-fit: contain;
+  object-position: center bottom;
 }
 
 .moto-left {
   animation: slide-left-to-right 2s ease-in-out;
+  flex: 1.1; /* Agrandir légèrement le R1 parce que image plus petite */
 }
 
 .moto-right {

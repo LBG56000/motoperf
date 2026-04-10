@@ -24,8 +24,11 @@ const value = computed({
 <template>
   <UInputDate
     ref="inputRef"
-    v-model="value as any"
+    v-model="value"
     class="w-full"
+    :ui="{
+      base: 'w-full justify-start text-left'
+    }"
     size="xl"
     locale="fr-FR"
   >

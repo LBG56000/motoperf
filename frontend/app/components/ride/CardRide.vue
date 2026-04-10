@@ -145,7 +145,7 @@ const fetchCreatorInfos = async () => {
       {
         params: {
           filter: JSON.stringify({ _id: props.ride.user_id }),
-          project: 'all'
+          project: 'pseudo,image'
         }
       }
     )
@@ -260,7 +260,7 @@ onMounted(async () => {
           <div class="card-footer-item">
             <template v-if="creator">
               <UAvatar
-                :alt="`Avatar de ${creator.pseudo}`"
+                :alt="`Avatar de ${creator.pseudo || 'MotoCenter'}`"
                 :src="srcAvatarCreator"
               />
               <p>
