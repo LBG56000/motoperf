@@ -117,17 +117,21 @@ colorMode.preference = computed(() => (mode.value ? 'dark' : 'light'))
         >Nous connaitre</UButton
       >
       <UButton
+        v-if="!isAuthenticated"
         size="md"
         color="neutral"
         variant="ghost"
         style="justify-content: center"
+        @click="connexionModal.open()"
         >Connexion</UButton
       >
       <UButton
+        v-if="isAuthenticated"
         size="md"
         color="neutral"
         variant="ghost"
         style="justify-content: center"
+        @click="profileModal.open()"
         >Mon profil</UButton
       >
     </div>
