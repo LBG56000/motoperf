@@ -103,6 +103,10 @@ router.put(
       }
     }
 
+    if (updateData.password) {
+      updateData.password = await hash(updateData.password)
+    }
+
     if (updateData.ridingStartYear) {
       const year = Number(updateData.ridingStartYear)
       const currentYear = new Date().getFullYear()
