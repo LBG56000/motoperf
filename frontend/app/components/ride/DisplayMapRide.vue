@@ -592,9 +592,13 @@ onMounted(async () => {
     })
 
     // Quand la modification est validé
-    map.value.on(LDraw.Draw.Event.EDITED, () =>
+    map.value.on(LDraw.Draw.Event.EDITED, () => {
       updateGeomModel(drawnItems.value)
-    )
+
+      if (drawControl._toolbars.edit._activeMode) {
+        drawControl._toolbars.edit._activeMode.handler.disable()
+      }
+    })
 
     // Quand la suppression est validé
     map.value.on(LDraw.Draw.Event.DELETED, () => {

@@ -148,13 +148,16 @@ const resetFilter = () => {
       </UFormField>
 
       <UFormField label="Date de la balade">
-        <InputDate v-model="filters.date" locale="fr-FR" />
+        <InputDate v-model="filters.date" locale="fr-FR" class="w-80" />
       </UFormField>
 
-      <UFormField label="Date de la balade">
-        <UFormField label="Heure de la balade">
-          <InputTime v-model="filters.time" :hour-cycle="24" locale="fr-FR" />
-        </UFormField>
+      <UFormField label="Heure de la balade">
+        <InputTime
+          v-model="filters.time"
+          :hour-cycle="24"
+          locale="fr-FR"
+          class="w-80"
+        />
       </UFormField>
 
       <UFormField label="Distance (km)">

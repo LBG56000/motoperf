@@ -227,7 +227,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     }
 
     toast.add({
-      title: 'Success',
+      title: 'Succès',
       description: 'Moto enregistrée',
       color: 'success'
     })
@@ -235,7 +235,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     props.onRefresh()
   } catch (err) {
     toast.add({
-      title: 'Error',
+      title: 'Erreur',
       description: 'Échec de la sauvegarde',
       color: 'error'
     })

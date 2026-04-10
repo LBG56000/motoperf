@@ -169,6 +169,7 @@ const calculateRouteFromCities = async () => {
     return
 
   isMapLoading.value = true
+  mapKey.value++ // Recharger la carte pour enlever tous les modes de modification, création ou suppression
 
   try {
     // On récupère les coordonnées en passant le nom de la ville ET le code postal
@@ -663,13 +664,11 @@ watch(
           </div>
         </UFormField>
 
-        <div
-          v-if="stateForm.isEvent"
-          class="w-full grid grid-cols-1 sm:grid-cols-2 gap-4"
-        >
+        <div v-if="stateForm.isEvent" class="row-container">
           <UFormField label="Date" required>
             <InputDate
               v-model="stateForm.dateEvent"
+              class="w-full"
               :min-value="
                 new CalendarDate(
                   now.getFullYear(),
@@ -681,7 +680,7 @@ watch(
           </UFormField>
 
           <UFormField label="Heure" required>
-            <InputTime v-model="stateForm.hourEvent" />
+            <InputTime v-model="stateForm.hourEvent" class="w-full" />
           </UFormField>
         </div>
 
@@ -713,9 +712,9 @@ watch(
 
           <div
             v-if="isGpsRoute || isMobile"
-            class="mt-2 text-red-500 flex items-center gap-2 text-sm font-medium"
+            class="mt-2 text-orange-500 flex items-center gap-2 text-sm font-medium"
           >
-            <UIcon name="i-lucide-alert-triangle" class="size-5" />
+            <UIcon name="i-lucide-info" class="size-5" />
             Modification désactivée pour les tracés GPS et sur téléphone
           </div>
 
@@ -736,7 +735,7 @@ watch(
                 <span>h</span>
                 <UInputNumber
                   v-model="durationMinutes"
-                  class="w-22"
+                  class="w-28"
                   :max="59"
                   size="md"
                 />

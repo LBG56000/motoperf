@@ -17,8 +17,9 @@ const emit = defineEmits<{
     arrows
     :items="items"
     :ui="{
+      viewport: 'px-4',
       container: 'flex items-stretch h-full',
-      item: 'basis-1/2 sm:basis-1/3 lg:basis-1/5 ps-0 self-stretch',
+      item: 'flex-none px-2 sm:px-3 self-stretch',
       prev: 'start-0',
       next: 'end-0'
     }"
@@ -47,8 +48,7 @@ const emit = defineEmits<{
         <UButton
           size="sm"
           color="primary"
-          class="rounded-full"
-          cursor-pointer
+          class="rounded-full cursor-pointer"
           style="color: white"
           icon="i-lucide-arrow-left-right"
           @click.stop="
@@ -77,7 +77,7 @@ article {
   border-radius: 16px;
 
   padding: 12px 0;
-  margin: 0 2px;
+  margin: 0 8px;
 
   gap: 0.5rem;
 }
